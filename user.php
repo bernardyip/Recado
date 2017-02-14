@@ -6,7 +6,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	$method = pg_escape_string($_POST['method']);
 	$dbcon = pg_connect('host=localhost dbname=postgres user=postgres password=password');
 	if ($method == 'create') {
-		$query = "INSERT INTO public.user VALUES (100, '" . $username . "', '" . $password . "', 'name', '" . $bio . "', 0);"; 
+		$query = "INSERT INTO public.user (username, password, name, bio, created_time, role) VALUES ('" . $username . "', '" . $password . "', 'name', '" . $bio . "', '2016-04-25T19:05:32Z', 'user');"; 
 		$result = pg_query($dbcon, $query);
 		print 'User created!';
 	} elseif ($method == 'update') {

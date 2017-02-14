@@ -7,14 +7,14 @@ DROP TABLE IF EXISTS public.comment CASCADE;
 
 --Create the tables with constraints
 CREATE TABLE public.category (
-	id INTEGER PRIMARY KEY,
+	id SERIAL PRIMARY KEY,
 	photo CHARACTER(128) NOT NULL,
 	name CHARACTER(32) NOT NULL,
 	description CHARACTER(256) NOT NULL
 );
 
 CREATE TABLE public.user (
-	id INTEGER PRIMARY KEY,
+	id SERIAL PRIMARY KEY,
 	username CHARACTER(32) NOT NULL,
 	password CHARACTER(128) NOT NULL,
 	email CHARACTER(128),
@@ -27,7 +27,7 @@ CREATE TABLE public.user (
 );
 
 CREATE TABLE public.task (
-	id INTEGER PRIMARY KEY,
+	id SERIAL PRIMARY KEY,
 	name CHARACTER(128) NOT NULL,
 	description CHARACTER(1024) NOT NULL,
 	postal_code INTEGER NOT NULL,
@@ -46,7 +46,7 @@ CREATE TABLE public.task (
 );
 
 CREATE TABLE public.bid (
-	id INTEGER PRIMARY KEY,
+	id SERIAL PRIMARY KEY,
 	amount MONEY NOT NULL,
 	bid_time TIMESTAMP WITH TIME ZONE NOT NULL,
 	selected BOOLEAN NOT NULL,
@@ -55,7 +55,7 @@ CREATE TABLE public.bid (
 );
 
 CREATE TABLE public.comment (
-	id INTEGER PRIMARY KEY,
+	id SERIAL PRIMARY KEY,
 	comment CHARACTER(128) NOT NULL,
 	created_time TIMESTAMP NOT NULL,
 	user_id INTEGER REFERENCES public.user(id) ON DELETE CASCADE NOT NULL,
