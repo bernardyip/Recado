@@ -11,7 +11,7 @@ pages INT,
 language VARCHAR(32),
 authors VARCHAR(256),
 publisher VARCHAR(64),
-year DATE,
+year INT,
 ISBN10 CHAR(10) NOT NULL UNIQUE,
 ISBN13 CHAR(14) PRIMARY KEY
 );
