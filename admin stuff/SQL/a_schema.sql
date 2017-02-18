@@ -15,7 +15,7 @@ CREATE TABLE public.category (
 
 CREATE TABLE public.user (
 	id SERIAL PRIMARY KEY,
-	username CHARACTER(32) NOT NULL,
+	username CHARACTER(32) UNIQUE NOT NULL,
 	password CHARACTER(128) NOT NULL,
 	email CHARACTER(128),
 	phone CHARACTER(8),
