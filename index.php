@@ -4,7 +4,7 @@
 	</head>
 	<body>
 		<?php include('banner.php') ?>
-		<h1>Welcome to Recardo</h1>
+		<h1>Welcome to Recado</h1>
 		<p> Here are some tasks for you to see: </p>
 		<?php 
 		$dbcon = pg_connect('host=localhost dbname=postgres user=postgres password=password');
