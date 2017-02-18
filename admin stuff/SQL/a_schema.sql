@@ -22,6 +22,7 @@ CREATE TABLE public.user (
 	name CHARACTER(64) NOT NULL,
 	bio CHARACTER(1000),
 	created_time TIMESTAMP WITH TIME ZONE NOT NULL,
+	last_logged_in TIMESTAMP WITH TIME ZONE,
 	role CHARACTER(32) NOT NULL,
 	CHECK(role = 'admin' OR role='user')
 );
@@ -34,10 +35,11 @@ CREATE TABLE public.task (
 	location CHARACTER(128) NOT NULL,
 	task_start_time TIMESTAMP WITH TIME ZONE NOT NULL,
 	task_end_time TIMESTAMP WITH TIME ZONE NOT NULL,
-	offer_amount MONEY,
+	listing_price MONEY,
 	created_time TIMESTAMP WITH TIME ZONE NOT NULL,
 	updated_time TIMESTAMP WITH TIME ZONE,
 	status CHARACTER(32) NOT NULL,
+	bid_picked INTEGER REFERENCES public.bid(id) ON DELETE CASCADE UNIQUE,
 	category_id INTEGER REFERENCES public.category(id) ON DELETE CASCADE NOT NULL,
 	creator_id INTEGER REFERENCES public.user(id) ON DELETE CASCADE NOT NULL,
 	CHECK(status = 'pending' OR status='completed'),
