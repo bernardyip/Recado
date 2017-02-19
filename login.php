@@ -12,13 +12,18 @@
 		$method = pg_escape_string($_POST['method']);
 		$dbcon = pg_connect('host=localhost dbname=postgres user=postgres password=password');
 		if ($method == 'login') {
-			pg_prepare($dbcon, 'select_user_query', "SELECT username FROM public.user WHERE username=$1 AND password=$2;");
+			pg_prepare($dbcon, 'select_user_query', "SELECT username, email, phone, name, bio FROM public.user WHERE username=$1 AND password=$2;");
 			$result = pg_execute($dbcon, 'select_user_query', array($username, $password));
 			if (pg_affected_rows($result) >= 1) { 
 				$user = pg_fetch_array($result);
-				$_SESSION['username'] = $user['username']; ?>
+				$_SESSION['username'] = $user['username'];
+				$_SESSION['email'] = $user['email'];
+				$_SESSION['phone'] = $user['phone'];
+				$_SESSION['name'] = $user['name'];
+				$_SESSION['bio'] = $user['bio'];
+				?>
 				<head>
-					<meta http-equiv='refresh' content='3; url=http://localhost/' />
+					<meta http-equiv='refresh' content='1; url=http://localhost/' />
 				</head>
 				<body>
 					<h1>Login successful</h1>
@@ -38,7 +43,7 @@
 				<input type="hidden" value="login" name="method"/>
 				<input type="submit" value="Log In"/>
 			</form>
-			<p><?=$_GET['message']?></p>
+			<p><?=pg_escape_string($_GET['message'])?></p>
  <?php 
 	} ?>
 		</body>
