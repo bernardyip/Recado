@@ -1,6 +1,11 @@
 <html>
 	<?php 
 	include('banner.php');
+	//If logged in already
+	if (isset($_SESSION['username'])) {
+		header('Refresh: 0; URL=http://localhost/');
+		die();
+	}
 	if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		$username = pg_escape_string($_POST['username']);
 		$password = pg_escape_string($_POST['password']);
@@ -27,23 +32,19 @@
 	<?php 	} 
 		} 
 	} else { 
-		if (isset($_SESSION['username'])) { ?>
-			<head>
-				<meta http-equiv='refresh' content='0; url=http://localhost' />
-			</head>
-<?php 	} else {?>
-			<body>
-				<form action="register.php" method="POST">
-					Username: <br />
-					<input type="text" name="username" /> <br /><br />
-					Password: <br />
-					<input type="password" name="password" /> <br /><br />
-					Details: <br />
-					<input type="textarea" name="bio" /> <br /><br />
-					<input type="hidden" value="create" name="method"/>
-					<input type="submit" value="Register"/>
-				</form>
-<?php   } 
+		?>
+		<body>
+			<form action="register.php" method="POST">
+				Username: <br />
+				<input type="text" name="username" /> <br /><br />
+				Password: <br />
+				<input type="password" name="password" /> <br /><br />
+				Details: <br />
+				<input type="textarea" name="bio" /> <br /><br />
+				<input type="hidden" value="create" name="method"/>
+				<input type="submit" value="Register"/>
+			</form>
+<?php   
 	} ?>
-			</body>
+		</body>
 </html>

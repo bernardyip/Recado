@@ -1,6 +1,11 @@
 <html>
 	<?php 
 	include('banner.php');
+	//If logged in already
+	if (isset($_SESSION['username'])) {
+		header('Refresh: 0; URL=http://localhost/');
+		die();
+	}
 	if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		$username = pg_escape_string($_POST['username']);
 		$password = pg_escape_string($_POST['password']);
@@ -18,31 +23,23 @@
 				<body>
 					<h1>Login successful</h1>
 					<p><a href="http://localhost/login.php">Redirect</a></p>
-	<?php   } else { ?>
-				<head>
-					<meta http-equiv='refresh' content='1; url=http://localhost/login.php' />
-				</head>
-				<body>
-					<h1>Login failed, please try again</h1>
-					<p><a href="http://localhost/login.php">Redirect</a></p>
-	<?php 	} 
+	<?php   } else { 
+				header('Refresh: 0; URL=http://localhost/login.php?message=' . urlencode("Incorrect username/password"));
+				die();
+			} 
 		} 
-	} else { 
-		if (isset($_SESSION['username'])) { ?>
-			<head>
-				<meta http-equiv='refresh' content='0; url=http://localhost' />
-			</head>
-<?php 	} else {?>
-			<body>
-				<form action="login.php" method="POST">
-					Username: <br />
-					<input type="text" name="username" /> <br /><br />
-					Password: <br />
-					<input type="password" name="password" /> <br /><br />
-					<input type="hidden" value="login" name="method"/>
-					<input type="submit" value="Log In"/>
-				</form>
- <?php }
+	} else { ?>
+		<body>
+			<form action="login.php" method="POST">
+				Username: <br />
+				<input type="text" name="username" /> <br /><br />
+				Password: <br />
+				<input type="password" name="password" /> <br /><br />
+				<input type="hidden" value="login" name="method"/>
+				<input type="submit" value="Log In"/>
+			</form>
+			<p><?=$_GET['message']?></p>
+ <?php 
 	} ?>
 		</body>
 </html>
