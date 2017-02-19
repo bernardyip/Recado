@@ -61,7 +61,7 @@
 <?php 	} ?>
 
 		<h1>Bids</h1>
-<?php 	$query  = "SELECT b.id, b.amount, u.username ";
+<?php 	$query  = "SELECT b.id, b.amount, u.username, b.selected ";
 		$query .= "FROM public.bid b ";
 		$query .= "INNER JOIN public.user u ON b.user_id = u.id ";
 		$query .= "WHERE b.task_id = $1 ";
@@ -69,8 +69,20 @@
 		$dbcon = pg_connect('host=localhost dbname=postgres user=postgres password=password');
 		pg_prepare($dbcon, 'select_bids_query', $query);
 		$result = pg_execute($dbcon, 'select_bids_query', array($_GET['task']));
-		while ($row = pg_fetch_array($result)) { ?>
-			<p><?=$row['username']?> bids <?=$row['amount']?> <?=$task_creator_username==$_SESSION['username']? "<a href='#'>Select this bid</a>" : ""?></p>
+		while ($row = pg_fetch_array($result)) { 
+			//Choose what option to show for diff kind of users
+			$display = "";
+			if ($task_creator_username==$_SESSION['username']) { //is the owner of this task
+				if ($row['selected'] == 't') {
+					$display = "<a href='#'>Unselect this user</a>";
+				} else {
+					$display = "<a href='#'>Select this user</a>";
+				}
+			} else if ($row['selected'] == 't') {
+				$display = " (Selected)";
+			}
+			?>
+			<p><?=$row['username']?> bids <?=$row['amount']?> <?=$display?></p>
 <?php 	} ?>
 		
 		<h1>Comments</h1>
