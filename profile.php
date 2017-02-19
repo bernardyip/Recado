@@ -38,7 +38,7 @@
 		}
 		?>
 		<form action="profile.php" method="POST">
-			Password (Verification): <br />
+			Password (for verification): <br />
 			<input type="password" name="password" /> <br /><br />
 			Email: <br />
 			<input type="email" name="email" value="<?=$_SESSION['email']?>" /> <br /><br />

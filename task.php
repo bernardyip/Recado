@@ -1,12 +1,30 @@
 <html>
 	<head>
 		<title>Recardo</title>
+		<script type="text/javascript">
+			function search() {
+				var search = document.getElementById("search").value;
+				console.log(search);
+			}
+		</script>
 	</head>
 	<body>
-		<?php include('banner.php') ?>
-		<h1>Welcome to Recado</h1>
-		<p>$$$$EZPZ MONEY$$$$ SIGN UP NOW ABOVE AND REAPS THE BENEFIT OF YOUR LIFETIME</p>
-		<p> Here are some tasks for you to see: </p>
+		<?php 
+		include('banner.php');
+		//If not logged in
+		if (!isset($_SESSION['username'])) {
+			header('Refresh: 0; URL=http://localhost/login.php');
+			die();
+		}
+		?>
+		
+		<h1>Create a task:</h1>
+		<h1>My Tasks:</h1>
+		<h1>My Bids:</h1>
+		
+		<h2>Search</h2>
+		<input id="search" type=text onchange="search()"/>
+		
 		<?php 
 		$dbcon = pg_connect('host=localhost dbname=postgres user=postgres password=password');
 		pg_prepare($dbcon, 'select_category_query', "SELECT c.id, c.name FROM public.category c");
@@ -16,14 +34,10 @@
 			$count_result = pg_execute($dbcon, 'count_category_query', array($row['id']));
 			$count_result = pg_fetch_array($count_result); ?>
 			<h3><?=$row['name']?> (<?=$count_result['count']?> tasks)</h3>
-	<?php 	pg_prepare($dbcon, 'select_task_in_category_query', "SELECT t.id, t.name, t.description FROM public.task t WHERE t.category_id=$1 LIMIT 3");
+	<?php 	pg_prepare($dbcon, 'select_task_in_category_query', "SELECT t.id, t.name, t.description FROM public.task t WHERE t.category_id=$1");
 			$cat_result = pg_execute($dbcon, 'select_task_in_category_query', array($row['id']));
 			while ($task_row = pg_fetch_array($cat_result)) {
 				echo $task_row['name'] . "<br />";
-			}
-			
-			if ($count_result['count'] > 3) {
-				echo "and more...<br />";
 			}
 		}
 		?>
