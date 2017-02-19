@@ -125,16 +125,14 @@
 		while ($row = pg_fetch_array($result)) { ?>
 			<p><?=$row['username']?> : <?=$row['comment']?> @ <?=(new datetime($row['created_time']))->format('Y-m-d H:i:s')?></p>
 <?php 	} ?>
-
-<?php   if ($task_creator_id!=$_SESSION['username']) { ?>		
-    		<h2>Submit a comment:</h2>
-    		<form action="task_details.php?task=<?=$_GET['task'] ?>" method="POST">
-    			Comment: <input type="textarea" name="comment" /> <br /><br />
-    			<input type="hidden" value="submit_comment" name="method"/>
-    			<input type="submit" value="Comment!"/>
-    		</form>
-    		<p><?=$_GET['comment_message']?></p>
-<?php   } ?>
+	
+		<h2>Submit a comment:</h2>
+		<form action="task_details.php?task=<?=$_GET['task'] ?>" method="POST">
+			Comment: <input type="textarea" name="comment" /> <br /><br />
+			<input type="hidden" value="submit_comment" name="method"/>
+			<input type="submit" value="Comment!"/>
+		</form>
+		<p><?=$_GET['comment_message']?></p>
 	</body>
 </html>
 		
