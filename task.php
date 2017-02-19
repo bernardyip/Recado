@@ -71,9 +71,9 @@
 			<h3><?=$row['name']?> (<?=$count_result['count']?> tasks)</h3>
 	<?php 	pg_prepare($dbcon, 'select_all_task_in_category_query', "SELECT t.id, t.name, t.description FROM public.task t WHERE t.category_id=$1");
 			$cat_result = pg_execute($dbcon, 'select_all_task_in_category_query', array($row['id']));
-			while ($task_row = pg_fetch_array($cat_result)) {
-				echo $task_row['name'] . "<br />";
-			}
+			while ($task_row = pg_fetch_array($cat_result)) { ?>
+				<a href="task_details.php?task=<?=$task_row['id']?>"><?=$task_row['name']?></a><br />
+<?php 		}
 		}
 		?>
 	</body>
