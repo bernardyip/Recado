@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<title>Recardo</title>
+		<title>Recado</title>
 		<script type="text/javascript">
 			function search() {
 				var search = document.getElementById("search").value;
@@ -23,11 +23,12 @@
 		if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		    if ($_POST['method'] == 'submit_bid') {
 		        $dbcon = pg_connect('host=localhost dbname=postgres user=postgres password=password');
-		        //Insert if not exists, update if exists query
-		        pg_prepare($dbcon, 'update_bid_query', "UPDATE bid SET amount=$1, selected='f' WHERE user_id=$2 AND task_id=$3;");
-		        $result = pg_execute($dbcon, 'update_bid_query', array($_POST['bid'], $_SESSION['id'], $_GET['task']));
+		        //Insert if not exists, update if exists query (ONLY IF NOT SELECTED)
+		        $current_datetime = (new DateTime(null, new DateTimeZone("Asia/Singapore")))->format('Y-m-d\TH:i:s\Z');
+		        pg_prepare($dbcon, 'update_bid_query', "UPDATE bid SET amount=$1, bid_time=$2 WHERE user_id=$3 AND task_id=$4 AND selected='f';");
+		        $result = pg_execute($dbcon, 'update_bid_query', array($_POST['bid'], $current_datetime, $_SESSION['id'], $_GET['task']));
 		        pg_prepare($dbcon, 'insert_bid_query', "INSERT INTO bid (amount, bid_time, selected, user_id, task_id) SELECT $1, $2, $3, $4, $5 WHERE NOT EXISTS (SELECT * FROM bid WHERE user_id=$4 AND task_id=$5);");
-		        $result = pg_execute($dbcon, 'insert_bid_query', array($_POST['bid'] ,(new DateTime(null, new DateTimeZone("Asia/Singapore")))->format('Y-m-d\TH:i:s\Z'), 'f', $_SESSION['id'], $_GET['task']));
+		        $result = pg_execute($dbcon, 'insert_bid_query', array($_POST['bid'] , $current_datetime, 'f', $_SESSION['id'], $_GET['task']));
                 header('Refresh: 0; URL=http://localhost/task_details.php?task=' . $_GET['task'] . "&bid_message=" . urlencode('Bid Submitted!'));
 		    } else if ($_POST['method'] == 'submit_comment') {
 		        $dbcon = pg_connect('host=localhost dbname=postgres user=postgres password=password');
@@ -38,7 +39,7 @@
 		    die();
 		}
 		
-		$query  = "SELECT t.id, t.name, t.description, t.postal_code, t.location, t.task_start_time, t.task_end_time, t.offer_amount, t.created_time, t.updated_time, c.name as category_name, u.username ";
+		$query  = "SELECT t.id, t.name, t.description, t.postal_code, t.location, t.task_start_time, t.task_end_time, t.listing_price, t.created_time, t.updated_time, c.name as category_name, u.username ";
 		$query .= "FROM public.task t ";
 		$query .= "INNER JOIN public.user u ON t.creator_id = u.id ";
 		$query .= "INNER JOIN public.category c ON t.category_id = c.id ";
@@ -54,11 +55,11 @@
 			$task_location = $row['location'];
 			$task_start_time = $row['task_start_time'];
 			$task_end_time = $row['task_end_time'];
-			$task_offer_amount = $row['offer_amount'];
+			$task_listing_price = $row['listing_price'];
 			$task_created_time = $row['created_time'];
 			$task_updated_time = $row['updated_time'];
 			$task_category_name = $row['category_name'];
-			$task_creator_id = $row['username'];
+			$task_creator_username = $row['username'];
 			
 			echo "<table>";
 			echo "<tr><td>id: </td><td>" . $task_id . " </td></tr>";
@@ -68,28 +69,28 @@
 			echo "<tr><td>location: </td><td>" . $task_location . " </td></tr>";
 			echo "<tr><td>start time: </td><td>" . $task_start_time . " </td></tr>";
 			echo "<tr><td>end time: </td><td>" . $task_end_time . " </td></tr>";
-			echo "<tr><td>offer: </td><td>" . $task_offer_amount . " </td></tr>";
+			echo "<tr><td>offer: </td><td>" . $task_listing_price . " </td></tr>";
 			echo "<tr><td>created time: </td><td>" . $task_created_time . " </td></tr>";
 			echo "<tr><td>updated time: </td><td>" . $task_updated_time . " </td></tr>";
 			echo "<tr><td>category: </td><td>" . $task_category_name . " </td></tr>";
-			echo "<tr><td>creator: </td><td>" . $task_creator_id . " </td></tr>";
+			echo "<tr><td>creator: </td><td>" . $task_creator_username . " </td></tr>";
 			echo "</table>"
 ?>
 <?php 	} ?>
 
 		<h1>Bids</h1>
-<?php 	$query  = "SELECT b.id, b.amount, u.username, b.selected ";
+<?php 	$query  = "SELECT b.id, b.amount, u.username, b.selected, b.bid_time ";
 		$query .= "FROM public.bid b ";
 		$query .= "INNER JOIN public.user u ON b.user_id = u.id ";
 		$query .= "WHERE b.task_id = $1 ";
-		$query .= "ORDER BY b.amount DESC;";
+		$query .= "ORDER BY b.amount DESC, b.bid_time ASC;";
 		$dbcon = pg_connect('host=localhost dbname=postgres user=postgres password=password');
 		pg_prepare($dbcon, 'select_bids_query', $query);
 		$result = pg_execute($dbcon, 'select_bids_query', array($_GET['task']));
 		while ($row = pg_fetch_array($result)) { 
 			//Choose what option to show for diff kind of users
 			$display = "";
-			if ($task_creator_id==$_SESSION['username']) { //is the owner of this task
+			if ($task_creator_username == $_SESSION['username']) { //is the owner of this task
 				if ($row['selected'] == 't') {
 					$display = "<a href='#'>Unselect this user</a>";
 				} else {
@@ -103,7 +104,7 @@
 <?php 	} ?>
 		
 <?php   //Only for non-owner
-        if ($task_creator_id!=$_SESSION['username']) { ?>		
+        if ($task_creator_username!=$_SESSION['username']) { ?>		
     		<h2>Submit a bid:</h2>
     		<form action="task_details.php?task=<?=$_GET['task'] ?>" method="POST">
     			Bid Amount: <input type="number" name="bid" /> <br /><br />

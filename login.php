@@ -22,6 +22,10 @@
 				$_SESSION['phone'] = $user['phone'];
 				$_SESSION['name'] = $user['name'];
 				$_SESSION['bio'] = $user['bio'];
+				
+				$current_datetime = (new DateTime(null, new DateTimeZone("Asia/Singapore")))->format('Y-m-d\TH:i:s\Z');
+				pg_prepare($dbcon, 'update_last_login_query', "UPDATE public.user SET last_logged_in=$3 WHERE username=$1 AND password=$2;");
+				$result = pg_execute($dbcon, 'select_user_query', array($username, $password, $current_datetime));
 				?>
 				<head>
 					<meta http-equiv='refresh' content='1; url=http://localhost/' />

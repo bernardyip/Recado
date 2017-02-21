@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<title>Recardo</title>
+		<title>Recado</title>
 	</head>
 	<body>
 		<?php include('banner.php') ?>

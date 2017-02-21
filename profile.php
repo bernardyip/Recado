@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<title>Recardo</title>
+		<title>Recado</title>
 		<?php 
 		include('banner.php');
 		if ($_SERVER['REQUEST_METHOD'] === 'POST') {

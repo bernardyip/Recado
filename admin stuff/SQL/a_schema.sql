@@ -39,7 +39,7 @@ CREATE TABLE public.task (
 	created_time TIMESTAMP WITH TIME ZONE NOT NULL,
 	updated_time TIMESTAMP WITH TIME ZONE,
 	status CHARACTER(32) NOT NULL,
-	bid_picked INTEGER REFERENCES public.bid(id) ON DELETE CASCADE UNIQUE,
+	bid_picked BOOLEAN NOT NULL,
 	category_id INTEGER REFERENCES public.category(id) ON DELETE CASCADE NOT NULL,
 	creator_id INTEGER REFERENCES public.user(id) ON DELETE CASCADE NOT NULL,
 	CHECK(status = 'pending' OR status='completed'),
