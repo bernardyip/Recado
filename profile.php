@@ -41,7 +41,7 @@
 			Password (for verification): <br />
 			<input type="password" name="password" /> <br /><br />
 			Email: <br />
-			<input type="email" name="email" value="<?=trim($_SESSION['email']);>" /> <br /><br />
+			<input type="email" name="email" value="<?=trim($_SESSION['email'])?>" /> <br /><br />
 			Phone: <br />
 			<input type="tel" name="phone" value="<?=trim($_SESSION['phone'])?>"/> <br /><br />
 			Name: <br />
