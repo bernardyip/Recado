@@ -41,13 +41,13 @@
 			Password (for verification): <br />
 			<input type="password" name="password" /> <br /><br />
 			Email: <br />
-			<input type="email" name="email" value="<?=$_SESSION['email']?>" /> <br /><br />
+			<input type="email" name="email" value="<?=trim($_SESSION['email']);>" /> <br /><br />
 			Phone: <br />
-			<input type="tel" name="phone" value="<?=$_SESSION['phone']?>"/> <br /><br />
+			<input type="tel" name="phone" value="<?=trim($_SESSION['phone'])?>"/> <br /><br />
 			Name: <br />
-			<input type="text" name="name" value="<?=$_SESSION['name']?>"/> <br /><br />
+			<input type="text" name="name" value="<?=trim($_SESSION['name'])?>"/> <br /><br />
 			Bio: <br />
-			<input type="textarea" name="bio" value="<?=$_SESSION['bio']?>"/> <br /><br />
+			<input type="textarea" name="bio" value="<?=trim($_SESSION['bio'])?>"/> <br /><br />
 			<input type="hidden" value="update" name="method"/>
 			<input type="submit" value="Update details"/>
 		</form>
