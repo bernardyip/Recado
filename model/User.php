@@ -6,13 +6,13 @@ class User {
 	}
 	public function getUsers() {
 		$sqlGetUser = "SELECT * FROM users";
-		$sth = $this->dbcon->prepare ($sqlGetUser);
-		$sth->execute ();
-		return json_encode ( $sth->fetchAll () );
+		$result = $this->dbcon->prepare ($sqlGetUser);
+		$result->execute ();
+		return json_encode ( $result->fetchAll () );
 	}
 	public function add($user) {
-		$sth = $this->dbcon->prepare ( "INSERT INTO users(name, email, mobile, address) VALUES (?, ?, ?, ?)" );
-		$sth->execute ( array (
+		$result = $this->dbcon->prepare ( "INSERT INTO users(name, email, mobile, address) VALUES (?, ?, ?, ?)" );
+		$result->execute ( array (
 				$user->name,
 				$user->email,
 				$user->mobile,
@@ -21,15 +21,15 @@ class User {
 		return json_encode ( $this->dbcon->lastInsertId () );
 	}
 	public function delete($user) {
-		$sth = $this->dbcon->prepare ( "DELETE FROM users WHERE id=?" );
-		$sth->execute ( array (
+		$result = $this->dbcon->prepare ( "DELETE FROM users WHERE id=?" );
+		$result->execute ( array (
 				$user->id 
 		) );
 		return json_encode ( 1 );
 	}
 	public function updateValue($user) {
-		$sth = $this->dbcon->prepare ( "UPDATE users SET " . $user->field . "=? WHERE id=?" );
-		$sth->execute ( array (
+		$result = $this->dbcon->prepare ( "UPDATE users SET " . $user->field . "=? WHERE id=?" );
+		$result->execute ( array (
 				$user->newvalue,
 				$user->id 
 		) );

@@ -1,6 +1,6 @@
 <?php
 function __autoload($className) {
-	include_once ("models/$className.php");
+	include_once ("../models/$className.php");
 }
 
 $users = new User ( "localhost", "postgres", "password", "postgres" );
