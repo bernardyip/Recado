@@ -1,4 +1,14 @@
 <?php
+
+class DatabaseResult {
+    // holds the status of the result of the current operation.
+    public $status;
+    
+    public function __construct() {
+        
+    }
+}
+
 class Database {
     
     // Database connection constants

@@ -56,8 +56,9 @@ class LoginController {
         $username = pg_escape_string ( $_POST ['username'] );
         $password = pg_escape_string ( $_POST ['password'] );
         $userDatabase = new UserDatabase ();
-        $user = $userDatabase->login ( $username, $password );
-        if ($user !== null) {
+        $result = $userDatabase->login ( $username, $password );
+        if ($result->status === UserDatabaseResult::LOGIN_SUCCESS) {
+            $user = $result->user;
             $_SESSION ['id'] = $user->id;
             $_SESSION ['username'] = $user->username;
             $_SESSION ['email'] = $user->email;
