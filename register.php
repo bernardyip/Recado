@@ -160,13 +160,75 @@ if ($_SERVER ['REQUEST_METHOD'] === 'POST') {
 <head>
 <script type="text/javascript">
 function validateForm() {
-	if (!passwordsMatch()) return false;
+	var valid = true;
+	if (!validateMandatoryFields()) valid = false;
+	if (!passwordsMatch()) valid = false;
+	if (!validateEmail()) valid = false;
+	if (!validatePhoneNumber()) valid = false;
+
+	return false;
 }
 
+function validateMandatoryFields() {
+	var valid = true;
+    var username = document.getElementsByName("username")[0].value;
+    var usernameValid = username == null || !(/\S/.test(username));
+    var name = document.getElementsByName("name")[0].value;
+    var nameValid = name == null || !(/\S/.test(name));
+
+    if (usernameValid) {
+        document.getElementsByName("requiredUsername")[0].style.display = "block";
+        document.getElementsByName("username")[0].style.borderColor = "#E34234";
+        valid = false;
+    } else {
+        document.getElementsByName("requiredUsername")[0].style.display = "none";
+        document.getElementsByName("username")[0].style.borderColor = "initial";
+    }
+
+    if (nameValid) {
+        document.getElementsByName("requiredName")[0].style.display = "block";
+        document.getElementsByName("name")[0].style.borderColor = "#E34234";
+        valid = false;
+    } else {
+        document.getElementsByName("requiredName")[0].style.display = "none";
+        document.getElementsByName("name")[0].style.borderColor = "initial";
+    }
+
+    return valid;
+}
+
+function validateEmail() {
+    var email = document.getElementsByName("email")[0].value;
+    var regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+	var valid = regex.test(email);
+	if (valid) {
+        document.getElementsByName("badEmail")[0].style.display = "none";
+        document.getElementsByName("email")[0].style.borderColor = "initial";
+	} else {
+        document.getElementsByName("badEmail")[0].style.display = "block";
+        document.getElementsByName("email")[0].style.borderColor = "#E34234";
+	}
+    return valid; 
+}
+
+function validatePhoneNumber() {
+    var phoneNumber = document.getElementsByName("phone")[0].value;
+	var regex = /^[0-9]{8}$/;
+    var valid = regex.test(phoneNumber);
+    if(valid) {
+        document.getElementsByName("badPhone")[0].style.display = "none";
+        document.getElementsByName("phone")[0].style.borderColor = "initial";
+	}  
+	else {
+        document.getElementsByName("badPhone")[0].style.display = "block";
+        document.getElementsByName("phone")[0].style.borderColor = "#E34234";
+	}
+	return valid;
+}
+	
 function passwordsMatch() {
     var password = document.getElementsByName("password")[0].value;
     var confirmPassword = document.getElementsByName("confirmPassword")[0].value;
-    alert(document.getElementsByName("password")[0].style.borderColor);
     if (password != confirmPassword) {
         document.getElementsByName("mismatchPassword")[0].style.display = "block";
         document.getElementsByName("password")[0].style.borderColor = "#E34234";
@@ -197,6 +259,7 @@ function passwordsMatch() {
 				  method="<?php echo RegisterController::REGISTER_METHOD?>">
 				Username: <br />
 				<?php echo $view->getUsernameField(); ?> <br />
+				<div name="requiredUsername" style="display:none;"><p style="font-color:#FF0000;"> This field is required. </p></div> <br />
 				<br /> Password: <br />
 				<?php echo $view->getPasswordField(); ?><br />
 				<br /> Confirm Password: <br />
@@ -204,10 +267,13 @@ function passwordsMatch() {
 				<div name="mismatchPassword" style="display:none;"><p style="font-color:#FF0000;"> Passwords do not match. </p></div> <br />
 				<br /> Name: <br />
 				<?php echo $view->getNameField(); ?><br />
+				<div name="requiredName" style="display:none;"><p style="font-color:#FF0000;"> This field is required. </p></div> <br />
 				<br /> E-mail: <br />
 				<?php echo $view->getEmailField(); ?><br />
+				<div name="badEmail" style="display:none;"><p style="font-color:#FF0000;"> Please enter a valid email address. </p></div> <br />
 				<br /> Phone: <br />
 				<?php echo $view->getPhoneField(); ?><br />
+				<div name="badPhone" style="display:none;"><p style="font-color:#FF0000;"> Enter a valid phone number. </p></div> <br />
 				<br /> Details: <br />
 				<?php echo $view->getBioField(); ?><br />
 				<br /> <input type="submit" value="Register" />
