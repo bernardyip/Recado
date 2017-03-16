@@ -1,6 +1,7 @@
 <?php
 include_once '/data/Database.php';
 include_once '/model/User.php';
+include_once '/model/UserAuthToken.php';
 
 class UserDatabaseResult extends DatabaseResult {
     const LOGIN_SUCCESS = 10;
@@ -29,6 +30,9 @@ class UserDatabaseResult extends DatabaseResult {
 
 class UserDatabase extends Database {
     
+    // Constatns
+    const SELECTOR_LENGTH = 12;
+    
     // SQL Queries
     const SQL_LOGIN_SELECT_USER = "SELECT * FROM public.user WHERE username=$1 AND password=$2;";
     const SQL_LOGIN_UPDATE_LAST_LOGIN = "UPDATE public.user SET last_logged_in=$3 WHERE username=$1 AND password=$2;";
@@ -36,7 +40,7 @@ class UserDatabase extends Database {
     const SQL_FIND_USER = "SELECT * FROM public.user WHERE username=$1;";
     const SQL_FIND_USERID = "SELECT * FROM public.user WHERE id=$1";
     const SQL_FIND_USER_FROM_AUTH = "SELECT * FROM public.user_auth_tokens WHERE selector=$1 AND token=$2 AND expires <= NOW();";
-    const SQL_CREATE_USER_AUTH = "INSERT INTO public.user_auth_tokens(selector, token, userid, expires) VALUES(random_string($1), random_string($2), $3, $4) RETURNING id, selector;";
+    const SQL_CREATE_USER_AUTH = "INSERT INTO public.user_auth_tokens(selector, token, userid, expires) VALUES(random_string($1), $2, $3, $4) RETURNING id, selector;";
     const SQL_CREATE_USER_AUTH_T = "INSERT INTO public.user_auth_tokens(selector, token, userid, expires) VALUES($1, $2, $3, $4) RETURNING id, selector;";
     
     public function login($username, $password) {
@@ -106,24 +110,26 @@ class UserDatabase extends Database {
         return $result;
     }
     
-    public function createAuthCookie($user, $selectorLength, $validatorLength, $expires) {
+    public function createAuthCookie($user, $validatorLength) {
 
+        $expires = new DateTime ( null, new DateTimeZone ( "Asia/Singapore" ) );
+        $expires->add(new DateInterval("P7D"));
         $validator = $this->generateRandomString($validatorLength);
         $token = hash("sha256", $validator);
         $auth = new UserAuthToken(-1, "", $validator, $token, $user->id, $expires);
         
-        pg_prepare ( $this->dbcon, 'SQL_CREATE_USER_AUTH_T', UserDatabase::SQL_CREATE_USER_AUTH_T );
+        pg_prepare ( $this->dbcon, 'SQL_CREATE_USER_AUTH', UserDatabase::SQL_CREATE_USER_AUTH );
         
         $threshold = 10;
         $attempts = 0;
         $dbResult = null;
         
         do {
-            $dbResult = pg_execute ( $this->dbcon, 'SQL_CREATE_USER_AUTH_T', array (
-                    "abc",
+            $dbResult = pg_execute ( $this->dbcon, 'SQL_CREATE_USER_AUTH', array (
+                    UserDatabase::SELECTOR_LENGTH, // SELECTOR_LENGTH
                     $auth->token,
                     $auth->userid,
-                    $auth->expires ) );
+                    $auth->expires->format ( 'Y-m-d\TH:i:s\Z' ) ) );
             
             if (pg_affected_rows ( $dbResult ) >= 1) {
     
@@ -192,7 +198,8 @@ class UserDatabase extends Database {
         $charactersLength = strlen($characters);
         $randomString = '';
         for ($i = 0; $i < $length; $i++) {
-            $randomString .= $characters[random_int(0, $charactersLength - 1)];
+            $index = rand(0, $charactersLength - 1);
+            $randomString .= $characters[$index];
         }
         return $randomString;
     }

@@ -49,6 +49,8 @@ class LoginController {
     const LOGIN_URL = "login.php?action=login";
     const LOGIN_METHOD = "POST";
     const HOME_URL = "/";
+    const VALIDATOR_LENGTH = 20;
+    const SECONDS_7_DAYS = 604800; //60 * 60 * 24 * 7, 7 days
     
     private $model;
 
@@ -63,10 +65,15 @@ class LoginController {
         $userDatabase = new UserDatabase ();
         $result = $userDatabase->login ( $username, $password );
         if ($result->status === UserDatabaseResult::LOGIN_SUCCESS) {
-            if (!is_null($rememberMe)) {
-                // create auth cookie
-            }
             $user = $result->user;
+            if (!is_null($rememberMe)) {
+                $resultAuthCookie = $userDatabase->createAuthCookie($user, LoginController::VALIDATOR_LENGTH);
+                if ($resultAuthCookie->status === UserDatabaseResult::AUTH_CREATE_SUCCESS) {
+                    // successfully associated token, keep a cookie for the client
+                    setcookie("remember", $resultAuthCookie->auth->selector . ":" . $resultAuthCookie->auth->validator,
+                            time() + LoginController::SECONDS_7_DAYS, "/", "localhost", false, false);
+                }
+            }
             $_SESSION ['id'] = $user->id;
             $_SESSION ['username'] = $user->username;
             $_SESSION ['email'] = $user->email;
