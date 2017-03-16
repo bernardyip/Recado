@@ -31,6 +31,10 @@ class LoginView {
         return $this->makeInput ( "password", "password", "" );
     }
     
+    public function getRememberMe() {
+        return $this->makeInput( "checkbox", "rememberMe", "Remember Me" );
+    }
+    
     private function makeInput($type, $name, $value, $autofocus = false) {
         $html = "<input type=\"$type\" name=\"$name\" value=\"$value\"";
         if ($autofocus) {
@@ -55,9 +59,13 @@ class LoginController {
     public function login() {
         $username = pg_escape_string ( $_POST ['username'] );
         $password = pg_escape_string ( $_POST ['password'] );
+        $rememberMe = $_POST ['rememberMe'];
         $userDatabase = new UserDatabase ();
         $result = $userDatabase->login ( $username, $password );
         if ($result->status === UserDatabaseResult::LOGIN_SUCCESS) {
+            if (!is_null($rememberMe)) {
+                // create auth cookie
+            }
             $user = $result->user;
             $_SESSION ['id'] = $user->id;
             $_SESSION ['username'] = $user->username;
@@ -140,8 +148,10 @@ if ($_SERVER ['REQUEST_METHOD'] === 'POST') {
 				<?php echo $view->getUsernameField(); ?> <br />
 				<br /> Password: <br />
 				<?php echo $view->getPasswordField(); ?><br />
+				<br /> Remember Me: <?php echo $view->getRememberMe(); ?><br />
 				<br /> <input type="submit" value="Log In" />
 			</form>
+			<p>Don't have an account? <a href="/register.php" >Register here</a>.</p>
 			<p><?php echo $model->message; ?></p>
 		<?php
         }
