@@ -195,11 +195,11 @@ if ( isset( $_SESSION ['username'] ) ) {
 function validateForm() {
 	var valid = true;
     var username = document.getElementsByName("username")[0].value;
-    var usernameValid = username == null || !(/\S/.test(username));
+    var usernameInvalid = username == null || !(/\S/.test(username));
     var password = document.getElementsByName("password")[0].value;
-    var passwordValid = name == null || !(/\S/.test(name));
+    var passwordInvalid = name == null || !(/\S/.test(name));
 
-    if (usernameValid) {
+    if (usernameInvalid) {
         document.getElementsByName("requiredUsername")[0].style.display = "block";
         document.getElementsByName("username")[0].style.borderColor = "#E34234";
         valid = false;
@@ -208,7 +208,7 @@ function validateForm() {
         document.getElementsByName("username")[0].style.borderColor = "initial";
     }
 
-    if (passwordValid) {
+    if (passwordInvalid) {
         document.getElementsByName("requiredPassword")[0].style.display = "block";
         document.getElementsByName("password")[0].style.borderColor = "#E34234";
         valid = false;
