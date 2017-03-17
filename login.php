@@ -51,6 +51,7 @@ class LoginController {
     const HOME_URL = "/";
     const VALIDATOR_LENGTH = 20;
     const SECONDS_7_DAYS = 604800; //60 * 60 * 24 * 7, 7 days
+    const COOKIE_NAME = "remember";
     
     private $model;
 
@@ -66,25 +67,12 @@ class LoginController {
         $result = $userDatabase->login ( $username, $password );
         if ($result->status === UserDatabaseResult::LOGIN_SUCCESS) {
             $user = $result->user;
-            if (!is_null($rememberMe)) {
-                $resultAuthCookie = $userDatabase->createAuthCookie($user, LoginController::VALIDATOR_LENGTH);
-                if ($resultAuthCookie->status === UserDatabaseResult::AUTH_CREATE_SUCCESS) {
-                    // successfully associated token, keep a cookie for the client
-                    setcookie("remember", $resultAuthCookie->auth->selector . ":" . $resultAuthCookie->auth->validator,
-                            time() + LoginController::SECONDS_7_DAYS, "/", "localhost", false, false);
-                }
-            }
-            $_SESSION ['id'] = $user->id;
-            $_SESSION ['username'] = $user->username;
-            $_SESSION ['email'] = $user->email;
-            $_SESSION ['phone'] = $user->phone;
-            $_SESSION ['name'] = $user->name;
-            $_SESSION ['bio'] = $user->bio;
             
-            $this->model->username = $user->username;
-            $this->model->password = "";
-            $this->model->message = "Hello, " . $user->username . "!";
-            $this->model->loginSuccess = true;
+            if (!is_null($rememberMe)) {
+                createLoginCookieForUser($user);
+            }
+            
+            $this->setSessionForUser($user);
             
             $userDatabase->updateLastLogin ( $user->username, $user->password );
             
@@ -95,25 +83,85 @@ class LoginController {
         }
     }
     
+    public function loginWithCookie() {
+        $cookieValue = $_COOKIE[LoginController::COOKIE_NAME];
+        $pieces = explode(":", $cookieValue);
+        
+        if (sizeof($pieces) !== 2) return;
+        
+        $selector = $pieces[0];
+        $validator = $pieces[1];
+        $userDatabase = new UserDatabase();
+        
+        $result = $userDatabase->findUserFromAuthCookie($selector, $validator);
+        
+        if ($result->status === UserDatabaseResult::AUTH_FIND_SUCCESS) {
+            $user = $result->user;
+            
+            $this->setSessionForUser($user);
+            
+            header ( "Refresh: 3; URL=" . LoginController::HOME_URL );
+        }
+    }
+    
+    public function logout() {
+        $this->removeLoginCookieForUser();
+        session_destroy ();
+        $this->redirectToHome();
+    }
+    
+    private function removeLoginCookieForUser() {
+        if ( isset ($_COOKIE[LoginController::COOKIE_NAME]) ) {
+            setcookie(LoginController::COOKIE_NAME, 
+                    $resultAuthCookie->auth->selector . ":" . $resultAuthCookie->auth->validator,
+                    time() - LoginController::SECONDS_7_DAYS, "/", "localhost", false, false);
+        }
+    }
+    
+    private function createLoginCookieForUser($user) {
+        $resultAuthCookie = $userDatabase->createAuthCookie($user, LoginController::VALIDATOR_LENGTH);
+        if ($resultAuthCookie->status === UserDatabaseResult::AUTH_CREATE_SUCCESS) {
+            // successfully associated token, keep a cookie for the client
+            setcookie(LoginController::COOKIE_NAME, 
+                    $resultAuthCookie->auth->selector . ":" . $resultAuthCookie->auth->validator,
+                    time() + LoginController::SECONDS_7_DAYS, "/", "localhost", false, false);
+        }
+    }
+    
+    private function setSessionForUser($user) {
+        $_SESSION ['id'] = $user->id;
+        $_SESSION ['username'] = $user->username;
+        $_SESSION ['email'] = $user->email;
+        $_SESSION ['phone'] = $user->phone;
+        $_SESSION ['name'] = $user->name;
+        $_SESSION ['bio'] = $user->bio;
+        
+        $this->model->username = $user->username;
+        $this->model->password = "";
+        $this->model->message = "Hello, " . $user->username . "!";
+        $this->model->loginSuccess = true;
+    }
+    
     public function handleHttpPost() {
         if (isset ( $_GET ['action'] )) {
             if ($_GET ['action'] === 'login') {
                 $this->login ();
             }
-        } else {
-            // invalid request.
-            http_response_code ( 400 );
-            die ();
-        }
+        } 
+
+        // invalid request.
+        http_response_code ( 400 );
+        die ();
     }
     
     public function handleHttpGet() {
         if (isset ( $_GET ['action'] )) {
-            // request for controller action
-            // No controller actions for HTTP GET
-        } else {
-            // display login page
+            if ($_GET ['action'] === 'logout') {
+                $this->logout ();
+            }
         }
+
+        // display login page
     }
     
     public function redirectToHome() {
@@ -126,14 +174,16 @@ $model = new LoginModel ();
 $controller = new LoginController ( $model );
 $view = new LoginView ( $controller, $model );
 
-if (isset ( $_SESSION ['username'] )) {
-    $controller->redirectToHome ();
-}
-
 if ($_SERVER ['REQUEST_METHOD'] === 'POST') {
     $controller->handleHttpPost ();
 } else if ($_SERVER ['REQUEST_METHOD'] === 'GET') {
     $controller->handleHttpGet ();
+}
+
+if ( isset( $_SESSION ['username'] ) ) {
+    $controller->redirectToHome ();
+} else if ( isset( $_COOKIE[LoginController::COOKIE_NAME] ) ) {
+    $controller->loginWithCookie ();
 }
 
 ?>

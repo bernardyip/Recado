@@ -39,7 +39,7 @@ class UserDatabase extends Database {
     const SQL_REGISTER_CREATE_USER = "INSERT INTO public.user (username, password, name, bio, created_time, last_logged_in, role) VALUES ($1, $2, $3, $4, $5, $6, 'user') RETURNING id;";
     const SQL_FIND_USER = "SELECT * FROM public.user WHERE username=$1;";
     const SQL_FIND_USERID = "SELECT * FROM public.user WHERE id=$1";
-    const SQL_FIND_USER_FROM_AUTH = "SELECT * FROM public.user_auth_tokens WHERE selector=$1 AND token=$2 AND expires <= NOW();";
+    const SQL_FIND_USER_FROM_AUTH = "SELECT * FROM public.user_auth_tokens WHERE selector=$1 AND token=$2 AND expires >= NOW();";
     const SQL_CREATE_USER_AUTH = "INSERT INTO public.user_auth_tokens(selector, token, userid, expires) VALUES(random_string($1), $2, $3, $4) RETURNING id, selector;";
     const SQL_CREATE_USER_AUTH_T = "INSERT INTO public.user_auth_tokens(selector, token, userid, expires) VALUES($1, $2, $3, $4) RETURNING id, selector;";
     
@@ -207,7 +207,7 @@ class UserDatabase extends Database {
     private function findUserFromId($id) {
 
         pg_prepare ( $this->dbcon, 'SQL_FIND_USERID', UserDatabase::SQL_FIND_USERID );
-        $dbResult = pg_execute ( $this->dbcon, 'SQL_LOGIN_SELECT_USER', array (
+        $dbResult = pg_execute ( $this->dbcon, 'SQL_FIND_USERID', array (
                 $id ) );
         if (pg_affected_rows ( $dbResult ) >= 1) {
             $user = pg_fetch_array ( $dbResult );
