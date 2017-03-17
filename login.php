@@ -189,6 +189,39 @@ if ( isset( $_SESSION ['username'] ) ) {
 ?>
 
 <html>
+<head>
+<script type="text/javascript">
+
+function validateForm() {
+	var valid = true;
+    var username = document.getElementsByName("username")[0].value;
+    var usernameValid = username == null || !(/\S/.test(username));
+    var password = document.getElementsByName("password")[0].value;
+    var passwordValid = name == null || !(/\S/.test(name));
+
+    if (usernameValid) {
+        document.getElementsByName("requiredUsername")[0].style.display = "block";
+        document.getElementsByName("username")[0].style.borderColor = "#E34234";
+        valid = false;
+    } else {
+        document.getElementsByName("requiredUsername")[0].style.display = "none";
+        document.getElementsByName("username")[0].style.borderColor = "initial";
+    }
+
+    if (passwordValid) {
+        document.getElementsByName("requiredPassword")[0].style.display = "block";
+        document.getElementsByName("password")[0].style.borderColor = "#E34234";
+        valid = false;
+    } else {
+        document.getElementsByName("requiredPassword")[0].style.display = "none";
+        document.getElementsByName("password")[0].style.borderColor = "initial";
+    }
+
+    return valid;
+}
+
+</script>
+</head>
 	<body>
 		<?php if ($model->loginSuccess) { ?>
 			<h1>Login Successful, Redirecting...</h1>
@@ -200,11 +233,14 @@ if ( isset( $_SESSION ['username'] ) ) {
             include ('banner.php');
             ?>
 			<form action="<?php echo LoginController::LOGIN_URL?>"
+				  onsubmit="return validateForm()"
 				  method="<?php echo LoginController::LOGIN_METHOD?>">
 				Username: <br />
 				<?php echo $view->getUsernameField(); ?> <br />
+				<div name="requiredUsername" style="display:none;"><p style="color:#FF0000;"> This field is required. </p></div> <br />
 				<br /> Password: <br />
 				<?php echo $view->getPasswordField(); ?><br />
+				<div name="requiredPassword" style="display:none;"><p style="color:#FF0000;"> This field is required. </p></div> <br />
 				<br /> Remember Me: <?php echo $view->getRememberMe(); ?><br />
 				<br /> <input type="submit" value="Log In" />
 			</form>
