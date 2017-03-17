@@ -74,6 +74,8 @@ CREATE TABLE public.comment (
 	task_id INTEGER REFERENCES public.task(id) ON DELETE CASCADE NOT NULL
 );
 
+
+-- function for generating random strings
 CREATE OR REPLACE FUNCTION random_string(length INTEGER) returns TEXT AS
 $$
 DECLARE
