@@ -4,12 +4,19 @@ session_start();
 include_once 'data/UserDatabase.php';
 
 class LoginModel {
-    public $username = "";
-    public $password = "";
+    public $username = null;
+    public $password = null;
+    public $rememberMe = null;
     public $message = "";
     public $loginSuccess = false;
 
     public function __construct() {
+    }
+    
+    public function isValid() {
+        if (isnull($this->username)) return false;
+        if (isnull($this->password)) return false;
+        return strlen($this->username) > 0 && strlen($this->password) > 0;
     }
     
 }
@@ -54,32 +61,35 @@ class LoginController {
     const COOKIE_NAME = "remember";
     
     private $model;
+    private $userDatabase;
 
     public function __construct($model) {
         $this->model = $model;
+        $this->userDatabase = new UserDatabase ();
     }
     
     public function login() {
-        $username = pg_escape_string ( $_POST ['username'] );
-        $password = pg_escape_string ( $_POST ['password'] );
-        $rememberMe = $_POST ['rememberMe'];
-        $userDatabase = new UserDatabase ();
-        $result = $userDatabase->login ( $username, $password );
-        if ($result->status === UserDatabaseResult::LOGIN_SUCCESS) {
-            $user = $result->user;
-            
-            if (!is_null($rememberMe)) {
-                createLoginCookieForUser($user);
+        if ($this->model->isValid()) {
+            $result = $this->userDatabase->login ( $username, $password );
+            if ($result->status === UserDatabaseResult::LOGIN_SUCCESS) {
+                $user = $result->user;
+                
+                if (!is_null($this->model->rememberMe)) {
+                    createLoginCookieForUser($user);
+                }
+                
+                $this->setSessionForUser($user);
+                $this->respondLoginSuccess($user);
+                $this->userDatabase->updateLastLogin ( $user->username, $user->password );
+                
+                header ( "Refresh: 3; URL=" . LoginController::HOME_URL );
+            } else {
+                $this->model->message = "Sorry, you have entered an invalid username-password pair.";
+                $this->model->loginSuccess = false;
             }
-            
-            $this->setSessionForUser($user);
-            
-            $userDatabase->updateLastLogin ( $user->username, $user->password );
-            
-            header ( "Refresh: 3; URL=" . LoginController::HOME_URL );
-        } else {
-            $this->model->message = "Sorry, you have entered an invalid username-password pair.";
-            $this->model->loginSuccess = false;
+        }
+        else {
+            return;
         }
     }
     
@@ -91,14 +101,15 @@ class LoginController {
         
         $selector = $pieces[0];
         $validator = $pieces[1];
-        $userDatabase = new UserDatabase();
         
-        $result = $userDatabase->findUserFromAuthCookie($selector, $validator);
+        $result = $this->userDatabase->findUserFromAuthCookie($selector, $validator);
         
         if ($result->status === UserDatabaseResult::AUTH_FIND_SUCCESS) {
             $user = $result->user;
             
             $this->setSessionForUser($user);
+            $this->respondLoginSuccess($user);
+            $this->userDatabase->updateLastLogin ( $user->username, $user->password );
             
             header ( "Refresh: 3; URL=" . LoginController::HOME_URL );
         }
@@ -119,7 +130,7 @@ class LoginController {
     }
     
     private function createLoginCookieForUser($user) {
-        $resultAuthCookie = $userDatabase->createAuthCookie($user, LoginController::VALIDATOR_LENGTH);
+        $resultAuthCookie = $this->userDatabase->createAuthCookie($user, LoginController::VALIDATOR_LENGTH);
         if ($resultAuthCookie->status === UserDatabaseResult::AUTH_CREATE_SUCCESS) {
             // successfully associated token, keep a cookie for the client
             setcookie(LoginController::COOKIE_NAME, 
@@ -135,7 +146,9 @@ class LoginController {
         $_SESSION ['phone'] = $user->phone;
         $_SESSION ['name'] = $user->name;
         $_SESSION ['bio'] = $user->bio;
-        
+    }
+    
+    private function respondLoginSuccess($user) {
         $this->model->username = $user->username;
         $this->model->password = "";
         $this->model->message = "Hello, " . $user->username . "!";
@@ -143,11 +156,22 @@ class LoginController {
     }
     
     public function handleHttpPost() {
+        
+        if (isset ( $_POST ['username'] )) {
+            $this->model->username = pg_escape_string ( $_POST ['username'] );
+        }
+        if (isset ( $_POST ['password'] )) {
+            $this->model->password = pg_escape_string ( $_POST ['password'] );
+        }
+        if (isset ( $_POST ['rememberMe'] )) {
+            $this->model->rememberMe = pg_escape_string ( $_POST ['rememberMe'] );
+        }
+
         if (isset ( $_GET ['action'] )) {
             if ($_GET ['action'] === 'login') {
                 $this->login ();
             }
-        } 
+        }
 
         // invalid request.
         http_response_code ( 400 );
@@ -160,8 +184,6 @@ class LoginController {
                 $this->logout ();
             }
         }
-
-        // display login page
     }
     
     public function redirectToHome() {
