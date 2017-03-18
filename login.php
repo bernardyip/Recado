@@ -8,6 +8,7 @@ class LoginModel {
     public $password = null;
     public $rememberMe = null;
     public $message = "";
+    public $next;
     public $loginSuccess = false;
 
     public function __construct() {
@@ -81,8 +82,8 @@ class LoginController {
                 $this->setSessionForUser($user);
                 $this->respondLoginSuccess($user);
                 $this->userDatabase->updateLastLogin ( $user->username, $user->password );
-                
-                header ( "Refresh: 3; URL=" . LoginController::HOME_URL );
+
+                $this->redirectToNext();
             } else {
                 $this->model->message = "Sorry, you have entered an invalid username-password pair.";
                 $this->model->loginSuccess = false;
@@ -111,7 +112,7 @@ class LoginController {
             $this->respondLoginSuccess($user);
             $this->userDatabase->updateLastLogin ( $user->username, $user->password );
             
-            header ( "Refresh: 3; URL=" . LoginController::HOME_URL );
+            $this->redirectToNext();
         }
     }
     
@@ -119,6 +120,14 @@ class LoginController {
         $this->removeLoginCookieForUser();
         session_destroy ();
         $this->redirectToHome();
+    }
+    
+    public function getLoginUrl() {
+        if (!is_null($this->model->next)) {
+            return LoginController::LOGIN_URL . "&next=" . urlencode($this->model->next);
+        } else {
+            return LoginController::LOGIN_URL;
+        }
     }
     
     private function removeLoginCookieForUser() {
@@ -155,6 +164,14 @@ class LoginController {
         $this->model->loginSuccess = true;
     }
     
+    private function redirectToNext() {
+        if (!is_null($this->model->next)) {
+            header ( "Refresh: 3; URL=" . $this->model->next );
+        } else {
+            header ( "Refresh: 3; URL=" . LoginController::HOME_URL );
+        }
+    }
+    
     public function handleHttpPost() {
         
         if (isset ( $_POST ['username'] )) {
@@ -165,6 +182,9 @@ class LoginController {
         }
         if (isset ( $_POST ['rememberMe'] )) {
             $this->model->rememberMe = $_POST ['rememberMe'];
+        }
+        if (isset ( $_GET ['next'] )) {
+            $this->model->next = $_GET ['next'];
         }
 
         if (isset ( $_GET ['action'] )) {
@@ -188,6 +208,9 @@ class LoginController {
         } 
         if (isset ( $_GET ['username'] )) {
             $this->model->username = $_GET ['username'];
+        }
+        if (isset ( $_GET ['next'] )) {
+            $this->model->next = $_GET ['next'];
         }
         
         if ( isset( $_SESSION ['username'] ) ) {
@@ -262,7 +285,7 @@ function validateForm() {
 			<?php
             include ('banner.php');
             ?>
-			<form action="<?php echo LoginController::LOGIN_URL?>"
+			<form action="<?php echo $controller->getLoginUrl();?>"
 				  onsubmit="return validateForm()"
 				  method="<?php echo LoginController::LOGIN_METHOD?>">
 				Username: <br />
