@@ -37,7 +37,7 @@ class TaskModel {
                 strlen($this->$newTaskDescription) &&
                 preg_match("/^[0-9]{6}$/", $this->$newTaskPostalCode) == 1 &&
                 strlen($this->$newTaskLocation) > 0 &&
-                $this->$newTaskStartDateTime < $this->$newTaskEndDateTime &&
+                $this->$newTaskStartDateTime <= $this->$newTaskEndDateTime &&
                 strlen($this->$newTaskListingPrice) > 0 && $this->$newTaskListingPrice > 0;
                 strlen($this->$newTaskCategory) > 0 && $this->$newTaskCategory > 0;
     }
@@ -66,13 +66,14 @@ class TaskView {
                    array ( "Description:", HtmlHelper::makeInput("text", "description", "", "Task Description", "") ),
                    array ( "Postal Code:", HtmlHelper::makeInput("number", "postal_code", "", "123456", "Six digit zip code") ),
                    array ( "Location:", HtmlHelper::makeInput("text", "location", "", "Where the task held at?", "") ),
-                   array ( "Task Start Date/Time:", HtmlHelper::makeInput("datetime-local", "task_start_time", "", "", "") ),
-                   array ( "Task End Date/Time:", HtmlHelper::makeInput("datetime-local", "task_end_time", "", "", "") ),
+                   array ( "Task Start Date/Time:", HtmlHelper::makeInput("datetime-local", "task_start_time", (new DateTime ( null, new DateTimeZone ( "Asia/Singapore" ) ))->format ( 'Y-m-d\TH:i' ), "", "") ),
+                   array ( "Task End Date/Time:", HtmlHelper::makeInput("datetime-local", "task_end_time", (new DateTime ( null, new DateTimeZone ( "Asia/Singapore" ) ))->format ( 'Y-m-d\TH:i' ), "", "") ),
                    array ( "Listing Price:", HtmlHelper::makeInput("number", "postal_code", "", "123456", "Six digit zip code") ),
-                   array ( "Category:", $this->makeCategoryDropdown($model->categoryTasks ) )
+                   array ( "Category:", $this->makeCategoryDropdown($this->model->categoryTasks ) )
                 ), null);
         $html = $html . HtmlHelper::makeInput("submit", "", "Create Task!", "", "");
         $html = $html . "</form>";
+        return $html;
     }
     
     public function getSearchForm() {
@@ -109,7 +110,7 @@ class TaskView {
     private static function makeCategoryDropdown($categoryTasks) {
         $html = "<select name=category>";
         foreach ($categoryTasks as $categoryTask) {
-            $html = $html . "<option value='$categoryTask->category->id'>$categoryTask->category->name</option>";
+            $html = $html . "<option value='" . $categoryTask->category->id . "'>" . htmlspecialchars($categoryTask->category->name) . "</option>";
         }
         $html = $html . "</select>";
         return $html;
@@ -236,29 +237,13 @@ if ($_SERVER ['REQUEST_METHOD'] === 'POST') {
 		    die();
 		}
 		
-		$dbcon = pg_connect('host=localhost dbname=postgres user=postgres password=password');
-		pg_prepare($dbcon, 'select_category_query', "SELECT c.id, c.name FROM public.category c");
-		$result = pg_execute($dbcon, 'select_category_query', array()); ?>
+		$dbcon = pg_connect('host=localhost dbname=postgres user=postgres password=password'); 
+		?>
 		
 		<h1>Create a task:</h1>
-		<form action="task.php" method="POST">
-			<table>
-    			<tr><td>name : 					</td><td><input type="text" name="name" 						value="test" /></td></tr>
-    			<tr><td>description : 			</td><td><input type="text" name="description" 					value="test desc" /></td></tr>
-    			<tr><td>postal_code :			</td><td><input type="text" pattern="[0-9]{6}" 					value="123123" title="Six digit zip code" name="postal_code" /></td></tr>
-    			<tr><td>location : 				</td><td><input type="text" name="location" 					value="Singapore" /></td></tr>
-    			<tr><td>task start date/time : 	</td><td><input type="datetime-local" name="task_start_time"	value="2017-01-02T11:00" /></td></tr>
-    			<tr><td>task end date/time :	</td><td><input type="datetime-local" name="task_end_time"		value="2017-01-02T13:00" /></td></tr>
-    			<tr><td>listing price :			</td><td><input type="number" name="listing_price"				value="12" /></td></tr>
-    			<tr><td>category : 				</td><td>
-    			<select name="category">
-<?php               while ($row = pg_fetch_array($result)) { ?>
-    				    <option value="<?=$row['id'] ?>"><?=$row['name'] ?></option>
-<?php               } ?>
-    			</select></td></tr>
-			</table>
-			<input type="submit" value="Create Task!" />
-		</form>
+		<?php
+		echo $view->getCreateTaskForm();
+		?>
 		
 		<h1>My Tasks:</h1>
 		<?php 
