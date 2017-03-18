@@ -1,6 +1,5 @@
 <?php 
 
-session_start();
 include_once 'data/UserDatabase.php';
 
 class RegisterModel {
@@ -10,11 +9,26 @@ class RegisterModel {
     public $phone;
     public $name;
     public $bio;
-    public $registerSuccess;
+    public $registerSuccess = false;
     public $message;
     
     public function __construct() {
+    }
+    
+    public function isValid() {
+        if (is_null($this->username)) return false;
+        if (is_null($this->password)) return false;
+        if (is_null($this->email)) return false;
+        if (is_null($this->phone)) return false;
+        if (is_null($this->name)) return false;
+        if (is_null($this->bio)) return false;
         
+        return strlen($this->username) > 0 &&
+        strlen($this->password) > 0 &&
+        strlen($this->email) > 0 &&
+        strlen($this->phone) > 0 &&
+        strlen($this->name) > 0 &&
+        strlen($this->bio) > 0;
     }
 }
 
@@ -28,7 +42,7 @@ class RegisterView {
     }
     
     public function getUsernameField() {
-        return $this->makeInput ( "text", "username", $this->model->username, true );
+        return $this->makeInput ( "text", "username", htmlspecialchars($this->model->username), true );
     }
     
     public function getPasswordField() {
@@ -40,19 +54,19 @@ class RegisterView {
     }
     
     public function getNameField() {
-        return $this->makeInput ( "text", "name", $this->model->name );
+        return $this->makeInput ( "text", "name", htmlspecialchars($this->model->name) );
     }
     
     public function getEmailField() {
-        return $this->makeInput ( "email", "email", $this->model->email );
+        return $this->makeInput ( "email", "email", htmlspecialchars($this->model->email) );
     }
     
     public function getPhoneField() {
-        return $this->makeInput ( "tel", "phone", "" );
+        return $this->makeInput ( "tel", "phone", htmlspecialchars($this->model->phone) );
     }
     
     public function getBioField() {
-        return $this->makeInput ( "text", "bio", $this->model->bio );
+        return $this->makeInput ( "text", "bio", htmlspecialchars($this->model->bio) );
     }
     
     private function makeInput($type, $name, $value, $autofocus = false) {
@@ -68,12 +82,14 @@ class RegisterView {
 class RegisterController {
     const REGISTER_URL = "register.php?action=register";
     const REGISTER_METHOD = "POST";
-    const HOME_URL = "/";
+    const LOGIN_URL = "/login.php";
     
     private $model;
+    private $userDatabase;
     
     public function __construct($model) {
         $this->model = $model;
+        $this->userDatabase = new UserDatabase ();
     }
     
     public function register() {
@@ -82,23 +98,16 @@ class RegisterController {
         $name = pg_escape_string ( $_POST ['name'] );
         $bio = pg_escape_string ( $_POST ['bio'] );
         
-        $userDatabase = new UserDatabase ();
-        $result = $userDatabase->register( $username, $password, $name, $bio );
+        $result = $this->userDatabase->register( $this->model->username, $this->model->password, $this->model->name, $this->model->bio );
         if ($result->status === UserDatabaseResult::REGISTER_SUCCESS) {
             $user = $result->user;
-            $_SESSION ['id'] = $user->id;
-            $_SESSION ['username'] = $user->username;
-            $_SESSION ['email'] = $user->email;
-            $_SESSION ['phone'] = $user->phone;
-            $_SESSION ['name'] = $user->name;
-            $_SESSION ['bio'] = $user->bio;
             
             $this->model->username = $user->username;
             $this->model->password = "";
             $this->model->message = "Welcome to Recado, " . $user->username . "!";
             $this->model->registerSuccess = true;
             
-            header ( "Refresh: 3; URL=" . RegisterController::HOME_URL );
+            header ( "Refresh: 3; URL=" . RegisterController::LOGIN_URL . "?username=" . urlencode($user->username) );
         } else {
             if ($result->status === UserDatabaseResult::REGISTER_USERNAME_TAKEN) {
                 $this->model->message = "Sorry, the username you have entered is already taken.";
@@ -114,6 +123,26 @@ class RegisterController {
     }
     
     public function handleHttpPost() {
+        
+        if (isset ( $_POST ['username'] )) {
+            $this->model->username = $_POST ['username'];
+        }
+        if (isset ( $_POST ['password'] )) {
+            $this->model->password = $_POST ['password'];
+        }
+        if (isset ( $_POST ['email'] )) {
+            $this->model->email = $_POST ['email'];
+        }
+        if (isset ( $_POST ['phone'] )) {
+            $this->model->phone = $_POST ['phone'];
+        }
+        if (isset ( $_POST ['name'] )) {
+            $this->model->name = $_POST ['name'];
+        }
+        if (isset ( $_POST ['bio'] )) {
+            $this->model->bio = $_POST ['bio'];
+        }
+        
         if (isset ( $_GET ['action'] )) {
             if ($_GET ['action'] === 'register') {
                 $this->register ();
@@ -166,7 +195,7 @@ function validateForm() {
 	if (!validateEmail()) valid = false;
 	if (!validatePhoneNumber()) valid = false;
 
-	return false;
+	return valid;
 }
 
 function validateMandatoryFields() {
@@ -290,7 +319,7 @@ function passwordsMatch() {
 				<?php echo $view->getBioField(); ?><br />
 				<br /> <input type="submit" value="Register" />
 			</form>
-			<p><?php echo $model->message; ?></p>
+			<p><?php echo htmlspecialchars($model->message); ?></p>
 		<?php
         }
         ?>
