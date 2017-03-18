@@ -34,20 +34,29 @@ class UserDatabase extends Database {
     const SELECTOR_LENGTH = 12;
     
     // SQL Queries
-    const SQL_LOGIN_SELECT_USER = "SELECT * FROM public.user WHERE username=$1 AND password=$2;";
-    const SQL_LOGIN_UPDATE_LAST_LOGIN = "UPDATE public.user SET last_logged_in=$3 WHERE username=$1 AND password=$2;";
+    const SQL_LOGIN_SELECT_USER = "SELECT * FROM public.user u WHERE u.username=$1 AND u.password=$2;";
+    const SQL_LOGIN_UPDATE_LAST_LOGIN = "UPDATE public.user u SET u.last_logged_in=$3 WHERE u.username=$1 AND u.password=$2;";
     const SQL_REGISTER_CREATE_USER = "INSERT INTO public.user (username, password, name, bio, created_time, last_logged_in, role) VALUES ($1, $2, $3, $4, $5, $6, 'user') RETURNING id;";
-    const SQL_FIND_USER = "SELECT * FROM public.user WHERE username=$1;";
-    const SQL_FIND_USERID = "SELECT * FROM public.user WHERE id=$1";
-    const SQL_FIND_USER_FROM_AUTH = "SELECT * FROM public.user_auth_tokens WHERE selector=$1 AND token=$2 AND expires >= NOW();";
+    const SQL_FIND_USER = "SELECT * FROM public.user u WHERE u.username=$1;";
+    const SQL_FIND_USERID = "SELECT * FROM public.user u WHERE u.id=$1";
+    const SQL_FIND_USER_FROM_AUTH = "SELECT * FROM public.user_auth_tokens t WHERE t.selector=$1 AND t.token=$2 AND t.expires >= NOW();";
     const SQL_CREATE_USER_AUTH = "INSERT INTO public.user_auth_tokens(selector, token, userid, expires) VALUES(random_string($1), $2, $3, $4) RETURNING id, selector;";
-    const SQL_CREATE_USER_AUTH_T = "INSERT INTO public.user_auth_tokens(selector, token, userid, expires) VALUES($1, $2, $3, $4) RETURNING id, selector;";
+    
+    public function __construct() {
+        parent::__construct();
+        pg_prepare ( $this->dbcon, 'SQL_LOGIN_SELECT_USER', UserDatabase::SQL_LOGIN_SELECT_USER );
+        pg_prepare ( $this->dbcon, 'SQL_LOGIN_UPDATE_LAST_LOGIN', UserDatabase::SQL_LOGIN_UPDATE_LAST_LOGIN );        
+        pg_prepare ( $this->dbcon, 'SQL_FIND_USER', UserDatabase::SQL_FIND_USER );
+        pg_prepare ( $this->dbcon, 'SQL_REGISTER_CREATE_USER', UserDatabase::SQL_REGISTER_CREATE_USER );
+        pg_prepare ( $this->dbcon, 'SQL_CREATE_USER_AUTH', UserDatabase::SQL_CREATE_USER_AUTH );
+        pg_prepare ( $this->dbcon, 'SQL_FIND_USER_FROM_AUTH', UserDatabase::SQL_FIND_USER_FROM_AUTH );
+        pg_prepare ( $this->dbcon, 'SQL_FIND_USERID', UserDatabase::SQL_FIND_USERID );
+    }
     
     public function login($username, $password) {
         $_username = pg_escape_string ( $username );
         $_password = pg_escape_string ( $password );
         
-        pg_prepare ( $this->dbcon, 'SQL_LOGIN_SELECT_USER', UserDatabase::SQL_LOGIN_SELECT_USER );
         $dbResult = pg_execute ( $this->dbcon, 'SQL_LOGIN_SELECT_USER', array (
                 $_username,
                 $_password
@@ -73,7 +82,6 @@ class UserDatabase extends Database {
         $_password = pg_escape_string ( $password );
         
         $current_datetime = (new DateTime ( null, new DateTimeZone ( "Asia/Singapore" ) ))->format ( 'Y-m-d\TH:i:s\Z' );
-        pg_prepare ( $this->dbcon, 'SQL_LOGIN_UPDATE_LAST_LOGIN', UserDatabase::SQL_LOGIN_UPDATE_LAST_LOGIN );
         $dbResult = pg_execute ( $this->dbcon, 'SQL_LOGIN_UPDATE_LAST_LOGIN', array (
                 $_username,
                 $_password,
@@ -85,8 +93,7 @@ class UserDatabase extends Database {
 
     public function userExists($username) {
         $_username = pg_escape_string ( $username );
-        
-        pg_prepare ( $this->dbcon, 'SQL_FIND_USER', UserDatabase::SQL_FIND_USER );
+
         $dbResult = pg_execute ( $this->dbcon, 'SQL_FIND_USER', array (
                 $_username ) );
         return pg_affected_rows ( $dbResult ) >= 1;
@@ -102,7 +109,6 @@ class UserDatabase extends Database {
             return new UserDatabaseResult(UserDatabaseResult::REGISTER_USERNAME_TAKEN, null);
         } else {
             $current_datetime = (new DateTime ( null, new DateTimeZone ( "Asia/Singapore" ) ))->format ( 'Y-m-d\TH:i:s\Z' );
-            pg_prepare ( $this->dbcon, 'SQL_REGISTER_CREATE_USER', UserDatabase::SQL_REGISTER_CREATE_USER );
             $dbResult = pg_execute ( $this->dbcon, 'SQL_REGISTER_CREATE_USER', array (
                     $_username,
                     $_password,
@@ -130,8 +136,6 @@ class UserDatabase extends Database {
         $validator = $this->generateRandomString($validatorLength);
         $token = hash("sha256", $validator);
         $auth = new UserAuthToken(-1, "", $validator, $token, $user->id, $expires);
-        
-        pg_prepare ( $this->dbcon, 'SQL_CREATE_USER_AUTH', UserDatabase::SQL_CREATE_USER_AUTH );
         
         $threshold = 10;
         $attempts = 0;
@@ -173,7 +177,6 @@ class UserDatabase extends Database {
         $token = hash("sha256", $validator);
         $auth = new UserAuthToken(-1, $selector, $validator, $token, -1, null);
         
-        pg_prepare ( $this->dbcon, 'SQL_FIND_USER_FROM_AUTH', UserDatabase::SQL_FIND_USER_FROM_AUTH );
         $dbResult = pg_execute ( $this->dbcon, 'SQL_FIND_USER_FROM_AUTH', array (
                 $_selector, 
                 $token ) );
@@ -220,7 +223,6 @@ class UserDatabase extends Database {
     
     private function findUserFromId($id) {
 
-        pg_prepare ( $this->dbcon, 'SQL_FIND_USERID', UserDatabase::SQL_FIND_USERID );
         $dbResult = pg_execute ( $this->dbcon, 'SQL_FIND_USERID', array (
                 $id ) );
         if (pg_affected_rows ( $dbResult ) >= 1) {
