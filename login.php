@@ -2,6 +2,7 @@
 
 session_start();
 include_once 'data/UserDatabase.php';
+include_once 'HtmlHelper.php';
 
 class LoginModel {
     public $username = null;
@@ -32,24 +33,15 @@ class LoginView {
     }
     
     public function getUsernameField() {
-        return $this->makeInput ( "text", "username", htmlspecialchars($this->model->username), true );
+        return HtmlHelper::makeInput( "text", "username", htmlspecialchars($this->model->username), "", "", true);
     }
     
     public function getPasswordField() {
-        return $this->makeInput ( "password", "password", "" );
+        return HtmlHelper::makeInput( "password", "password", "", "", "");
     }
     
     public function getRememberMe() {
-        return $this->makeInput( "checkbox", "rememberMe", "Remember Me" );
-    }
-    
-    private function makeInput($type, $name, $value, $autofocus = false) {
-        $html = "<input type=\"$type\" name=\"$name\" value=\"$value\"";
-        if ($autofocus) {
-            $html = $html . " autofocus ";
-        }
-        $html = $html . "/>";
-        return $html;
+        return HtmlHelper::makeInput( "checkbox", "rememberMe", "Remember Me", "", "");
     }
 }
 

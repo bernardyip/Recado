@@ -1,6 +1,7 @@
 <?php 
 
 include_once 'data/UserDatabase.php';
+include_once 'HtmlHelper.php';
 
 class RegisterModel {
     public $username;
@@ -42,40 +43,31 @@ class RegisterView {
     }
     
     public function getUsernameField() {
-        return $this->makeInput ( "text", "username", htmlspecialchars($this->model->username), true );
+        return HtmlHelper::makeInput( "text", "username", htmlspecialchars($this->model->username), "", "", true);
     }
     
     public function getPasswordField() {
-        return $this->makeInput ( "password", "password", "" );
+        return HtmlHelper::makeInput( "password", "password", "", "", "");
     }
     
     public function getConfirmPasswordField() {
-        return $this->makeInput ( "password", "confirmPassword", "" );
+        return HtmlHelper::makeInput( "password", "confirmPassword", "", "", "");
     }
     
     public function getNameField() {
-        return $this->makeInput ( "text", "name", htmlspecialchars($this->model->name) );
+        return HtmlHelper::makeInput( "text", "name", htmlspecialchars($this->model->name), "", "");
     }
     
     public function getEmailField() {
-        return $this->makeInput ( "email", "email", htmlspecialchars($this->model->email) );
+        return HtmlHelper::makeInput( "email", "email", htmlspecialchars($this->model->email), "", "");
     }
     
     public function getPhoneField() {
-        return $this->makeInput ( "tel", "phone", htmlspecialchars($this->model->phone) );
+        return HtmlHelper::makeInput( "tel", "phone", htmlspecialchars($this->model->phone), "", "");
     }
     
     public function getBioField() {
-        return $this->makeInput ( "text", "bio", htmlspecialchars($this->model->bio) );
-    }
-    
-    private function makeInput($type, $name, $value, $autofocus = false) {
-        $html = "<input type=\"$type\" name=\"$name\" value=\"$value\"";
-        if ($autofocus) {
-            $html = $html . " autofocus ";
-        }
-        $html = $html . "/>";
-        return $html;
+        return HtmlHelper::makeInput( "text", "bio", htmlspecialchars($this->model->bio), "", "");
     }
 }
 
