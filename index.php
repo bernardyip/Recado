@@ -1,3 +1,25 @@
+<?php 
+
+class IndexModel {
+    
+    
+    public function __construct() {
+        
+    }
+}
+
+class IndexView {
+    
+}
+
+class IndexController {
+    
+}
+
+
+
+?>
+
 <html>
 <head>
 <title>Recado</title>
