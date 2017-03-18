@@ -14,8 +14,8 @@ class LoginModel {
     }
     
     public function isValid() {
-        if (isnull($this->username)) return false;
-        if (isnull($this->password)) return false;
+        if (is_null($this->username)) return false;
+        if (is_null($this->password)) return false;
         return strlen($this->username) > 0 && strlen($this->password) > 0;
     }
     
@@ -31,7 +31,7 @@ class LoginView {
     }
     
     public function getUsernameField() {
-        return $this->makeInput ( "text", "username", "", true );
+        return $this->makeInput ( "text", "username", htmlspecialchars($this->model->username), true );
     }
     
     public function getPasswordField() {
@@ -70,12 +70,12 @@ class LoginController {
     
     public function login() {
         if ($this->model->isValid()) {
-            $result = $this->userDatabase->login ( $username, $password );
+            $result = $this->userDatabase->login ( $this->model->username, $this->model->password );
             if ($result->status === UserDatabaseResult::LOGIN_SUCCESS) {
                 $user = $result->user;
                 
                 if (!is_null($this->model->rememberMe)) {
-                    createLoginCookieForUser($user);
+                    $this->createLoginCookieForUser($user);
                 }
                 
                 $this->setSessionForUser($user);
@@ -171,18 +171,30 @@ class LoginController {
             if ($_GET ['action'] === 'login') {
                 $this->login ();
             }
+        } else {
+            // invalid request.
+            http_response_code ( 400 );
+            die ();
         }
 
-        // invalid request.
-        http_response_code ( 400 );
-        die ();
     }
     
     public function handleHttpGet() {
         if (isset ( $_GET ['action'] )) {
             if ($_GET ['action'] === 'logout') {
                 $this->logout ();
+                return;
             }
+        } 
+        if (isset ( $_GET ['username'] )) {
+            $this->model->username = $_GET ['username'];
+        }
+        
+        if ( isset( $_SESSION ['username'] ) ) {
+            $this->redirectToHome ();
+        }
+        if ( isset( $_COOKIE[LoginController::COOKIE_NAME] ) ) {
+            $this->loginWithCookie ();
         }
     }
     
@@ -202,11 +214,7 @@ if ($_SERVER ['REQUEST_METHOD'] === 'POST') {
     $controller->handleHttpGet ();
 }
 
-if ( isset( $_SESSION ['username'] ) ) {
-    $controller->redirectToHome ();
-} else if ( isset( $_COOKIE[LoginController::COOKIE_NAME] ) ) {
-    $controller->loginWithCookie ();
-}
+
 
 ?>
 
@@ -219,7 +227,7 @@ function validateForm() {
     var username = document.getElementsByName("username")[0].value;
     var usernameInvalid = username == null || !(/\S/.test(username));
     var password = document.getElementsByName("password")[0].value;
-    var passwordInvalid = name == null || !(/\S/.test(name));
+    var passwordInvalid = password == null || !(/\S/.test(password));
 
     if (usernameInvalid) {
         document.getElementsByName("requiredUsername")[0].style.display = "block";
@@ -247,7 +255,7 @@ function validateForm() {
 	<body>
 		<?php if ($model->loginSuccess) { ?>
 			<h1>Login Successful, Redirecting...</h1>
-			<p><?php echo $model->message; ?></p>
+			<p><?php echo htmlspecialchars($model->message); ?></p>
 		<?php
         } else {
         ?>
