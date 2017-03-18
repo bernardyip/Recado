@@ -12,11 +12,13 @@ class TaskDatabaseResult extends DatabaseResult {
     const TASK_DELETE_SUCCESS = 13;
     const TASK_DELETE_FAIL = 16;
     
-    public $task;
+    public $tasks;
+    public $count;
     
-    public function __construct($status, $task, $auth) {
+    public function __construct($status, $tasks, $count) {
         $this->status = $status;
-        $this->task = $task;
+        $this->tasks = $tasks;
+        $this->count = $count;
     }
 }
 
@@ -24,239 +26,77 @@ class TaskDatabaseResult extends DatabaseResult {
 class TaskDatabase extends Database {
     
     // SQL Queries
-    const SQL_LOGIN_SELECT_USER = "SELECT * FROM public.user WHERE username=$1 AND password=$2;";
-    const SQL_LOGIN_UPDATE_LAST_LOGIN = "UPDATE public.user SET last_logged_in=$3 WHERE username=$1 AND password=$2;";
-    const SQL_REGISTER_CREATE_USER = "INSERT INTO public.user (username, password, name, bio, created_time, last_logged_in, role) VALUES ($1, $2, $3, $4, $5, $6, 'user') RETURNING id;";
-    const SQL_FIND_USER = "SELECT * FROM public.user WHERE username=$1;";
-    const SQL_FIND_USERID = "SELECT * FROM public.user WHERE id=$1";
-    const SQL_FIND_USER_FROM_AUTH = "SELECT * FROM public.user_auth_tokens WHERE selector=$1 AND token=$2 AND expires >= NOW();";
-    const SQL_CREATE_USER_AUTH = "INSERT INTO public.user_auth_tokens(selector, token, userid, expires) VALUES(random_string($1), $2, $3, $4) RETURNING id, selector;";
-    const SQL_CREATE_USER_AUTH_T = "INSERT INTO public.user_auth_tokens(selector, token, userid, expires) VALUES($1, $2, $3, $4) RETURNING id, selector;";
+    const SQL_FIND_TASK_WITH_CATEGORY_WITH_LIMIT = "SELECT * FROM public.task t WHERE t.category_id=$1 LIMIT $2";
+    const SQL_FIND_TASK_WITH_CATEGORY = "SELECT * FROM public.task t WHERE t.category_id=$1";
+    const SQL_FIND_TASK_COUNT_WITH_CATEGORY = "SELECT COUNT(*) AS count FROM public.task t WHERE t.category_id=$1";
+    const SQL_FIND_TASK_COUNT = "SELECT COUNT(*) AS count FROM public.task t";
     
-    public function login($username, $password) {
-        $_username = pg_escape_string ( $username );
-        $_password = pg_escape_string ( $password );
-        
-        pg_prepare ( $this->dbcon, 'SQL_LOGIN_SELECT_USER', UserDatabase::SQL_LOGIN_SELECT_USER );
-        $dbResult = pg_execute ( $this->dbcon, 'SQL_LOGIN_SELECT_USER', array (
-                $_username,
-                $_password
-        ) );
-        
-        if (pg_affected_rows ( $dbResult ) >= 1) {
-            $user = pg_fetch_array ( $dbResult );
-            return new UserDatabaseResult(
-                    UserDatabaseResult::LOGIN_SUCCESS, 
-                    new User ( $user ['id'], $user ['username'], $user ['password'], 
-                                $user ['email'], $user ['phone'], $user ['name'], 
-                                $user ['bio'], $user ['created_time'], $user ['last_logged_in'], 
-                                $user ['role'] ));
-        } else {
-            return new UserDatabaseResult(
-                    UserDatabaseResult::LOGIN_BAD_USERNAME_PASSWORD, 
-                    null);
-        }
+    public function __construct() {
+        parent::__construct();
+        pg_prepare ( $this->dbcon, 'SQL_FIND_TASK_WITH_CATEGORY_WITH_LIMIT', TaskDatabase::SQL_FIND_TASK_WITH_CATEGORY_WITH_LIMIT );
+        pg_prepare ( $this->dbcon, 'SQL_FIND_TASK_WITH_CATEGORY', TaskDatabase::SQL_FIND_TASK_WITH_CATEGORY );
+        pg_prepare ( $this->dbcon, 'SQL_FIND_TASK_COUNT_WITH_CATEGORY', TaskDatabase::SQL_FIND_TASK_COUNT_WITH_CATEGORY );
+        pg_prepare ( $this->dbcon, 'SQL_FIND_TASK_COUNT', TaskDatabase::SQL_FIND_TASK_COUNT );
     }
     
-    public function updateLastLogin($username, $password) {
-        $_username = pg_escape_string ( $username );
-        $_password = pg_escape_string ( $password );
+    public function findTasksWithCategoryIdLimitTo($categoryId, $count = 0) {
         
-        $current_datetime = (new DateTime ( null, new DateTimeZone ( "Asia/Singapore" ) ))->format ( 'Y-m-d\TH:i:s\Z' );
-        pg_prepare ( $this->dbcon, 'SQL_LOGIN_UPDATE_LAST_LOGIN', UserDatabase::SQL_LOGIN_UPDATE_LAST_LOGIN );
-        $dbResult = pg_execute ( $this->dbcon, 'SQL_LOGIN_UPDATE_LAST_LOGIN', array (
-                $_username,
-                $_password,
-                $current_datetime ) );
-        
-        // always successful
-        return new UserDatabaseResult(UserDatabaseResult::LOGIN_UPDATE_LAST_LOGIN_SUCCESS, null);
-    }
-
-    public function userExists($username) {
-        $_username = pg_escape_string ( $username );
-        
-        pg_prepare ( $this->dbcon, 'SQL_FIND_USER', UserDatabase::SQL_FIND_USER );
-        $dbResult = pg_execute ( $this->dbcon, 'SQL_FIND_USER', array (
-                $_username ) );
-        return pg_affected_rows ( $dbResult ) >= 1;
-    }
-    
-    public function register($username, $password, $name, $bio) {
-        $_username = pg_escape_string ( $username );
-        $_password = pg_escape_string ( $password );
-        $_name = pg_escape_string ( $name );
-        $_bio = pg_escape_string ( $bio );
-        
-        if ($this->userExists($username)) {
-            return new UserDatabaseResult(UserDatabaseResult::REGISTER_USERNAME_TAKEN, null);
-        } else {
-            $current_datetime = (new DateTime ( null, new DateTimeZone ( "Asia/Singapore" ) ))->format ( 'Y-m-d\TH:i:s\Z' );
-            pg_prepare ( $this->dbcon, 'SQL_REGISTER_CREATE_USER', UserDatabase::SQL_REGISTER_CREATE_USER );
-            $dbResult = pg_execute ( $this->dbcon, 'SQL_REGISTER_CREATE_USER', array (
-                    $_username,
-                    $_password,
-                    $_name,
-                    $_bio,
-                    $current_datetime,
-                    $current_datetime ) );
-            
-            if (pg_affected_rows ( $dbResult ) >= 1) {
-                $user = pg_fetch_array ( $dbResult );
-                return new UserDatabaseResult(
-                        UserDatabaseResult::REGISTER_SUCCESS, 
-                        new User($user['id'], $username, $password, "", "", $name, $bio, $current_datetime, $current_datetime, "user"));
-            } else {
-                return new UserDatabaseResult(UserDatabaseResult::REGISTER_FAILED, null);
-            }
-        }
-        return $result;
-    }
-    
-    public function createAuthCookie($user, $validatorLength) {
-
-        $expires = new DateTime ( null, new DateTimeZone ( "Asia/Singapore" ) );
-        $expires->add(new DateInterval("P7D"));
-        $validator = $this->generateRandomString($validatorLength);
-        $token = hash("sha256", $validator);
-        $auth = new UserAuthToken(-1, "", $validator, $token, $user->id, $expires);
-        
-        pg_prepare ( $this->dbcon, 'SQL_CREATE_USER_AUTH', UserDatabase::SQL_CREATE_USER_AUTH );
-        
-        $threshold = 10;
-        $attempts = 0;
         $dbResult = null;
-        
-        do {
-            $dbResult = pg_execute ( $this->dbcon, 'SQL_CREATE_USER_AUTH', array (
-                    UserDatabase::SELECTOR_LENGTH, // SELECTOR_LENGTH
-                    $auth->token,
-                    $auth->userid,
-                    $auth->expires->format ( 'Y-m-d\TH:i:s\Z' ) ) );
-            
-            if (pg_affected_rows ( $dbResult ) >= 1) {
-    
-                $authResult = pg_fetch_array ( $dbResult );
-                $auth->id = $authResult['id'];
-                $auth->selector = $authResult['selector'];
-    
-                $result = new UserDatabaseResult(
-                        UserDatabaseResult::AUTH_CREATE_SUCCESS,
-                        $user,
-                        $auth);
-                break;
-            } else {
-                $result = new UserDatabaseResult(
-                        UserDatabaseResult::AUTH_CREATE_FAIL,
-                        $user,
-                        $auth);
-                $attempts++;
-            }
-        } while ($attempts < $threshold);
-        
-        return $result;
-    }
-    
-    public function findUserFromAuthCookie($selector, $validator) {
-        $_selector = pg_escape_string ( $selector );
-        
-        $token = hash("sha256", $validator);
-        $auth = new UserAuthToken(-1, $selector, $validator, $token, -1, null);
-        
-        pg_prepare ( $this->dbcon, 'SQL_FIND_USER_FROM_AUTH', UserDatabase::SQL_FIND_USER_FROM_AUTH );
-        $dbResult = pg_execute ( $this->dbcon, 'SQL_FIND_USER_FROM_AUTH', array (
-                $_selector, 
-                $token ) );
-        
-        if (pg_affected_rows ( $dbResult ) >= 1) {
-
-            $authResult = pg_fetch_array ( $dbResult );
-            $auth->expires = $authResult['expires'];
-            $auth->id = $authResult['id'];
-            $auth->userid = $authResult['userid'];
-            
-            $userid = $authResult['userid'];
-            $user = $this->findUserFromId($userid);
-            
-            if (!is_null($user)) {
-                return new UserDatabaseResult(
-                        UserDatabaseResult::AUTH_FIND_SUCCESS, 
-                        $user,
-                        $auth);
-            } else {
-                return new UserDatabaseResult(
-                        UserDatabaseResult::AUTH_FIND_FAIL, 
-                        null, 
-                        $auth);
-            }
+        if ($count > 0) {
+            $dbResult = pg_execute ( $this->dbcon, 'SQL_FIND_TASK_WITH_CATEGORY_WITH_LIMIT', array (
+                    $categoryId,
+                    $count
+            ) );
         } else {
-            return new UserDatabaseResult(
-                    UserDatabaseResult::AUTH_FIND_FAIL, 
-                    null, 
-                    $auth);
+            $dbResult = pg_execute ( $this->dbcon, 'SQL_FIND_TASK_WITH_CATEGORY', array (
+                    $categoryId
+            ) );
         }
-    }
-    
-    private function generateRandomString($length = 10) {
-        $characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-        $charactersLength = strlen($characters);
-        $randomString = '';
-        for ($i = 0; $i < $length; $i++) {
-            $index = rand(0, $charactersLength - 1);
-            $randomString .= $characters[$index];
-        }
-        return $randomString;
-    }
-    
-    private function findUserFromId($id) {
 
-        pg_prepare ( $this->dbcon, 'SQL_FIND_USERID', UserDatabase::SQL_FIND_USERID );
-        $dbResult = pg_execute ( $this->dbcon, 'SQL_FIND_USERID', array (
-                $id ) );
-        if (pg_affected_rows ( $dbResult ) >= 1) {
-            $user = pg_fetch_array ( $dbResult );
-            return new User ( $user ['id'], $user ['username'], $user ['password'], 
-                                $user ['email'], $user ['phone'], $user ['name'], 
-                                $user ['bio'], $user ['created_time'], $user ['last_logged_in'], 
-                                $user ['role'] );
-        } else {
-            return null;
+        $tasks = null;
+        $nrRows = pg_affected_rows ( $dbResult );
+        if ($nrRows >= 1) {
+            $tasks = array();
+            for ($i = 0; $i < $nrRows; $i++) {
+                $task = pg_fetch_array( $dbResult );
+                $tasks[$i] = new Task($task['id'], $task['name'], $task['description'],
+                        $task['postal_code'], $task['location'], $task['task_start_time'], 
+                        $task['task_end_time'], $task['listing_price'], $task['created_time'], 
+                        $task['updated_time'], $task['status'], $task['bid_picked'], $task['category_id'], 
+                        $task['creator_id']);
+            }
         }
         
+        return new TaskDatabaseResult(TaskDatabaseResult::TASK_FIND_SUCCESS, $tasks, $nrRows);
     }
-    /*
-     * public function getUsers() {
-     * $sqlGetUser = "SELECT * FROM users";
-     * $result = $this->dbcon->prepare ($sqlGetUser);
-     * $result->execute ();
-     * return json_encode ( $result->fetchAll () );
-     * }
-     * public function add($user) {
-     * $result = $this->dbcon->prepare ( "INSERT INTO users(name, email, mobile, address) VALUES (?, ?, ?, ?)" );
-     * $result->execute ( array (
-     * $user->name,
-     * $user->email,
-     * $user->mobile,
-     * $user->address
-     * ) );
-     * return json_encode ( $this->dbcon->lastInsertId () );
-     * }
-     * public function delete($user) {
-     * $result = $this->dbcon->prepare ( "DELETE FROM users WHERE id=?" );
-     * $result->execute ( array (
-     * $user->id
-     * ) );
-     * return json_encode ( 1 );
-     * }
-     * public function updateValue($user) {
-     * $result = $this->dbcon->prepare ( "UPDATE users SET " . $user->field . "=? WHERE id=?" );
-     * $result->execute ( array (
-     * $user->newvalue,
-     * $user->id
-     * ) );
-     * return json_encode ( 1 );
-     * }
-     */
+    
+    public function findTaskCountWithCategoryId($categoryId) {
+        $dbResult = pg_execute ( $this->dbcon, 'SQL_FIND_TASK_COUNT_WITH_CATEGORY', array (
+                $categoryId
+        ) );
+
+        $count = 0;
+        if (pg_affected_rows ( $dbResult ) >= 1) {
+            $result = pg_fetch_array( $dbResult );
+            $count = $result['count'];
+        }
+        
+        return new TaskDatabaseResult(TaskDatabaseResult::TASK_FIND_SUCCESS, array(), $count);
+    }
+    
+    public function findTaskCount() {
+        $dbResult = pg_execute ( $this->dbcon, 'SQL_FIND_TASK_COUNT', array (
+        ) );
+
+        $count = 0;
+        if (pg_affected_rows ( $dbResult ) >= 1) {
+            $result = pg_fetch_array( $dbResult );
+            $count = $result['count'];
+        }
+        
+        return new TaskDatabaseResult(TaskDatabaseResult::TASK_FIND_SUCCESS, array(), $count);
+    }
+    
 }
 
 ?>
