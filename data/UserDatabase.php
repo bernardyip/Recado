@@ -35,7 +35,7 @@ class UserDatabase extends Database {
     
     // SQL Queries
     const SQL_LOGIN_SELECT_USER = "SELECT * FROM public.user u WHERE u.username=$1 AND u.password=$2;";
-    const SQL_LOGIN_UPDATE_LAST_LOGIN = "UPDATE public.user u SET u.last_logged_in=$3 WHERE u.username=$1 AND u.password=$2;";
+    const SQL_LOGIN_UPDATE_LAST_LOGIN = "UPDATE public.user SET last_logged_in=$3 WHERE username=$1 AND password=$2;";
     const SQL_REGISTER_CREATE_USER = "INSERT INTO public.user (username, password, name, bio, created_time, last_logged_in, role) VALUES ($1, $2, $3, $4, $5, $6, 'user') RETURNING id;";
     const SQL_FIND_USER = "SELECT * FROM public.user u WHERE u.username=$1;";
     const SQL_FIND_USERID = "SELECT * FROM public.user u WHERE u.id=$1";
@@ -69,10 +69,12 @@ class UserDatabase extends Database {
                     new User ( $user ['id'], $user ['username'], $user ['password'], 
                                 $user ['email'], $user ['phone'], $user ['name'], 
                                 $user ['bio'], $user ['created_time'], $user ['last_logged_in'], 
-                                $user ['role'] ));
+                                $user ['role'] ),
+                    null);
         } else {
             return new UserDatabaseResult(
                     UserDatabaseResult::LOGIN_BAD_USERNAME_PASSWORD, 
+                    null,
                     null);
         }
     }
@@ -88,7 +90,7 @@ class UserDatabase extends Database {
                 $current_datetime ) );
         
         // always successful
-        return new UserDatabaseResult(UserDatabaseResult::LOGIN_UPDATE_LAST_LOGIN_SUCCESS, null);
+        return new UserDatabaseResult(UserDatabaseResult::LOGIN_UPDATE_LAST_LOGIN_SUCCESS, null, null);
     }
 
     public function userExists($username) {
@@ -106,7 +108,7 @@ class UserDatabase extends Database {
         $_bio = pg_escape_string ( $bio );
         
         if ($this->userExists($username)) {
-            return new UserDatabaseResult(UserDatabaseResult::REGISTER_USERNAME_TAKEN, null);
+            return new UserDatabaseResult(UserDatabaseResult::REGISTER_USERNAME_TAKEN, null, null);
         } else {
             $current_datetime = (new DateTime ( null, new DateTimeZone ( "Asia/Singapore" ) ))->format ( 'Y-m-d\TH:i:s\Z' );
             $dbResult = pg_execute ( $this->dbcon, 'SQL_REGISTER_CREATE_USER', array (
@@ -121,9 +123,10 @@ class UserDatabase extends Database {
                 $user = pg_fetch_array ( $dbResult );
                 return new UserDatabaseResult(
                         UserDatabaseResult::REGISTER_SUCCESS, 
-                        new User($user['id'], $username, $password, "", "", $name, $bio, $current_datetime, $current_datetime, "user"));
+                        new User($user['id'], $username, $password, "", "", $name, $bio, $current_datetime, $current_datetime, "user"),
+                        null);
             } else {
-                return new UserDatabaseResult(UserDatabaseResult::REGISTER_FAILED, null);
+                return new UserDatabaseResult(UserDatabaseResult::REGISTER_FAILED, null, null);
             }
         }
         return $result;
