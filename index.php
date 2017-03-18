@@ -2,19 +2,9 @@
 
 include_once 'data/TaskDatabase.php';
 include_once 'data/CategoryDatabase.php';
+include_once 'model/CategoryTask.php';
 
-class CategoryTask {
-    
-    public $category;
-    public $tasks;
-    public $totalTaskCount;
-    
-    public function __construct($category, $tasks, $totalTaskCount) {
-        $this->category = $category;
-        $this->tasks = $tasks;
-        $this->totalTaskCount = $totalTaskCount;
-    }
-}
+session_start();
 
 class IndexModel {
     
