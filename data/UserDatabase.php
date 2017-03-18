@@ -44,10 +44,13 @@ class UserDatabase extends Database {
     const SQL_CREATE_USER_AUTH_T = "INSERT INTO public.user_auth_tokens(selector, token, userid, expires) VALUES($1, $2, $3, $4) RETURNING id, selector;";
     
     public function login($username, $password) {
+        $_username = pg_escape_string ( $username );
+        $_password = pg_escape_string ( $password );
+        
         pg_prepare ( $this->dbcon, 'SQL_LOGIN_SELECT_USER', UserDatabase::SQL_LOGIN_SELECT_USER );
         $dbResult = pg_execute ( $this->dbcon, 'SQL_LOGIN_SELECT_USER', array (
-                $username,
-                $password 
+                $_username,
+                $_password
         ) );
         
         if (pg_affected_rows ( $dbResult ) >= 1) {
@@ -66,11 +69,14 @@ class UserDatabase extends Database {
     }
     
     public function updateLastLogin($username, $password) {
+        $_username = pg_escape_string ( $username );
+        $_password = pg_escape_string ( $password );
+        
         $current_datetime = (new DateTime ( null, new DateTimeZone ( "Asia/Singapore" ) ))->format ( 'Y-m-d\TH:i:s\Z' );
         pg_prepare ( $this->dbcon, 'SQL_LOGIN_UPDATE_LAST_LOGIN', UserDatabase::SQL_LOGIN_UPDATE_LAST_LOGIN );
         $dbResult = pg_execute ( $this->dbcon, 'SQL_LOGIN_UPDATE_LAST_LOGIN', array (
-                $username,
-                $password,
+                $_username,
+                $_password,
                 $current_datetime ) );
         
         // always successful
@@ -78,23 +84,30 @@ class UserDatabase extends Database {
     }
 
     public function userExists($username) {
+        $_username = pg_escape_string ( $username );
+        
         pg_prepare ( $this->dbcon, 'SQL_FIND_USER', UserDatabase::SQL_FIND_USER );
         $dbResult = pg_execute ( $this->dbcon, 'SQL_FIND_USER', array (
-                $username ) );
+                $_username ) );
         return pg_affected_rows ( $dbResult ) >= 1;
     }
     
     public function register($username, $password, $name, $bio) {
+        $_username = pg_escape_string ( $username );
+        $_password = pg_escape_string ( $password );
+        $_name = pg_escape_string ( $name );
+        $_bio = pg_escape_string ( $bio );
+        
         if ($this->userExists($username)) {
             return new UserDatabaseResult(UserDatabaseResult::REGISTER_USERNAME_TAKEN, null);
         } else {
             $current_datetime = (new DateTime ( null, new DateTimeZone ( "Asia/Singapore" ) ))->format ( 'Y-m-d\TH:i:s\Z' );
             pg_prepare ( $this->dbcon, 'SQL_REGISTER_CREATE_USER', UserDatabase::SQL_REGISTER_CREATE_USER );
             $dbResult = pg_execute ( $this->dbcon, 'SQL_REGISTER_CREATE_USER', array (
-                    $username,
-                    $password,
-                    $name,
-                    $bio,
+                    $_username,
+                    $_password,
+                    $_name,
+                    $_bio,
                     $current_datetime,
                     $current_datetime ) );
             
@@ -155,13 +168,14 @@ class UserDatabase extends Database {
     }
     
     public function findUserFromAuthCookie($selector, $validator) {
+        $_selector = pg_escape_string ( $selector );
         
         $token = hash("sha256", $validator);
         $auth = new UserAuthToken(-1, $selector, $validator, $token, -1, null);
         
         pg_prepare ( $this->dbcon, 'SQL_FIND_USER_FROM_AUTH', UserDatabase::SQL_FIND_USER_FROM_AUTH );
         $dbResult = pg_execute ( $this->dbcon, 'SQL_FIND_USER_FROM_AUTH', array (
-                $selector, 
+                $_selector, 
                 $token ) );
         
         if (pg_affected_rows ( $dbResult ) >= 1) {

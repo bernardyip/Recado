@@ -158,13 +158,13 @@ class LoginController {
     public function handleHttpPost() {
         
         if (isset ( $_POST ['username'] )) {
-            $this->model->username = pg_escape_string ( $_POST ['username'] );
+            $this->model->username = $_POST ['username'];
         }
         if (isset ( $_POST ['password'] )) {
-            $this->model->password = pg_escape_string ( $_POST ['password'] );
+            $this->model->password = $_POST ['password'];
         }
         if (isset ( $_POST ['rememberMe'] )) {
-            $this->model->rememberMe = pg_escape_string ( $_POST ['rememberMe'] );
+            $this->model->rememberMe = $_POST ['rememberMe'];
         }
 
         if (isset ( $_GET ['action'] )) {
@@ -267,7 +267,7 @@ function validateForm() {
 				<br /> <input type="submit" value="Log In" />
 			</form>
 			<p>Don't have an account? <a href="/register.php" >Register here</a>.</p>
-			<p><?php echo $model->message; ?></p>
+			<p><?php echo htmlspecialchars($model->message); ?></p>
 		<?php
         }
         ?>
