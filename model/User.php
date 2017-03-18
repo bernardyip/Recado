@@ -14,15 +14,15 @@ class User {
     
     public function __construct($id, $username, $password, $email, $phone, $name, $bio, $createdTime, $lastLoggedIn, $role) {
         $this->id = $id;
-        $this->username = $username;
-        $this->password = $password;
-        $this->email = $email;
-        $this->phone = $phone;
-        $this->name = $name;
-        $this->bio = $bio;
+        $this->username = trim($username);
+        $this->password = trim($password);
+        $this->email = trim($email);
+        $this->phone = trim($phone);
+        $this->name = trim($name);
+        $this->bio = trim($bio);
         $this->createdTime = $createdTime;
         $this->lastLoggedIn = $lastLoggedIn;
-        $this->role = $role;
+        $this->role = trim($role);
     }
 }
 ?>

@@ -8,7 +8,7 @@ class Comment {
     
     public function __construct($id, $comment, $createdTime, $userId, $taskId) {
         $this->id = $id;
-        $this->comment = $comment;
+        $this->comment = trim($comment);
         $this->createdTime = $createdTime;
         $this->userId = $userId;
         $this->taskId = $taskId;

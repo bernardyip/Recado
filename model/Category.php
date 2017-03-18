@@ -7,9 +7,9 @@ class Category {
     
     public function __construct($id, $photo, $name, $description) {
         $this->id = $id;
-        $this->photo = $photo;
-        $this->name = $name;
-        $this->description = $description;
+        $this->photo = trim($photo);
+        $this->name = trim($name);
+        $this->description = trim($description);
     }
 }
 ?>

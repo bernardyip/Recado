@@ -15,18 +15,20 @@ class Task {
     public $categoryId;
     public $creatorId;
     
-    public function __construct($id, $name, $description, $postalCode, $location, $taskStartTime, $taskEndTime, $listingPrice, $createdTime, $updatedTime, $status, $bidPicked, $categoryId, $creatorId) {
+    public function __construct($id, $name, $description, $postalCode, $location, 
+            $taskStartTime, $taskEndTime, $listingPrice, $createdTime, $updatedTime, 
+            $status, $bidPicked, $categoryId, $creatorId) {
         $this->id = $id;
-        $this->name = $name;
-        $this->description = $description;
+        $this->name = trim($name);
+        $this->description = trim($description);
         $this->postalCode = $postalCode;
-        $this->location = $location;
+        $this->location = trim($location);
         $this->taskStartTime = $taskStartTime;
         $this->taskEndTime = $taskEndTime;
         $this->listingPrice = $listingPrice;
         $this->createdTime = $createdTime;
         $this->updatedTime = $updatedTime;
-        $this->status = $status;
+        $this->status = trim($status);
         $this->bidPicked = $bidPicked;
         $this->categoryId = $categoryId;
         $this->creatorId = $creatorId;

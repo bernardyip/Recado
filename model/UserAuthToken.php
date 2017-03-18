@@ -10,9 +10,9 @@ class UserAuthToken {
     
     public function __construct($id, $selector, $validator, $token, $userid, $expires) {
         $this->id = $id;
-        $this->selector = $selector;
-        $this->validator = $validator;
-        $this->token = $token;
+        $this->selector = trim($selector);
+        $this->validator = trim($validator);
+        $this->token = trim($token);
         $this->userid = $userid;
         $this->expires = $expires;
     }
