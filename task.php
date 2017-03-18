@@ -12,7 +12,7 @@
 <?php   include('banner.php');
 		//If not logged in
 		if (!isset($_SESSION['username'])) {
-			header('Refresh: 0; URL=http://localhost/login.php');
+			header('Refresh: 0; URL=http://localhost/login.php?next=' . urlencode("/task.php"));
 			die();
 		}
 		
