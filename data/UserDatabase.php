@@ -37,6 +37,7 @@ class UserDatabase extends Database {
     const SQL_LOGIN_SELECT_USER = "SELECT * FROM public.user u WHERE u.username=$1 AND u.password=$2;";
     const SQL_LOGIN_UPDATE_LAST_LOGIN = "UPDATE public.user SET last_logged_in=$3 WHERE username=$1 AND password=$2;";
     const SQL_REGISTER_CREATE_USER = "INSERT INTO public.user (username, password, name, bio, created_time, last_logged_in, role) VALUES ($1, $2, $3, $4, $5, $6, 'user') RETURNING id;";
+    const SQL_PROFILE_UPDATE_USER = "UPDATE public.user SET bio=$3,email=$4,phone=$5,name=$6 WHERE username=$1 AND password=$2;";
     const SQL_FIND_USER = "SELECT * FROM public.user u WHERE u.username=$1;";
     const SQL_FIND_USERID = "SELECT * FROM public.user u WHERE u.id=$1";
     const SQL_FIND_USER_FROM_AUTH = "SELECT * FROM public.user_auth_tokens t WHERE t.selector=$1 AND t.token=$2 AND t.expires >= NOW();";
@@ -48,6 +49,7 @@ class UserDatabase extends Database {
         pg_prepare ( $this->dbcon, 'SQL_LOGIN_UPDATE_LAST_LOGIN', UserDatabase::SQL_LOGIN_UPDATE_LAST_LOGIN );        
         pg_prepare ( $this->dbcon, 'SQL_FIND_USER', UserDatabase::SQL_FIND_USER );
         pg_prepare ( $this->dbcon, 'SQL_REGISTER_CREATE_USER', UserDatabase::SQL_REGISTER_CREATE_USER );
+        pg_prepare ( $this->dbcon, 'SQL_PROFILE_UPDATE_USER', UserDatabase::SQL_PROFILE_UPDATE_USER );
         pg_prepare ( $this->dbcon, 'SQL_CREATE_USER_AUTH', UserDatabase::SQL_CREATE_USER_AUTH );
         pg_prepare ( $this->dbcon, 'SQL_FIND_USER_FROM_AUTH', UserDatabase::SQL_FIND_USER_FROM_AUTH );
         pg_prepare ( $this->dbcon, 'SQL_FIND_USERID', UserDatabase::SQL_FIND_USERID );
@@ -130,6 +132,37 @@ class UserDatabase extends Database {
             }
         }
         return $result;
+    }
+    
+    public function update($username, $password, $name, $bio) {
+    	$_username = pg_escape_string ( $username );
+    	$_password = pg_escape_string ( $password );
+    	$_name = pg_escape_string ( $name );
+    	$_bio = pg_escape_string ( $bio );
+    
+    	if ($this->userExists($username)) {
+    		return new UserDatabaseResult(UserDatabaseResult::REGISTER_USERNAME_TAKEN, null, null);
+    	} else {
+    		$current_datetime = (new DateTime ( null, new DateTimeZone ( "Asia/Singapore" ) ))->format ( 'Y-m-d\TH:i:s\Z' );
+    		$dbResult = pg_execute ( $this->dbcon, 'SQL_REGISTER_CREATE_USER', array (
+    				$_username,
+    				$_password,
+    				$_name,
+    				$_bio,
+    				$current_datetime,
+    				$current_datetime ) );
+    
+    		if (pg_affected_rows ( $dbResult ) >= 1) {
+    			$user = pg_fetch_array ( $dbResult );
+    			return new UserDatabaseResult(
+    					UserDatabaseResult::REGISTER_SUCCESS,
+    					new User($user['id'], $username, $password, "", "", $name, $bio, $current_datetime, $current_datetime, "user"),
+    					null);
+    		} else {
+    			return new UserDatabaseResult(UserDatabaseResult::REGISTER_FAILED, null, null);
+    		}
+    	}
+    	return $result;
     }
     
     public function createAuthCookie($user, $validatorLength) {
