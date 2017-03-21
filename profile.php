@@ -47,10 +47,6 @@ class ProfileView {
         return HtmlHelper::makeInput( "password", "password", "", "", "");
     }
     
-    public function getConfirmPasswordField() {
-        return HtmlHelper::makeInput( "password", "confirmPassword", "", "", "");
-    }
-    
     public function getNameField() {
         return HtmlHelper::makeInput( "text", "name", htmlspecialchars($this->model->name), "", "");
     }
@@ -84,33 +80,41 @@ class ProfileController {
         $this->userDatabase = new UserDatabase ();
     }
     
-    public function register() {
+    public function update() {
         $username = pg_escape_string ( $_POST ['username'] );
         $password = pg_escape_string ( $_POST ['password'] );
         $name = pg_escape_string ( $_POST ['name'] );
         $bio = pg_escape_string ( $_POST ['bio'] );
-        
-        $result = $this->userDatabase->update( $this->model->username, $this->model->password, $this->model->name, $this->model->bio );
-        if ($result->status === UserDatabaseResult::REGISTER_SUCCESS) {
+        $email = pg_escape_string ( $_POST ['email'] );
+        $phone = pg_escape_string ( $_POST ['phone'] );
+                
+        $result = $this->userDatabase->update( $this->model->username, $this->model->password, $this->model->name, $this->model->phone, $this->model->bio, $this->model->email);
+        if ($result->status === UserDatabaseResult::PROFILE_UPDATE_SUCCESS) {
             $user = $result->user;
             
             $this->model->username = $user->username;
-            $this->model->password = $password;
+            $this->model->password = "";
+            $this->model->name;
+            $this->model->bio;
+            $this->model->email;
+            $this->model->phone;
             $this->model->message = PROFILE_UPDATE_SUCCESS;
             $this->model->profileEditSuccess = true;
             
-            header ( "Refresh: 3; URL=" . ProfileController::PROFILE_URL . "?username=" . urlencode($user->username) );
+            header ( "Refresh: 0; URL=" . ProfileController::PROFILE_URL . "?message=" . urlencode($message) );
         } else {
-            if ($result->status === UserDatabaseResult::REGISTER_USERNAME_TAKEN) {
+            if ($result->status === UserDatabaseResult::PROFILE_UPDATE_FAILED) {
                 $this->model->message = PROFILE_UPDATE_FAIL;
-            } else if ($result->status === UserDatabaseResult::REGISTER_FAILED) {
-                $this->model->message = "An unexpected error has occured, please try again later.";
             }
+            
             $this->model->username = $username;
-            $this->model->password = $password;
+            $this->model->password = "";
             $this->model->name = $name;
             $this->model->bio = $bio;
+            $this->model->phone = $phone;
+            $this->model->email = $email;
             $this->model->profileEditSuccess = false;
+            header ( "Refresh: 0; URL=" . ProfileController::PROFILE_URL . "?message=" . urlencode($message) );
         }
     }
     
@@ -137,7 +141,7 @@ class ProfileController {
         
         if (isset ( $_GET ['action'] )) {
             if ($_GET ['action'] === 'update') {
-                $this->register ();
+                $this->update ();
             }
         } else {
             // invalid request.
@@ -176,3 +180,139 @@ if ($_SERVER ['REQUEST_METHOD'] === 'POST') {
 }
 
 ?>
+
+
+<html>
+<head>
+<script type="text/javascript">
+function validateForm() {
+	var valid = true;
+	if (!validateMandatoryFields()) valid = false;
+	if (!passwordsMatch()) valid = false;
+	if (!validateEmail()) valid = false;
+	if (!validatePhoneNumber()) valid = false;
+
+	return valid;
+}
+
+function validateMandatoryFields() {
+	var valid = true;
+    var username = document.getElementsByName("username")[0].value;
+    var usernameInvalid = username == null || !(/\S/.test(username));
+    var name = document.getElementsByName("name")[0].value;
+    var nameInvalid = name == null || !(/\S/.test(name));
+
+    if (usernameInvalid) {
+        document.getElementsByName("requiredUsername")[0].style.display = "block";
+        document.getElementsByName("username")[0].style.borderColor = "#E34234";
+        valid = false;
+    } else {
+        document.getElementsByName("requiredUsername")[0].style.display = "none";
+        document.getElementsByName("username")[0].style.borderColor = "initial";
+    }
+
+    if (nameInvalid) {
+        document.getElementsByName("requiredName")[0].style.display = "block";
+        document.getElementsByName("name")[0].style.borderColor = "#E34234";
+        valid = false;
+    } else {
+        document.getElementsByName("requiredName")[0].style.display = "none";
+        document.getElementsByName("name")[0].style.borderColor = "initial";
+    }
+
+    return valid;
+}
+
+function validateEmail() {
+    var email = document.getElementsByName("email")[0].value;
+    var regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+	var valid = regex.test(email);
+	if (valid) {
+        document.getElementsByName("badEmail")[0].style.display = "none";
+        document.getElementsByName("email")[0].style.borderColor = "initial";
+	} else {
+        document.getElementsByName("badEmail")[0].style.display = "block";
+        document.getElementsByName("email")[0].style.borderColor = "#E34234";
+	}
+    return valid; 
+}
+
+function validatePhoneNumber() {
+    var phoneNumber = document.getElementsByName("phone")[0].value;
+	var regex = /^[0-9]{8}$/;
+    var valid = regex.test(phoneNumber);
+    if(valid) {
+        document.getElementsByName("badPhone")[0].style.display = "none";
+        document.getElementsByName("phone")[0].style.borderColor = "initial";
+	}  
+	else {
+        document.getElementsByName("badPhone")[0].style.display = "block";
+        document.getElementsByName("phone")[0].style.borderColor = "#E34234";
+	}
+	return valid;
+}
+	
+function passwordsMatch() {
+    var password = document.getElementsByName("password")[0].value;
+    var confirmPassword = document.getElementsByName("confirmPassword")[0].value;
+    var passwordInvalid = password == null || !(/\S/.test(password));
+    if (passwordInvalid) {
+        document.getElementsByName("requiredPassword")[0].style.display = "block";
+        document.getElementsByName("password")[0].style.borderColor = "#E34234";
+        document.getElementsByName("mismatchPassword")[0].style.display = "none";
+        document.getElementsByName("confirmPassword")[0].style.borderColor = "initial";
+        return false;
+    } else {
+        document.getElementsByName("requiredPassword")[0].style.display = "none";
+        document.getElementsByName("password")[0].style.borderColor = "initial";
+        if (password != confirmPassword) {
+            document.getElementsByName("mismatchPassword")[0].style.display = "block";
+            document.getElementsByName("password")[0].style.borderColor = "#E34234";
+            document.getElementsByName("confirmPassword")[0].style.borderColor = "#E34234";
+            return false;
+        }
+        else {
+            document.getElementsByName("mismatchPassword")[0].style.display = "none";
+            document.getElementsByName("password")[0].style.borderColor = "initial";
+            document.getElementsByName("confirmPassword")[0].style.borderColor = "initial";
+    		return true;
+        }
+    }
+}
+</script>
+</head>
+<body>
+			<?php if ($model->profileEditSuccess) { ?>
+				<h1>Profile updated.</h1>
+				<p><?php echo $model->message; ?></p>
+			<?php
+			} else {
+			?>
+				<?php
+				include ('banner.php');
+				?>
+				<form action="<?php echo ProfileController::PROFILE_URL?>"
+						onsubmit="return validateForm()"
+						method="<?php echo ProfileController::PROFILE_METHOD?>">
+						<br /> Password (for verification): <br />
+						<?php echo $view->getPasswordField(); ?><br />
+						<div name="requiredPassword" style="display:none;"><p style="color:#FF0000;"> This field is required. </p></div> <br />
+						<br /> Name: <br />
+						<?php echo $view->getNameField(); ?><br />
+						<div name="requiredName" style="display:none;"><p style="color:#FF0000;"> This field is required. </p></div> <br />
+						<br /> E-mail: <br />
+						<?php echo $view->getEmailField(); ?><br />
+						<div name="badEmail" style="display:none;"><p style="color:#FF0000;"> Please enter a valid email address. </p></div> <br />
+						<br /> Phone: <br />
+						<?php echo $view->getPhoneField(); ?><br />
+						<div name="badPhone" style="display:none;"><p style="color:#FF0000;"> Enter a valid phone number. </p></div> <br />
+						<br /> Details: <br />
+						<?php echo $view->getBioField(); ?><br />
+						<br /> <input type="submit" value="Register" />
+	</form>
+	<p><?php echo htmlspecialchars($model->message); ?></p>
+				<?php
+			}
+			?>
+		</body>
+</html>

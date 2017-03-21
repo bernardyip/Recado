@@ -16,6 +16,8 @@ class UserDatabaseResult extends DatabaseResult {
     const AUTH_FIND_FAIL = 38;
     const AUTH_DELETE_SUCCESS = 32;
     const AUTH_DELETE_FAIL = 37;
+    const PROFILE_UPDATE_SUCCESS = 24;
+    const PROFILE_UPDATE_FAILED = 33;
     
     public $user;
     public $auth;
@@ -134,34 +136,32 @@ class UserDatabase extends Database {
         return $result;
     }
     
-    public function update($username, $password, $name, $bio) {
+    public function update($username, $password, $name, $phone, $bio, $email) {
     	$_username = pg_escape_string ( $username );
     	$_password = pg_escape_string ( $password );
     	$_name = pg_escape_string ( $name );
+    	$_phone = pg_escape_string ( $phone );
     	$_bio = pg_escape_string ( $bio );
+    	$_email = pg_escape_string ( $email );
     
-    	if ($this->userExists($username)) {
-    		return new UserDatabaseResult(UserDatabaseResult::REGISTER_USERNAME_TAKEN, null, null);
+    	$dbResult = pg_execute ( $this->dbcon, 'SQL_PROFILE_UPDATE_USER', array (
+    			$_username,
+    			$_password,
+    			$_bio,
+    			$_email,
+    			$_phone,
+    			$_name ) );
+    
+    	if (pg_affected_rows ( $dbResult ) >= 1) {
+    		$user = pg_fetch_array ( $dbResult );
+    		return new UserDatabaseResult(
+    				UserDatabaseResult::PROFILE_UPDATE_SUCCESS,
+    				new User($user['id'], $username, $password, $email, $phone, $name, $bio, $current_datetime, $current_datetime, "user"),
+    				null);
     	} else {
-    		$current_datetime = (new DateTime ( null, new DateTimeZone ( "Asia/Singapore" ) ))->format ( 'Y-m-d\TH:i:s\Z' );
-    		$dbResult = pg_execute ( $this->dbcon, 'SQL_REGISTER_CREATE_USER', array (
-    				$_username,
-    				$_password,
-    				$_name,
-    				$_bio,
-    				$current_datetime,
-    				$current_datetime ) );
-    
-    		if (pg_affected_rows ( $dbResult ) >= 1) {
-    			$user = pg_fetch_array ( $dbResult );
-    			return new UserDatabaseResult(
-    					UserDatabaseResult::REGISTER_SUCCESS,
-    					new User($user['id'], $username, $password, "", "", $name, $bio, $current_datetime, $current_datetime, "user"),
-    					null);
-    		} else {
-    			return new UserDatabaseResult(UserDatabaseResult::REGISTER_FAILED, null, null);
-    		}
+    		return new UserDatabaseResult(UserDatabaseResult::PROFILE_UPDATE_FAILED, null, null);
     	}
+    	
     	return $result;
     }
     
