@@ -38,10 +38,10 @@ class UserDatabase extends Database {
     // SQL Queries
     const SQL_LOGIN_SELECT_USER = "SELECT * FROM public.user u WHERE u.username=$1 AND u.password=$2;";
     const SQL_LOGIN_UPDATE_LAST_LOGIN = "UPDATE public.user SET last_logged_in=$3 WHERE username=$1 AND password=$2;";
-    const SQL_REGISTER_CREATE_USER = "INSERT INTO public.user (username, password, name, bio, created_time, last_logged_in, role) VALUES ($1, $2, $3, $4, $5, $6, 'user') RETURNING id;";
+    const SQL_REGISTER_CREATE_USER = "INSERT INTO public.user (username, password, email, phone, name, bio, created_time, last_logged_in, role) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'user') RETURNING id;";
     const SQL_PROFILE_UPDATE_USER = "UPDATE public.user SET bio=$3,email=$4,phone=$5,name=$6 WHERE username=$1 AND password=$2;";
     const SQL_FIND_USER = "SELECT * FROM public.user u WHERE u.username=$1;";
-    const SQL_FIND_USERID = "SELECT * FROM public.user u WHERE u.id=$1";
+    const SQL_FIND_USERID = "SELECT * FROM public.user u WHERE u.id=$1;";
     const SQL_FIND_USER_FROM_AUTH = "SELECT * FROM public.user_auth_tokens t WHERE t.selector=$1 AND t.token=$2 AND t.expires >= NOW();";
     const SQL_CREATE_USER_AUTH = "INSERT INTO public.user_auth_tokens(selector, token, userid, expires) VALUES(random_string($1), $2, $3, $4) RETURNING id, selector;";
     
@@ -105,11 +105,13 @@ class UserDatabase extends Database {
         return pg_affected_rows ( $dbResult ) >= 1;
     }
     
-    public function register($username, $password, $name, $bio) {
+    public function register($username, $password, $email, $phone, $name, $bio) {
         $_username = pg_escape_string ( $username );
         $_password = pg_escape_string ( $password );
         $_name = pg_escape_string ( $name );
         $_bio = pg_escape_string ( $bio );
+        $_email = pg_escape_string( $email );
+        $_phone = pg_escape_string( $phone );
         
         if ($this->userExists($username)) {
             return new UserDatabaseResult(UserDatabaseResult::REGISTER_USERNAME_TAKEN, null, null);
@@ -118,6 +120,8 @@ class UserDatabase extends Database {
             $dbResult = pg_execute ( $this->dbcon, 'SQL_REGISTER_CREATE_USER', array (
                     $_username,
                     $_password,
+                    $_email,
+                    $_phone,
                     $_name,
                     $_bio,
                     $current_datetime,

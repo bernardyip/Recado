@@ -9,12 +9,12 @@ class UserAuthToken {
     public $expires;
     
     public function __construct($id, $selector, $validator, $token, $userid, $expires) {
-        $this->id = $id;
+        $this->id = (int)$id;
         $this->selector = trim($selector);
         $this->validator = trim($validator);
         $this->token = trim($token);
-        $this->userid = $userid;
-        $this->expires = $expires;
+        $this->userid = (int)$userid;
+        $this->expires = new DateTime($expires, new DateTimeZone('Asia/Singapore'));
     }
 }
 ?>

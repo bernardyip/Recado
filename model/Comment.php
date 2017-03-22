@@ -7,11 +7,11 @@ class Comment {
     public $taskId;
     
     public function __construct($id, $comment, $createdTime, $userId, $taskId) {
-        $this->id = $id;
+        $this->id = (int)$id;
         $this->comment = trim($comment);
-        $this->createdTime = $createdTime;
-        $this->userId = $userId;
-        $this->taskId = $taskId;
+        $this->createdTime = new DateTime($createdTime, new DateTimeZone('Asia/Singapore'));
+        $this->userId = (int)$userId;
+        $this->taskId = (int)$taskId;
     }
 }
 ?>

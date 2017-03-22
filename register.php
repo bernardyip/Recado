@@ -90,7 +90,8 @@ class RegisterController {
         $name = pg_escape_string ( $_POST ['name'] );
         $bio = pg_escape_string ( $_POST ['bio'] );
         
-        $result = $this->userDatabase->register( $this->model->username, $this->model->password, $this->model->name, $this->model->bio );
+        $result = $this->userDatabase->register( $this->model->username, $this->model->password, 
+                $this->model->email, $this->model->phone, $this->model->name, $this->model->bio );
         if ($result->status === UserDatabaseResult::REGISTER_SUCCESS) {
             $user = $result->user;
             

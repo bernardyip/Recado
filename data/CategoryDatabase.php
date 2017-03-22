@@ -37,12 +37,12 @@ class CategoryDatabase extends Database {
         pg_prepare ( $this->dbcon, 'SQL_FIND_CATEGORY_COUNT', CategoryDatabase::SQL_FIND_CATEGORY_COUNT );
     }
     
-    public function findCategoriesLimitTo($count = 0) {
+    public function findCategories($limitTo = 0) {
         
         $dbResult = null;
-        if ($count > 0) {
+        if ($limitTo > 0) {
             $dbResult = pg_execute ( $this->dbcon, 'SQL_FIND_CATEGORY_WITH_LIMIT', array (
-                    $count
+                    $limitTo
             ) );
         } else {
             $dbResult = pg_execute ( $this->dbcon, 'SQL_FIND_CATEGORY', array (
