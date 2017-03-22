@@ -6,7 +6,7 @@ class Category {
     public $description;
     
     public function __construct($id, $photo, $name, $description) {
-        $this->id = $id;
+        $this->id = (int)$id;
         $this->photo = trim($photo);
         $this->name = trim($name);
         $this->description = trim($description);
