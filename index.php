@@ -1,8 +1,8 @@
 <?php 
 
-include_once 'data/TaskDatabase.php';
-include_once 'data/CategoryDatabase.php';
-include_once 'model/CategoryTask.php';
+include_once '/data/TaskDatabase.php';
+include_once '/data/CategoryDatabase.php';
+include_once '/model/CategoryTask.php';
 
 session_start();
 
@@ -64,13 +64,13 @@ class IndexController {
     
     public function fetchTasks() {
         $categoryTasks = array();
-        $categoryResult = $this->categoryDatabase->findCategoriesLimitTo();
+        $categoryResult = $this->categoryDatabase->findCategories();
         if ($categoryResult->status === CategoryDatabaseResult::CATEGORY_FIND_SUCCESS) {
             for ($i = 0; $i < $categoryResult->count; $i++) {
                 $category = $categoryResult->categories[$i];
                 $tasks = null;
                 $totalTaskCount = 0;
-                $taskResult = $this->taskDatabase->findTasksWithCategoryIdLimitTo($category->id, IndexController::TASKS_PER_CATEGORY);
+                $taskResult = $this->taskDatabase->findTasksWithCategoryId($category->id, IndexController::TASKS_PER_CATEGORY);
                 if ($taskResult->status === TaskDatabaseResult::TASK_FIND_SUCCESS) {
                     $tasks = $taskResult->tasks;
                 }
