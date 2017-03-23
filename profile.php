@@ -5,6 +5,12 @@ include_once 'HtmlHelper.php';
 
 session_start();
 
+// user needs to be logged in
+if (!isset($_SESSION['username'])) {
+    header('Refresh: 0; URL=http://localhost/login.php?next=' . urlencode("/profile.php"));
+    die();
+}
+
 class ProfileModel {
 	public $username;
 	public $password;
@@ -67,7 +73,7 @@ class ProfileView {
 class ProfileController {
     const PROFILE_URL = "/profile.php?message=";
     const PROFILE_METHOD = "POST";
-    const PROFILE_URL = "/login.php";
+    const HOME_URL = "/";
     
     const PROFILE_UPDATE_SUCCESS = "Updated user successfully.";
     const PROFILE_UPDATE_FAIL = "Incorrect password.";
@@ -168,10 +174,6 @@ class ProfileController {
 $model = new ProfileModel ();
 $controller = new ProfileController ( $model );
 $view = new ProfileView ( $controller, $model );
-
-if (isset ( $_SESSION ['username'] )) {
-    $controller->redirectToHome ();
-}
 
 if ($_SERVER ['REQUEST_METHOD'] === 'POST') {
     $controller->handleHttpPost ();

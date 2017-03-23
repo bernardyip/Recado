@@ -85,32 +85,27 @@ class RegisterController {
     }
     
     public function register() {
-        $username = pg_escape_string ( $_POST ['username'] );
-        $password = pg_escape_string ( $_POST ['password'] );
-        $name = pg_escape_string ( $_POST ['name'] );
-        $bio = pg_escape_string ( $_POST ['bio'] );
-        
-        $result = $this->userDatabase->register( $this->model->username, $this->model->password, 
-                $this->model->email, $this->model->phone, $this->model->name, $this->model->bio );
-        if ($result->status === UserDatabaseResult::REGISTER_SUCCESS) {
-            $user = $result->user;
-            
-            $this->model->username = $user->username;
-            $this->model->password = "";
-            $this->model->message = "Welcome to Recado, " . $user->username . "!";
-            $this->model->registerSuccess = true;
-            
-            header ( "Refresh: 2; URL=" . RegisterController::LOGIN_URL . "?username=" . urlencode($user->username) );
-        } else {
-            if ($result->status === UserDatabaseResult::REGISTER_USERNAME_TAKEN) {
-                $this->model->message = "Sorry, the username you have entered is already taken.";
-            } else if ($result->status === UserDatabaseResult::REGISTER_FAILED) {
-                $this->model->message = "An unexpected error has occured, please try again later.";
+        if ($this->model->isValid()) {
+            $result = $this->userDatabase->register( $this->model->username, $this->model->password, 
+                    $this->model->email, $this->model->phone, $this->model->name, $this->model->bio );
+            if ($result->status === UserDatabaseResult::REGISTER_SUCCESS) {
+                $user = $result->user;
+                
+                $this->model->username = $user->username;
+                $this->model->password = "";
+                $this->model->message = "Welcome to Recado, " . $user->username . "!";
+                $this->model->registerSuccess = true;
+                
+                header ( "Refresh: 2; URL=" . RegisterController::LOGIN_URL . "?username=" . urlencode($user->username) );
+            } else {
+                if ($result->status === UserDatabaseResult::REGISTER_USERNAME_TAKEN) {
+                    $this->model->message = "Sorry, the username you have entered is already taken.";
+                } else if ($result->status === UserDatabaseResult::REGISTER_FAILED) {
+                    $this->model->message = "An unexpected error has occured, please try again later.";
+                }
+                $this->model->registerSuccess = false;
             }
-            $this->model->username = $username;
-            $this->model->password = "";
-            $this->model->name = $name;
-            $this->model->bio = $bio;
+        } else {
             $this->model->registerSuccess = false;
         }
     }
@@ -252,31 +247,31 @@ http://www.templatemo.com/tm-475-holiday
 						</div>
 						<?php } ?>
                         <div class="form-group">
-        					<?php echo $view->getUsernameField(); ?> <br />
-        					<div name="requiredUsername" style="display:none;"><p style="color:#FF0000;"> This field is required. </p></div> <br />
+        					<?php echo $view->getUsernameField(); ?>
+        					<div name="requiredUsername" style="display:none;"><p style="color:#FF0000;"> This field is required. </p></div>
         				</div>
                         <div class="form-group">
-							<?php echo $view->getPasswordField(); ?><br />
-							<div name="requiredPassword" style="display:none;"><p style="color:#FF0000;"> This field is required. </p></div> <br />
+							<?php echo $view->getPasswordField(); ?>
+							<div name="requiredPassword" style="display:none;"><p style="color:#FF0000;"> This field is required. </p></div>
 						</div>
 						<div class="form-group">
-							<?php echo $view->getConfirmPasswordField(); ?><br />
-        					<div name="mismatchPassword" style="display:none;"><p style="color:#FF0000;"> Passwords do not match. </p></div> <br />
+							<?php echo $view->getConfirmPasswordField(); ?>
+        					<div name="mismatchPassword" style="display:none;"><p style="color:#FF0000;"> Passwords do not match. </p></div>
         				</div>
 						<div class="form-group">
-							<?php echo $view->getNameField(); ?><br />
-        					<div name="requiredName" style="display:none;"><p style="color:#FF0000;"> This field is required. </p></div> <br />
+							<?php echo $view->getNameField(); ?>
+        					<div name="requiredName" style="display:none;"><p style="color:#FF0000;"> This field is required. </p></div>
         				</div>
 						<div class="form-group">
-							<?php echo $view->getEmailField(); ?><br />
-        					<div name="badEmail" style="display:none;"><p style="color:#FF0000;"> Please enter a valid email address. </p></div> <br />
+							<?php echo $view->getEmailField(); ?>
+        					<div name="badEmail" style="display:none;"><p style="color:#FF0000;"> Please enter a valid email address. </p></div>
         				</div>
 						<div class="form-group">
-							<?php echo $view->getPhoneField(); ?><br />
-        					<div name="badPhone" style="display:none;"><p style="color:#FF0000;"> Enter a valid phone number. </p></div> <br />
+							<?php echo $view->getPhoneField(); ?>
+        					<div name="badPhone" style="display:none;"><p style="color:#FF0000;"> Enter a valid phone number. </p></div>
         				</div>
 						<div class="form-group">
-        					<?php echo $view->getBioField(); ?><br />
+        					<?php echo $view->getBioField(); ?>
         				</div>
 						<div class="form-group">
 							<button class="tm-submit-btn" type="submit" name="submit">Proceed</button> 
