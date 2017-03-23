@@ -32,6 +32,21 @@ class HtmlHelper {
         return $html;
     }
     
+    public static function makeTextArea2($name, $value, $rows, $placeholder) {
+        $html = "<textarea class=\"form-control\" name=\"$name\" placeholder=\"$placeholder\" value=\"$value\">";
+        $html = $html . "</textarea>";
+        return $html;
+    }
+    
+    public static function makeInput2($type, $name, $value, $placeholder, $title, $autofocus = false) {
+        $html = "<input class=\"form-control\" type=\"$type\" name=\"$name\" placeholder=\"$placeholder\" title=\"$title\" value=\"$value\"";
+        if ($autofocus) {
+            $html = $html . " autofocus ";
+        }
+        $html = $html . "/>";
+        return $html;
+    }
+    
     public static function makeInput($type, $name, $value, $placeholder, $title, $autofocus = false) {
         $html = "<input type=\"$type\" name=\"$name\" placeholder=\"$placeholder\" title=\"$title\" value=\"$value\"";
         if ($autofocus) {
