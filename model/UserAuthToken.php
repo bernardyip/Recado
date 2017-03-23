@@ -14,7 +14,11 @@ class UserAuthToken {
         $this->validator = trim($validator);
         $this->token = trim($token);
         $this->userid = (int)$userid;
-        $this->expires = new DateTime($expires, new DateTimeZone('Asia/Singapore'));
+        if ($expires instanceof DateTime) {
+            $this->expires = $expires;
+        } else {
+            $this->expires = new DateTime($expires, new DateTimeZone('Asia/Singapore'));
+        }
     }
 }
 ?>
