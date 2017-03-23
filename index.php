@@ -3,13 +3,14 @@
 include_once '/data/TaskDatabase.php';
 include_once '/data/CategoryDatabase.php';
 include_once '/model/CategoryTask.php';
+include_once '/model/index/TaskOverview.php';
 include_once 'HtmlHelper.php';
 
 session_start();
 
 class IndexModel {
     
-    public $categoryTasks;
+    public $tasks;
     
     public function __construct() {
     }
@@ -49,33 +50,14 @@ class IndexView {
         return HtmlHelper::makeInput2( "tel", "phone", htmlspecialchars($this->model->phone), "Phone Number", "");
     }
     
-    public function getTasks() {
-        $html = "";
-        foreach ($this->model->categoryTasks as $categoryTask) {
-            $html = $html . $this->createHeaderWithCount($categoryTask->category->name, $categoryTask->totalTaskCount);
-            foreach ($categoryTask->tasks as $task) {
-                $html = $html . $this->createHyperlinkForTask($task);
-            }
-            if ($categoryTask->totalTaskCount > 3) {
-                $html = $html . "and more...<br />";
-            }
-        }
-        return $html;
-    }
-    
-    private function createHeaderWithCount($categoryName, $taskCount) {
-        $result = "<h3>" . htmlspecialchars($categoryName) . " ($taskCount)</h3>";
-        return $result;
-    }
-    
-    private function createHyperlinkForTask($task) {
-        $result = "<a href='/task_details.php?task=$task->id'>" . htmlspecialchars($task->name) . "</a><br />";
+    public function createLinkForTaskDetail($taskId) {
+        $result = "/task_details.php?task=$taskId";
         return $result;
     }
 }
 
 class IndexController {
-    const TASKS_PER_CATEGORY = 3;
+    const TASK_COUNT = 6;
     const LOGIN_URL = "login.php?action=login";
     const LOGIN_METHOD = "POST";
     const REGISTER_URL = "register.php?action=register";
@@ -92,25 +74,10 @@ class IndexController {
     }
     
     public function fetchTasks() {
-        $categoryTasks = array();
-        $categoryResult = $this->categoryDatabase->findCategories();
-        if ($categoryResult->status === CategoryDatabaseResult::CATEGORY_FIND_SUCCESS) {
-            for ($i = 0; $i < $categoryResult->count; $i++) {
-                $category = $categoryResult->categories[$i];
-                $tasks = null;
-                $totalTaskCount = 0;
-                $taskResult = $this->taskDatabase->findTasksWithCategoryId($category->id, IndexController::TASKS_PER_CATEGORY);
-                if ($taskResult->status === TaskDatabaseResult::TASK_FIND_SUCCESS) {
-                    $tasks = $taskResult->tasks;
-                }
-                $taskResult = $this->taskDatabase->findTaskCountWithCategoryId($category->id);
-                if ($taskResult->status === TaskDatabaseResult::TASK_FIND_SUCCESS) {
-                    $totalTaskCount = $taskResult->count;
-                }
-                $categoryTasks[$i] = new CategoryTask($category, $tasks, $totalTaskCount);
-            }
+        $taskResult = $this->taskDatabase->findTasksAtRandom(IndexController::TASK_COUNT);
+        if ($taskResult->status === TaskDatabaseResult::TASK_FIND_SUCCESS) {
+            $this->model->tasks = $taskResult->tasks;
         }
-        $this->model->categoryTasks = $categoryTasks;
     }
     
     public function handleHttpPost() {
@@ -208,6 +175,7 @@ http://www.templatemo.com/tm-475-holiday
 		<div class="row">
 			<div class="col-lg-4 col-md-4 col-sm-6">
 				<!-- Nav tabs -->
+				<?php if (!isset($_SESSION['username'])) { ?>
 				<div class="tm-home-box-1">
 					<ul class="nav nav-tabs tm-white-bg" role="tablist" id="hotelCarTabs">
 					    <li role="presentation" class="active">
@@ -271,72 +239,114 @@ http://www.templatemo.com/tm-475-holiday
 					    </div>				    
 					</div>
 				</div>								
+				<?php } else if (sizeof($model->tasks) >= 1) { 
+				    $task = $model->tasks[0];
+				    ?>
+				<div class="tm-home-box-1 tm-home-box-1-2 tm-home-box-1-center">
+					<img src="<?php echo $task->taskDisplayPicture?>" alt="image" class="img-responsive">
+					<a href="<?php echo $view->createLinkForTaskDetail($task->taskId)?>">
+						<div class="tm-yellow-gradient-bg tm-city-price-container">
+							<span><?php echo $task->taskName ?></span>
+						</div>	
+					</a>			
+				</div>
+				<?php } else { ?>
+				<br />
+				<?php } ?>
 			</div>
 
 			<div class="col-lg-4 col-md-4 col-sm-6">
+				<?php if (sizeof($model->tasks) >= 2) { 
+				    $task = $model->tasks[1];
+				?> 
 				<div class="tm-home-box-1 tm-home-box-1-2 tm-home-box-1-center">
-					<img src="img/index-01.jpg" alt="image" class="img-responsive">
-					<a href="#">
+					<img src="<?php echo $task->taskDisplayPicture?>" alt="image" class="img-responsive">
+					<a href="<?php echo $view->createLinkForTaskDetail($task->taskId)?>">
 						<div class="tm-green-gradient-bg tm-city-price-container">
-							<span>What to</span>
-							<span>Put Here?</span>
+							<span><?php echo $task->taskName ?></span>
 						</div>	
 					</a>			
-				</div>				
+				</div>
+				<?php } else { ?>
+				<br />
+				<?php } ?>
 			</div>
 			
 			<div class="col-lg-4 col-md-4 col-sm-6">
-				<div class="tm-home-box-1 tm-home-box-1-2 tm-home-box-1-right">
-					<img src="img/index-02.jpg" alt="image" class="img-responsive">
-					<a href="#">
+				<?php if (sizeof($model->tasks) >= 3) { 
+				    $task = $model->tasks[2];
+				?> 
+				<div class="tm-home-box-1 tm-home-box-1-2 tm-home-box-1-center">
+					<img src="<?php echo $task->taskDisplayPicture?>" alt="image" class="img-responsive">
+					<a href="<?php echo $view->createLinkForTaskDetail($task->taskId)?>">
 						<div class="tm-red-gradient-bg tm-city-price-container">
-							<span>Any</span>
-							<span>Idea?</span>
+							<span><?php echo $task->taskName ?></span>
 						</div>	
-					</a>					
-				</div>				
+					</a>			
+				</div>
+				<?php } else { ?>
+				<br />
+				<?php } ?>			
 			</div>
 		</div>
 		
+		<?php if (sizeof($model->tasks) >= 4) {?>
 		<br /><br /><br />
 		<div class="row">
 			<div class="col-lg-4 col-md-4 col-sm-6">
+				<?php if (sizeof($model->tasks) >= 4) { 
+				    $task = $model->tasks[4];
+				?> 
 				<div class="tm-home-box-1 tm-home-box-1-2 tm-home-box-1-center">
-					<img src="img/index-01.jpg" alt="image" class="img-responsive">
-					<a href="#">
+					<img src="<?php echo $task->taskDisplayPicture?>" alt="image" class="img-responsive">
+					<a href="<?php echo $view->createLinkForTaskDetail($task->taskId)?>">
 						<div class="tm-yellow-gradient-bg tm-city-price-container">
-							<span>What to</span>
-							<span>Put Here?</span>
+							<span><?php echo $task->taskName ?></span>
 						</div>	
 					</a>			
-				</div>		
+				</div>
+				<?php } else { ?>
+				<br />
+				<?php } ?>			
 			</div>
 
 			<div class="col-lg-4 col-md-4 col-sm-6">
+				<?php if (sizeof($model->tasks) >= 5) { 
+				    $task = $model->tasks[4];
+				?> 
 				<div class="tm-home-box-1 tm-home-box-1-2 tm-home-box-1-center">
-					<img src="img/index-01.jpg" alt="image" class="img-responsive">
-					<a href="#">
+					<img src="<?php echo $task->taskDisplayPicture?>" alt="image" class="img-responsive">
+					<a href="<?php echo $view->createLinkForTaskDetail($task->taskId)?>">
 						<div class="tm-green-gradient-bg tm-city-price-container">
-							<span>What to</span>
-							<span>Put Here?</span>
+							<span><?php echo $task->taskName ?></span>
 						</div>	
 					</a>			
-				</div>				
+				</div>
+				<?php } else { ?>
+				<br />
+				<?php } ?>			
 			</div>
 			
 			<div class="col-lg-4 col-md-4 col-sm-6">
-				<div class="tm-home-box-1 tm-home-box-1-2 tm-home-box-1-right">
-					<img src="img/index-02.jpg" alt="image" class="img-responsive">
-					<a href="#">
+				<?php if (sizeof($model->tasks) >= 6) { 
+				    $task = $model->tasks[5];
+				?> 
+				<div class="tm-home-box-1 tm-home-box-1-2 tm-home-box-1-center">
+					<img src="<?php echo $task->taskDisplayPicture?>" alt="image" class="img-responsive">
+					<a href="<?php echo $view->createLinkForTaskDetail($task->taskId)?>">
 						<div class="tm-red-gradient-bg tm-city-price-container">
-							<span>Any</span>
-							<span>Idea?</span>
+							<span><?php echo $task->taskName ?></span>
 						</div>	
-					</a>					
-				</div>				
+					</a>			
+				</div>
+				<?php } else { ?>
+				<br />
+				<?php } ?>						
 			</div>
 		</div>
-	
+		<?php } ?>
+		
+		
 		<div class="section-margin-top" id="more">
 			<div class="row">				
 				<div class="tm-section-header">

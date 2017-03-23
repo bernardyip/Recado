@@ -3,6 +3,7 @@ include_once '/data/Database.php';
 include_once '/model/Task.php';
 include_once '/model/task/MyTask.php';
 include_once '/model/task/MyBid.php';
+include_once '/model/index/TaskOverview.php';
 
 class TaskDatabaseResult extends DatabaseResult {
     const TASK_FIND_SUCCESS = 10;
@@ -42,6 +43,9 @@ class TaskDatabase extends Database {
     const SQL_FIND_TASK_COUNT_WITH_CATEGORY = "SELECT COUNT(*) AS count FROM public.task t WHERE t.category_id=$1;";
     const SQL_FIND_TASK_COUNT = "SELECT COUNT(*) AS count FROM public.task t;";
     const SQL_CREATE_TASK = "INSERT INTO public.task (name, description, postal_code, location, task_start_time, task_end_time, listing_price, created_time, updated_time, status, bid_picked, category_id, creator_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id;";
+    const SQL_FIND_TASK_RANDOM = "SELECT t.id, t.name FROM public.task t ORDER BY RANDOM();";
+    const SQL_FIND_TASK_RANDOM_WITH_LIMIT = "SELECT t.id, t.name FROM public.task t ORDER BY RANDOM() LIMIT $1;";
+    
     
     public function __construct() {
         parent::__construct();
@@ -52,6 +56,8 @@ class TaskDatabase extends Database {
         pg_prepare ( $this->dbcon, 'SQL_FIND_TASK_WITH_CATEGORY', TaskDatabase::SQL_FIND_TASK_WITH_CATEGORY );
         pg_prepare ( $this->dbcon, 'SQL_FIND_TASK_COUNT_WITH_CATEGORY', TaskDatabase::SQL_FIND_TASK_COUNT_WITH_CATEGORY );
         pg_prepare ( $this->dbcon, 'SQL_FIND_TASK_COUNT', TaskDatabase::SQL_FIND_TASK_COUNT );
+        pg_prepare ( $this->dbcon, 'SQL_FIND_TASK_RANDOM', TaskDatabase::SQL_FIND_TASK_RANDOM );
+        pg_prepare ( $this->dbcon, 'SQL_FIND_TASK_RANDOM_WITH_LIMIT', TaskDatabase::SQL_FIND_TASK_RANDOM_WITH_LIMIT );
     }
     
     public function task_myTasks($userId) {
@@ -111,6 +117,31 @@ class TaskDatabase extends Database {
                     $task['task_end_time'], $task['listing_price'], $task['created_time'], 
                     $task['updated_time'], $task['status'], $task['bid_picked'], $task['category_id'], 
                     $task['creator_id']);
+        }
+        
+        return new TaskDatabaseResult(TaskDatabaseResult::TASK_FIND_SUCCESS, $tasks, $nrRows);
+    }
+    
+    public function findTasksAtRandom($limitTo = 0) {
+        
+        $dbResult = null;
+        if ($limitTo > 0) {
+            $dbResult = pg_execute ( $this->dbcon, 'SQL_FIND_TASK_RANDOM_WITH_LIMIT', array (
+                    $limitTo
+            ) );
+        } else {
+            $dbResult = pg_execute ( $this->dbcon, 'SQL_FIND_TASK_RANDOM', array (
+            ) );
+        }
+
+        $tasks = null;
+        $nrRows = pg_affected_rows ( $dbResult );
+        if ($nrRows >= 1) {
+            $tasks = array();
+            for ($i = 0; $i < $nrRows; $i++) {
+                $task = pg_fetch_array( $dbResult );
+                $tasks[$i] = new TaskOverview($task['id'], $task['name'], "/img/index-01.jpg");
+            }
         }
         
         return new TaskDatabaseResult(TaskDatabaseResult::TASK_FIND_SUCCESS, $tasks, $nrRows);
