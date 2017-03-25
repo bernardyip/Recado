@@ -4,6 +4,7 @@ include_once '/model/Task.php';
 include_once '/model/task/MyTask.php';
 include_once '/model/task/MyBid.php';
 include_once '/model/index/TaskOverview.php';
+include_once '/model/mytasks/MyTaskInfo.php';
 
 class TaskDatabaseResult extends DatabaseResult {
     const TASK_FIND_SUCCESS = 10;
@@ -30,11 +31,18 @@ class TaskDatabase extends Database {
     
     // SQL Queries
     const SQL_TASK_FIND_MYTASKS_WITH_USERID = "" .
-            "SELECT t.id, t.name, t.listing_price, b1.amount, u.id AS uid, u.username FROM public.task t " .
-            "LEFT OUTER JOIN public.bid b1 ON " .
-                "t.id = b1.task_id AND b1.amount >= ALL(SELECT b2.amount FROM public.bid b2 WHERE b1.task_id = b2.task_id) " .
+            "SELECT t.id, t.name, t.description, t.task_start_time, b1.amount AS max_bid, u.id AS max_bidder_id, u.username AS max_bidder_username " .
+            "FROM public.task t " . 
+            "LEFT OUTER JOIN public.bid b1 " .
+                "ON t.id = b1.task_id AND b1.amount >= ALL(" . 
+                    "SELECT b2.amount FROM public.bid b2 WHERE b1.task_id = b2.task_id) " .
             "LEFT OUTER JOIN public.user u ON b1.user_id = u.id " .
             "WHERE t.creator_id=$1 ORDER BY t.id;";
+    
+    const SQL_TASKS_FIND_ALL = "".
+            "SELECT t.id, t.name, t.description, t.creator_id, u.username " .
+            "FROM public.task t INNER JOIN public.user u " .
+                "ON t.creator_id = u.id;";
     
     const SQL_FIND_TASK_WITH_ID = "SELECT * FROM public.task t WHERE t.id=$1;";
     const SQL_FIND_TASK_WITH_USERID = "SELECT * FROM public.task t WHERE t.creator_id=$1;";
@@ -58,9 +66,30 @@ class TaskDatabase extends Database {
         pg_prepare ( $this->dbcon, 'SQL_FIND_TASK_COUNT', TaskDatabase::SQL_FIND_TASK_COUNT );
         pg_prepare ( $this->dbcon, 'SQL_FIND_TASK_RANDOM', TaskDatabase::SQL_FIND_TASK_RANDOM );
         pg_prepare ( $this->dbcon, 'SQL_FIND_TASK_RANDOM_WITH_LIMIT', TaskDatabase::SQL_FIND_TASK_RANDOM_WITH_LIMIT );
+        pg_prepare ( $this->dbcon, 'SQL_TASKS_FIND_ALL', TaskDatabase::SQL_TASKS_FIND_ALL );
     }
     
-    public function task_myTasks($userId) {
+    public function tasks_getAll() {
+        $dbResult = pg_execute ( $this->dbcon, 'SQL_TASKS_FIND_ALL', array (
+            ) );
+
+        $tasks = null;
+        $nrRows = pg_affected_rows ( $dbResult );
+        if ($nrRows > 0) {
+            $tasks = array();
+            for ($i = 0; $i < $nrRows; $i++) {
+                $task = pg_fetch_array( $dbResult );
+                $tasks[$i] = new TaskInfo($task['id'], 
+                        $task['name'], $task['description'], "/img/index-03.jpg",
+                        $task['creator_id'], $task['username']);
+            }
+        }
+        
+        return new TaskDatabaseResult(TaskDatabaseResult::TASK_FIND_SUCCESS, $tasks, $nrRows);
+    }
+    
+    
+    public function myTasks_getAllByUserId($userId) {
         $dbResult = pg_execute ( $this->dbcon, 'SQL_TASK_FIND_MYTASKS_WITH_USERID', array (
                 $userId
             ) );
@@ -71,8 +100,8 @@ class TaskDatabase extends Database {
             $tasks = array();
             for ($i = 0; $i < $nrRows; $i++) {
                 $task = pg_fetch_array( $dbResult );
-                $tasks[$i] = new MyTask($task['id'], $task['name'], 
-                        $task['listing_price'], $task['amount'], $task['uid'], $task['username']);
+                $tasks[$i] = new MyTaskInfo($task['id'], $task['name'], $task['description'], $task['task_start_time'], 
+                        "/img/tours-05.jpg", $task['max_bidder_id'], $task['max_bidder_username'], $task['max_bid']);
             }
         }
         
