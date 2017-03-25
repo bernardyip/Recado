@@ -46,20 +46,18 @@ class MyTasksView {
         $html = "";
         $taskCount = sizeof($this->model->tasks);
         $tasks = $this->model->tasks;
-        while ($taskCount % 4 !== 0) {
+        while ($taskCount % 2 !== 0) {
             $tasks[$taskCount++] = null;
         }
         
-        $rows = sizeof($tasks) / 4;
+        $rows = sizeof($tasks) / 2;
         
         for ($i = 0; $i < $rows; $i++) {
             $html = $html . "<div class=\"row\">";
             $html = $html . $this->createTaskRow(
                                         array(
-                                            $tasks[$i * 4 + 0],
-                                            $tasks[$i * 4 + 1],
-                                            $tasks[$i * 4 + 2],
-                                            $tasks[$i * 4 + 3]));
+                                            $tasks[$i * 2 + 0],
+                                            $tasks[$i * 2 + 1]));
             $html = $html . "</div><br />";
         }
         
@@ -79,7 +77,7 @@ class MyTasksView {
                 $html = $html . "<div class=\"tm-tours-box-1-info\">";
                 $html = $html . "<div class=\"tm-tours-box-1-info-left\">";
                 $html = $html . "<a href=\"/task_details.php?task=$task->taskId\" class=\"text-uppercase margin-bottom-20\">" . htmlspecialchars($task->taskName) . "</a>";
-                $html = $html . "<p class=\"gray-text\">" . $task->taskStartDate->format("d-F-Y") . "</p>";
+                $html = $html . "<p class=\"gray-text\">" . $task->taskStartDate->format("d F Y") . "</p>";
                 $html = $html . "</div>";
                 $html = $html . "<div class=\"tm-tours-box-1-info-right\">";
                 $html = $html . "<p class=\"gray-text tours-1-description\">" . htmlspecialchars($task->taskDescription) . "</p>";
@@ -219,7 +217,7 @@ http://www.templatemo.com/tm-475-holiday
 
             <div class="row">
 				<div class="col-lg-3 col-md-3 col-sm-3"></div>
-				<div class="col-lg-6 col-md-6 col-sm-6"><a href="createtask.html" class="link-create-task" style="width: 100%;">Create a new Task</a></div>
+				<div class="col-lg-6 col-md-6 col-sm-6"><a href="createtask.php" class="link-create-task" style="width: 100%;">Create a new Task</a></div>
 				<div class="col-lg-3 col-md-3 col-sm-3"></div>	
             </div>
 
