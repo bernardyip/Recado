@@ -67,6 +67,7 @@ class TaskDatabase extends Database {
         pg_prepare ( $this->dbcon, 'SQL_FIND_TASK_RANDOM', TaskDatabase::SQL_FIND_TASK_RANDOM );
         pg_prepare ( $this->dbcon, 'SQL_FIND_TASK_RANDOM_WITH_LIMIT', TaskDatabase::SQL_FIND_TASK_RANDOM_WITH_LIMIT );
         pg_prepare ( $this->dbcon, 'SQL_TASKS_FIND_ALL', TaskDatabase::SQL_TASKS_FIND_ALL );
+        pg_prepare ( $this->dbcon, 'SQL_CREATE_TASK', TaskDatabase::SQL_CREATE_TASK );
     }
     
     public function tasks_getAll() {
@@ -254,7 +255,7 @@ class TaskDatabase extends Database {
                         new Task($result['id'], $name, $description, $postalCode, $location, 
                                 $taskStartTime, $taskEndTime, $listingPrice, $createdTime, 
                                 $updatedTime, $status, false, $categoryId, $creatorId)
-                    ), $count);
+                    ), 1);
         } else {
             return new TaskDatabaseResult(TaskDatabaseResult::TASK_CREATE_FAIL, null, 0);
         }
