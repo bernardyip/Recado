@@ -33,7 +33,7 @@ class HtmlHelper {
     }
     
     public static function makeTextArea2($name, $value, $rows, $placeholder) {
-        $html = "<textarea class=\"form-control\" name=\"$name\" placeholder=\"$placeholder\" value=\"$value\">";
+        $html = "<textarea class=\"form-control\" name=\"$name\" placeholder=\"$placeholder\">$value";
         $html = $html . "</textarea>";
         return $html;
     }
@@ -49,6 +49,15 @@ class HtmlHelper {
     
     public static function makeInput($type, $name, $value, $placeholder, $title, $autofocus = false) {
         $html = "<input type=\"$type\" name=\"$name\" placeholder=\"$placeholder\" title=\"$title\" value=\"$value\"";
+        if ($autofocus) {
+            $html = $html . " autofocus ";
+        }
+        $html = $html . "/>";
+        return $html;
+    }
+    
+    public static function makeMoneyInput2($name, $value, $placeholder, $title, $autofocus = false) {
+        $html = "<input class=\"form-control\" type=\"number\" min=\"0.01\" step=\"0.01\" name=\"$name\" placeholder=\"$placeholder\" title=\"$title\" value=\"$value\"";
         if ($autofocus) {
             $html = $html . " autofocus ";
         }
