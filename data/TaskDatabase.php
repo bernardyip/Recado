@@ -70,6 +70,26 @@ class TaskDatabase extends Database {
         pg_prepare ( $this->dbcon, 'SQL_CREATE_TASK', TaskDatabase::SQL_CREATE_TASK );
     }
     
+    public function task_myTasks($userId) {
+        $dbResult = pg_execute ( $this->dbcon, 'SQL_TASK_FIND_MYTASKS_WITH_USERID', array (
+                $userId
+            ) );
+
+        $tasks = null;
+        $nrRows = pg_affected_rows ( $dbResult );
+        if ($nrRows > 0) {
+            $tasks = array();
+            for ($i = 0; $i < $nrRows; $i++) {
+                $task = pg_fetch_array( $dbResult );
+                $tasks[$i] = new MyTask($task['id'], $task['name'], 
+                        $task['listing_price'], $task['amount'], $task['uid'], $task['username']);
+            }
+        }
+        
+        return new TaskDatabaseResult(TaskDatabaseResult::TASK_FIND_SUCCESS, $tasks, $nrRows);
+        
+    }
+    
     public function tasks_getAll() {
         $dbResult = pg_execute ( $this->dbcon, 'SQL_TASKS_FIND_ALL', array (
             ) );
