@@ -8,12 +8,12 @@
 	  				<div class="mobile-menu-icon">
 		              <i class="fa fa-bars"></i>
 		            </div>
-	  				<nav class="tm-nav">
+	  				<nav class="tm-nav" style="float: right;">
 						<ul>
                         <?php if (isset($_SESSION['username'])) { ?>
                             <li><a href="/profile.php"><?php echo $_SESSION['username'] ?></a></li>
-                            <li><a href="/task.php">Tasks</a></li>
-                            <li><a href="/mytasks.html">My Tasks</a></li>
+                            <li><a href="/tasks.php">Tasks</a></li>
+                            <li><a href="/mytasks.php">My Tasks</a></li>
                             <li><a href="/mybids.html">My Bids</a></li>
                             <li><a href="/login.php?action=logout">Log Out</a></li>
                         <?php } else { ?>
