@@ -53,8 +53,8 @@ CREATE TABLE public.task (
 	category_id INTEGER REFERENCES public.category(id) ON DELETE CASCADE NOT NULL,
 	creator_id INTEGER REFERENCES public.user(id) ON DELETE CASCADE NOT NULL,
 	CHECK(status = 'pending' OR status='completed'),
-	CHECK (task_end_time > task_start_time),
-	CHECK (updated_time > created_time)
+	CHECK (task_end_time >= task_start_time),
+	CHECK (updated_time >= created_time)
 );
 
 CREATE TABLE public.bid (
@@ -92,3 +92,4 @@ BEGIN
   RETURN result;
 END;
 $$ LANGUAGE plpgsql;
+
