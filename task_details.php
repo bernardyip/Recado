@@ -11,6 +11,7 @@
 	<body>
 		<?php 
 		include('banner.php');
+		session_start();
 		//If not logged in or no specified task
 		if (!isset($_SESSION['username'])) {
 			header('Refresh: 0; URL=http://localhost/login.php');
