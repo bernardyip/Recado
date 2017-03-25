@@ -8,7 +8,7 @@
     		<li><a href="http://localhost">Home</a></li>
     		<li><a href="profile.php">Profile</a>
     		<li><a href="task.php">View Tasks</a>
-    		<li><a href="logout.php">Logout</a>
+    		<li><a href="login.php?action=logout">Logout</a>
 			<form action="search.php" method="POST">
 				<li>Find task: <input type="text" name="searchTerm" id="Search"> 
 				<input type="hidden" value="search" name="method"/>

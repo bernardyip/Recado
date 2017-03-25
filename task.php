@@ -1,3 +1,197 @@
+<?php 
+
+include_once "model/CategoryTask.php";
+include_once "data/TaskDatabase.php";
+include_once "data/CategoryDatabase.php";
+include_once 'HtmlHelper.php';
+
+class TaskModel {
+    public $newTaskName;
+    public $newTaskDescription;
+    public $newTaskPostalCode;
+    public $newTaskLocation;
+    public $newTaskStartDateTime;
+    public $newTaskEndDateTime;
+    public $newTaskListingPrice;
+    public $newTaskCategory;
+    public $myTasks;
+    public $myBids;
+    public $searchKey;
+    public $categoryTasks;
+    
+    public function __construct() {
+        
+    }
+    
+    public function isValidForCreate() {
+        if (is_null($this->$newTaskName)) return false;
+        if (is_null($this->$newTaskDescription)) return false;
+        if (is_null($this->$newTaskPostalCode)) return false;
+        if (is_null($this->$newTaskLocation)) return false;
+        if (is_null($this->$newTaskStartDateTime)) return false;
+        if (is_null($this->$newTaskEndDateTime)) return false;
+        if (is_null($this->$newTaskListingPrice)) return false;
+        if (is_null($this->$newTaskCategory)) return false;
+        
+        return strlen($this->newTaskName) > 0 &&
+                strlen($this->$newTaskDescription) &&
+                preg_match("/^[0-9]{6}$/", $this->$newTaskPostalCode) == 1 &&
+                strlen($this->$newTaskLocation) > 0 &&
+                $this->$newTaskStartDateTime <= $this->$newTaskEndDateTime &&
+                strlen($this->$newTaskListingPrice) > 0 && $this->$newTaskListingPrice > 0;
+                strlen($this->$newTaskCategory) > 0 && $this->$newTaskCategory > 0;
+    }
+    
+    public function isValidForSearch() {
+        if (is_null($this->searchKey)) return false;
+        return strlen($this->searchKey) > 0;
+    }
+}
+
+class TaskView {
+    
+    private $model;
+    private $controller;
+    
+    public function __construct($controller, $model) {
+        $this->controller = $controller;
+        $this->model = $model;
+    }
+    
+    public function getCreateTaskForm() {
+        $html = "<form action='" . TaskController::CREATE_TASK_URL . "' method='POST'>";
+        $html = $html . HtmlHelper::createTable(
+                array (
+                   array ( "Name: ", HtmlHelper::makeInput("text", "name", "", "Task Name", "") ),
+                   array ( "Description:", HtmlHelper::makeInput("text", "description", "", "Task Description", "") ),
+                   array ( "Postal Code:", HtmlHelper::makeInput("number", "postal_code", "", "123456", "Six digit zip code") ),
+                   array ( "Location:", HtmlHelper::makeInput("text", "location", "", "Where the task held at?", "") ),
+                   array ( "Task Start Date/Time:", HtmlHelper::makeInput("datetime-local", "task_start_time", (new DateTime ( null, new DateTimeZone ( "Asia/Singapore" ) ))->format ( 'Y-m-d\TH:i' ), "", "") ),
+                   array ( "Task End Date/Time:", HtmlHelper::makeInput("datetime-local", "task_end_time", (new DateTime ( null, new DateTimeZone ( "Asia/Singapore" ) ))->format ( 'Y-m-d\TH:i' ), "", "") ),
+                   array ( "Listing Price:", HtmlHelper::makeInput("number", "postal_code", "", "123456", "Six digit zip code") ),
+                   array ( "Category:", $this->makeCategoryDropdown($this->model->categoryTasks ) )
+                ), null);
+        $html = $html . HtmlHelper::makeInput("submit", "", "Create Task!", "", "");
+        $html = $html . "</form>";
+        return $html;
+    }
+    
+    public function getSearchForm() {
+        $html = "<form action='" . TaskController::SEARCH_TASK_URL . "' method='POST'>";
+        $html = $html . HtmlHelper::createTable(
+                array (
+                   array ( HtmlHelper::makeInput("text", "searchKey", "", "Keywords", ""), HtmlHelper::makeInput("submit", "", "Search", "", "") )
+                ), null);
+        $html = $html . "</form>";
+        return $html;
+    }
+    
+    public function getTasks() {
+        $html = "";
+        foreach ($this->model->categoryTasks as $categoryTask) {
+            $html = $html . $this->createHeaderWithCount($categoryTask->category->name, $categoryTask->totalTaskCount);
+            foreach ($categoryTask->tasks as $task) {
+                $html = $html . $this->createHyperlinkForTask($task);
+            }
+        }
+        return $html;
+    }
+    
+    private function createHeaderWithCount($categoryName, $taskCount) {
+        $result = "<h3>" . htmlspecialchars($categoryName) . " ($taskCount)</h3>";
+        return $result;
+    }
+    
+    private function createHyperlinkForTask($task) {
+        $result = "<a href='/task_details.php?task=$task->id'>" . htmlspecialchars($task->name) . "</a><br />";
+        return $result;
+    }
+    
+    private static function makeCategoryDropdown($categoryTasks) {
+        $html = "<select name=category>";
+        foreach ($categoryTasks as $categoryTask) {
+            $html = $html . "<option value='" . $categoryTask->category->id . "'>" . htmlspecialchars($categoryTask->category->name) . "</option>";
+        }
+        $html = $html . "</select>";
+        return $html;
+    }
+}
+
+class TaskController {
+    const CREATE_TASK_URL = "task.php?action=create";
+    const SEARCH_TASK_URL = "task.php?action=search";
+    
+    private $model;
+    private $taskDatabase;
+    private $categoryDatabase;
+    
+    public function __construct($model) {
+        $this->model = $model;
+        $this->taskDatabase = new TaskDatabase();
+        $this->categoryDatabase = new CategoryDatabase();
+    }
+    
+    public function fetchTasks() {
+        $categoryTasks = array();
+        $categoryResult = $this->categoryDatabase->findCategoriesLimitTo();
+        if ($categoryResult->status === CategoryDatabaseResult::CATEGORY_FIND_SUCCESS) {
+            for ($i = 0; $i < $categoryResult->count; $i++) {
+                $category = $categoryResult->categories[$i];
+                $tasks = null;
+                $totalTaskCount = 0;
+                $taskResult = $this->taskDatabase->findTasksWithCategoryIdLimitTo($category->id);
+                if ($taskResult->status === TaskDatabaseResult::TASK_FIND_SUCCESS) {
+                    $tasks = $taskResult->tasks;
+                }
+                $taskResult = $this->taskDatabase->findTaskCountWithCategoryId($category->id);
+                if ($taskResult->status === TaskDatabaseResult::TASK_FIND_SUCCESS) {
+                    $totalTaskCount = $taskResult->count;
+                }
+                $categoryTasks[$i] = new CategoryTask($category, $tasks, $totalTaskCount);
+            }
+        }
+        $this->model->categoryTasks = $categoryTasks;
+    }
+    
+    public function searchTask() {
+        
+    }
+    
+    public function createTask() {
+        
+    }
+    
+    public function handleHttpPost() {
+        if (isset ( $_GET ['action'] )) {
+            if ($_GET ['action'] === 'create') {
+                $this->createTask ();
+            } else if ($_GET ['action'] === 'search') {
+                $this->searchTask ();
+            }
+        } else {
+            // invalid request.
+            http_response_code ( 400 );
+            die ();
+        }
+    }
+    
+    public function handleHttpGet() {
+        $this->fetchTasks();
+    }
+}
+
+$model = new TaskModel ();
+$controller = new TaskController ( $model );
+$view = new TaskView ( $controller, $model );
+
+if ($_SERVER ['REQUEST_METHOD'] === 'POST') {
+    $controller->handleHttpPost ();
+} else if ($_SERVER ['REQUEST_METHOD'] === 'GET') {
+    $controller->handleHttpGet ();
+}
+
+?>
+
 <html>
 	<head>
 		<title>Recado</title>
@@ -12,7 +206,7 @@
 <?php   include('banner.php');
 		//If not logged in
 		if (!isset($_SESSION['username'])) {
-			header('Refresh: 0; URL=http://localhost/login.php');
+			header('Refresh: 0; URL=http://localhost/login.php?next=' . urlencode("/task.php"));
 			die();
 		}
 		
@@ -43,29 +237,13 @@
 		    die();
 		}
 		
-		$dbcon = pg_connect('host=localhost dbname=postgres user=postgres password=password');
-		pg_prepare($dbcon, 'select_category_query', "SELECT c.id, c.name FROM public.category c");
-		$result = pg_execute($dbcon, 'select_category_query', array()); ?>
+		$dbcon = pg_connect('host=localhost dbname=postgres user=postgres password=password'); 
+		?>
 		
 		<h1>Create a task:</h1>
-		<form action="task.php" method="POST">
-			<table>
-    			<tr><td>name : 					</td><td><input type="text" name="name" 						value="test" /></td></tr>
-    			<tr><td>description : 			</td><td><input type="text" name="description" 					value="test desc" /></td></tr>
-    			<tr><td>postal_code :			</td><td><input type="text" pattern="[0-9]{6}" 					value="123123" title="Six digit zip code" name="postal_code" /></td></tr>
-    			<tr><td>location : 				</td><td><input type="text" name="location" 					value="Singapore" /></td></tr>
-    			<tr><td>task start date/time : 	</td><td><input type="datetime-local" name="task_start_time"	value="2017-01-02T11:00" /></td></tr>
-    			<tr><td>task end date/time :	</td><td><input type="datetime-local" name="task_end_time"		value="2017-01-02T13:00" /></td></tr>
-    			<tr><td>listing price :			</td><td><input type="number" name="listing_price"				value="12" /></td></tr>
-    			<tr><td>category : 				</td><td>
-    			<select name="category">
-<?php               while ($row = pg_fetch_array($result)) { ?>
-    				    <option value="<?=$row['id'] ?>"><?=$row['name'] ?></option>
-<?php               } ?>
-    			</select></td></tr>
-			</table>
-			<input type="submit" value="Create Task!" />
-		</form>
+		<?php
+		echo $view->getCreateTaskForm();
+		?>
 		
 		<h1>My Tasks:</h1>
 		<?php 
@@ -111,23 +289,13 @@
 <?php   } ?>
 		
 		<h2>Search</h2>
-		<input id="search" type=text onchange="search()"/>
+		<?php
+		echo $view->getSearchForm();
+		?>
 		
-		<?php 
-		$dbcon = pg_connect('host=localhost dbname=postgres user=postgres password=password');
-		pg_prepare($dbcon, 'task_select_category_query', "SELECT c.id, c.name FROM public.category c");
-		$result = pg_execute($dbcon, 'task_select_category_query', array());
-		while ($row = pg_fetch_array($result)) { 
-			pg_prepare($dbcon, 'task_count_category_query', "SELECT COUNT(*) as count FROM public.task t WHERE t.category_id=$1");
-			$count_result = pg_execute($dbcon, 'task_count_category_query', array($row['id']));
-			$count_result = pg_fetch_array($count_result); ?>
-			<h3><?=$row['name']?> (<?=$count_result['count']?> tasks)</h3>
-<?php    	pg_prepare($dbcon, 'task_select_all_task_in_category_query', "SELECT t.id, t.name, t.description FROM public.task t WHERE t.category_id=$1");
-			$cat_result = pg_execute($dbcon, 'task_select_all_task_in_category_query', array($row['id']));
-			while ($task_row = pg_fetch_array($cat_result)) { ?>
-				<a href="task_details.php?task=<?=$task_row['id']?>"><?=$task_row['name']?></a><br />
-<?php 		}
-		}
+		<h1>All Tasks:</h1>
+		<?php
+		echo $view->getTasks();
 		?>
 	</body>
 </html>
