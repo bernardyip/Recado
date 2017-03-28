@@ -75,7 +75,7 @@ class ProfileController {
     const PROFILE_METHOD = "POST";
     const HOME_URL = "/";
     
-    const PROFILE_UPDATE_SUCCESS = "Updated user successfully.";
+    const PROFILE_UPDATE_SUCCESS = "Profile updated successfully.";
     const PROFILE_UPDATE_FAIL = "Incorrect password.";
     
     private $model;
@@ -183,138 +183,251 @@ if ($_SERVER ['REQUEST_METHOD'] === 'POST') {
 
 ?>
 
-
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<script type="text/javascript">
-function validateForm() {
-	var valid = true;
-	if (!validateMandatoryFields()) valid = false;
-	if (!passwordsMatch()) valid = false;
-	if (!validateEmail()) valid = false;
-	if (!validatePhoneNumber()) valid = false;
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Recado - Profile</title>
+<!--
+Holiday Template
+http://www.templatemo.com/tm-475-holiday
+-->
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,400italic,600,700' rel='stylesheet' type='text/css'>
+	<link href="css/font-awesome.min.css" rel="stylesheet">
+	<link href="css/bootstrap.min.css" rel="stylesheet">
+	<link href="css/bootstrap-datetimepicker.min.css" rel="stylesheet">  
+	<link href="css/flexslider.css" rel="stylesheet">
+	<link href="css/templatemo-style.css" rel="stylesheet">
 
-	return valid;
-}
+	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
 
-function validateMandatoryFields() {
-	var valid = true;
-    var username = document.getElementsByName("username")[0].value;
-    var usernameInvalid = username == null || !(/\S/.test(username));
-    var name = document.getElementsByName("name")[0].value;
-    var nameInvalid = name == null || !(/\S/.test(name));
-
-    if (usernameInvalid) {
-        document.getElementsByName("requiredUsername")[0].style.display = "block";
-        document.getElementsByName("username")[0].style.borderColor = "#E34234";
-        valid = false;
-    } else {
-        document.getElementsByName("requiredUsername")[0].style.display = "none";
-        document.getElementsByName("username")[0].style.borderColor = "initial";
-    }
-
-    if (nameInvalid) {
-        document.getElementsByName("requiredName")[0].style.display = "block";
-        document.getElementsByName("name")[0].style.borderColor = "#E34234";
-        valid = false;
-    } else {
-        document.getElementsByName("requiredName")[0].style.display = "none";
-        document.getElementsByName("name")[0].style.borderColor = "initial";
-    }
-
-    return valid;
-}
-
-function validateEmail() {
-    var email = document.getElementsByName("email")[0].value;
-    var regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-	var valid = regex.test(email);
-	if (valid) {
-        document.getElementsByName("badEmail")[0].style.display = "none";
-        document.getElementsByName("email")[0].style.borderColor = "initial";
-	} else {
-        document.getElementsByName("badEmail")[0].style.display = "block";
-        document.getElementsByName("email")[0].style.borderColor = "#E34234";
-	}
-    return valid; 
-}
-
-function validatePhoneNumber() {
-    var phoneNumber = document.getElementsByName("phone")[0].value;
-	var regex = /^[0-9]{8}$/;
-    var valid = regex.test(phoneNumber);
-    if(valid) {
-        document.getElementsByName("badPhone")[0].style.display = "none";
-        document.getElementsByName("phone")[0].style.borderColor = "initial";
-	}  
-	else {
-        document.getElementsByName("badPhone")[0].style.display = "block";
-        document.getElementsByName("phone")[0].style.borderColor = "#E34234";
-	}
-	return valid;
-}
-	
-function passwordsMatch() {
-    var password = document.getElementsByName("password")[0].value;
-    var confirmPassword = document.getElementsByName("confirmPassword")[0].value;
-    var passwordInvalid = password == null || !(/\S/.test(password));
-    if (passwordInvalid) {
-        document.getElementsByName("requiredPassword")[0].style.display = "block";
-        document.getElementsByName("password")[0].style.borderColor = "#E34234";
-        document.getElementsByName("mismatchPassword")[0].style.display = "none";
-        document.getElementsByName("confirmPassword")[0].style.borderColor = "initial";
-        return false;
-    } else {
-        document.getElementsByName("requiredPassword")[0].style.display = "none";
-        document.getElementsByName("password")[0].style.borderColor = "initial";
-        if (password != confirmPassword) {
-            document.getElementsByName("mismatchPassword")[0].style.display = "block";
-            document.getElementsByName("password")[0].style.borderColor = "#E34234";
-            document.getElementsByName("confirmPassword")[0].style.borderColor = "#E34234";
-            return false;
-        }
-        else {
-            document.getElementsByName("mismatchPassword")[0].style.display = "none";
-            document.getElementsByName("password")[0].style.borderColor = "initial";
-            document.getElementsByName("confirmPassword")[0].style.borderColor = "initial";
-    		return true;
-        }
-    }
-}
-</script>
 </head>
 <body>
-			<?php if ($model->profileEditSuccess) { ?>
-				<h1>Profile updated.</h1>
-				<p><?php echo $model->message; ?></p>
-			<?php
-			} else {
-			?>
-				<?php
-				include ('banner.php');
-				?>
-				<form action="<?php echo ProfileController::PROFILE_URL?>"
+	<!-- Header -->
+	<div class="tm-header">
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-6 col-md-4 col-sm-3 tm-site-name-container">
+					<a href="index.html" class="tm-site-name">Recado</a>	
+				</div>
+				<div class="col-lg-6 col-md-8 col-sm-9">
+					<div class="mobile-menu-icon">
+						<i class="fa fa-bars"></i>
+					</div>
+					<nav class="tm-nav">
+						<ul>
+						</ul>
+					</nav>		
+				</div>				
+			</div>
+		</div>	  	
+	</div>
+	
+	<!-- white bg -->
+	<section class="section-padding-bottom">
+		<div class="container">
+			<div class="row">
+				<div class="tm-section-header section-margin-top">
+					<div class="col-lg-4 col-md-3 col-sm-3"><hr></div>
+					<div class="col-lg-4 col-md-6 col-sm-6"><h2 class="tm-section-title">Profile</h2></div>
+					<div class="col-lg-4 col-md-3 col-sm-3"><hr></div>	
+				</div>				
+			</div>
+			<div class="row">
+				<!-- contact form -->
+				<form action="<?php echo ProfileController::PROFILE_URL?>" 
 						onsubmit="return validateForm()"
-						method="<?php echo ProfileController::PROFILE_METHOD?>">
-						<br /> Password (for verification): <br />
-						<?php echo $view->getPasswordField(); ?><br />
-						<div name="requiredPassword" style="display:none;"><p style="color:#FF0000;"> This field is required. </p></div> <br />
-						<br /> Name: <br />
-						<?php echo $view->getNameField(); ?><br />
-						<div name="requiredName" style="display:none;"><p style="color:#FF0000;"> This field is required. </p></div> <br />
-						<br /> E-mail: <br />
-						<?php echo $view->getEmailField(); ?><br />
-						<div name="badEmail" style="display:none;"><p style="color:#FF0000;"> Please enter a valid email address. </p></div> <br />
-						<br /> Phone: <br />
-						<?php echo $view->getPhoneField(); ?><br />
-						<div name="badPhone" style="display:none;"><p style="color:#FF0000;"> Enter a valid phone number. </p></div> <br />
-						<br /> Details: <br />
-						<?php echo $view->getBioField(); ?><br />
-						<br /> <input type="submit" value="Register" />
-	</form>
-	<p><?php echo htmlspecialchars($model->message); ?></p>
-				<?php
-			}
-			?>
-		</body>
+						method="<?php echo ProfileController::PROFILE_METHOD?>"
+						class="tm-contact-form">
+					<div class="col-lg-3">
+						<br />
+					</div> 
+					<div class="col-lg-6 col-md-6 tm-contact-form-input">
+					<?php if (!$model->profileEditSuccess) { ?>
+						<?php if (!is_null($model->message) && strlen($model->message) > 0) { ?>
+						<div class="form-group">
+							<label style="color: #FF0000;"><?php echo htmlspecialchars($model->message); ?></label>
+						</div>
+						<?php } ?>
+                        <div class="form-group">
+							<?php echo $view->getPasswordField(); ?>
+							<div name="requiredPassword" style="display:none;"><p style="color:#FF0000;"> This field is required. </p></div>
+						</div>
+						<div class="form-group">
+							<?php echo $view->getNameField(); ?>
+        					<div name="requiredName" style="display:none;"><p style="color:#FF0000;"> This field is required. </p></div>
+        				</div>
+						<div class="form-group">
+							<?php echo $view->getEmailField(); ?>
+        					<div name="badEmail" style="display:none;"><p style="color:#FF0000;"> Please enter a valid email address. </p></div>
+        				</div>
+						<div class="form-group">
+							<?php echo $view->getPhoneField(); ?>
+        					<div name="badPhone" style="display:none;"><p style="color:#FF0000;"> Enter a valid phone number. </p></div>
+        				</div>
+						<div class="form-group">
+        					<?php echo $view->getBioField(); ?>
+        				</div>
+						<div class="form-group">
+							<button class="tm-submit-btn" type="submit" name="submit">Update</button> 
+						</div>               
+					<?php } else { ?>
+						<div class="form-group">
+							<p><?php echo htmlspecialchars($model->message); ?></p>
+						</div>
+					<?php } ?>
+					</div>
+					<div class="col-lg-3">
+						<br />
+					</div> 
+				</form>
+			</div>			
+		</div>
+	</section>
+	<?php 
+	   include "footer.php"
+	?>
+	<script type="text/javascript" src="js/jquery-1.11.2.min.js"></script>      		<!-- jQuery -->
+	<script type="text/javascript" src="js/bootstrap.min.js"></script>					<!-- bootstrap js -->
+	<script type="text/javascript" src="js/jquery.flexslider-min.js"></script>			<!-- flexslider js -->
+	<script type="text/javascript" src="js/templatemo-script.js"></script>      		<!-- Templatemo Script -->
+	<script type="text/javascript" src="js/bootstrap-datetimepicker.min.js"></script>	<!-- bootstrap date time picker js, http://eonasdan.github.io/bootstrap-datetimepicker/ -->
+	<script type="text/javascript" src="js/moment.js"></script>							<!-- moment.js -->
+	
+    <script>
+        function validateForm() {
+        	var valid = true;
+        	if (!validateMandatoryFields()) valid = false;
+        	if (!passwordsMatch()) valid = false;
+        	if (!validateEmail()) valid = false;
+        	if (!validatePhoneNumber()) valid = false;
+    
+        	return valid;
+        }
+    
+        function validateMandatoryFields() {
+        	var valid = true;
+            var username = document.getElementsByName("username")[0].value;
+            var usernameInvalid = username == null || !(/\S/.test(username));
+            var name = document.getElementsByName("name")[0].value;
+            var nameInvalid = name == null || !(/\S/.test(name));
+    
+            if (usernameInvalid) {
+                document.getElementsByName("requiredUsername")[0].style.display = "block";
+                document.getElementsByName("username")[0].style.borderColor = "#E34234";
+                valid = false;
+            } else {
+                document.getElementsByName("requiredUsername")[0].style.display = "none";
+                document.getElementsByName("username")[0].style.borderColor = "initial";
+            }
+    
+            if (nameInvalid) {
+                document.getElementsByName("requiredName")[0].style.display = "block";
+                document.getElementsByName("name")[0].style.borderColor = "#E34234";
+                valid = false;
+            } else {
+                document.getElementsByName("requiredName")[0].style.display = "none";
+                document.getElementsByName("name")[0].style.borderColor = "initial";
+            }
+    
+            return valid;
+        }
+    
+        function validateEmail() {
+            var email = document.getElementsByName("email")[0].value;
+            var regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        	var valid = regex.test(email);
+        	if (valid) {
+                document.getElementsByName("badEmail")[0].style.display = "none";
+                document.getElementsByName("email")[0].style.borderColor = "initial";
+        	} else {
+                document.getElementsByName("badEmail")[0].style.display = "block";
+                document.getElementsByName("email")[0].style.borderColor = "#E34234";
+        	}
+            return valid; 
+        }
+    
+        function validatePhoneNumber() {
+            var phoneNumber = document.getElementsByName("phone")[0].value;
+        	var regex = /^[0-9]{8}$/;
+            var valid = regex.test(phoneNumber);
+            if(valid) {
+                document.getElementsByName("badPhone")[0].style.display = "none";
+                document.getElementsByName("phone")[0].style.borderColor = "initial";
+        	}  
+        	else {
+                document.getElementsByName("badPhone")[0].style.display = "block";
+                document.getElementsByName("phone")[0].style.borderColor = "#E34234";
+        	}
+        	return valid;
+        }
+        	
+        function passwordsMatch() {
+            var password = document.getElementsByName("password")[0].value;
+            var confirmPassword = document.getElementsByName("confirmPassword")[0].value;
+            var passwordInvalid = password == null || !(/\S/.test(password));
+            if (passwordInvalid) {
+                document.getElementsByName("requiredPassword")[0].style.display = "block";
+                document.getElementsByName("password")[0].style.borderColor = "#E34234";
+                document.getElementsByName("mismatchPassword")[0].style.display = "none";
+                document.getElementsByName("confirmPassword")[0].style.borderColor = "initial";
+                return false;
+            } else {
+                document.getElementsByName("requiredPassword")[0].style.display = "none";
+                document.getElementsByName("password")[0].style.borderColor = "initial";
+                if (password != confirmPassword) {
+                    document.getElementsByName("mismatchPassword")[0].style.display = "block";
+                    document.getElementsByName("password")[0].style.borderColor = "#E34234";
+                    document.getElementsByName("confirmPassword")[0].style.borderColor = "#E34234";
+                    return false;
+                }
+                else {
+                    document.getElementsByName("mismatchPassword")[0].style.display = "none";
+                    document.getElementsByName("password")[0].style.borderColor = "initial";
+                    document.getElementsByName("confirmPassword")[0].style.borderColor = "initial";
+            		return true;
+                }
+            }
+        }
+	
+      	// DOM is ready
+		$(function() {
+
+        
+			// https://css-tricks.com/snippets/jquery/smooth-scrolling/
+			$('a[href*=#]:not([href=#])').click(function() {
+				if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'') && location.hostname == this.hostname) {
+					var target = $(this.hash);
+					target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
+					if (target.length) {
+						$('html,body').animate({
+							scrollTop: target.offset().top
+						}, 1000);
+						return false;
+					}
+				}
+			});
+
+		  	// Flexslider
+		  	$('.flexslider').flexslider({
+		  		controlNav: false,
+		  		directionNav: false
+		  	});
+
+            $('.date').datetimepicker({
+            	format: 'MM/DD/YYYY'
+            });
+            $('.date-time').datetimepicker();
+           
+		  });
+          
+	</script>
+</body>
 </html>
