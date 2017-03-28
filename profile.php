@@ -165,15 +165,23 @@ class ProfileController {
         }
     }
     
-    public function redirectToHome() {
-        header ( "Refresh: 0; URL=" . ProfileController::HOME_URL );
-        die ();
-    }
+//     public function redirectToHome() {
+//         header ( "Refresh: 0; URL=" . ProfileController::HOME_URL );
+//         die ();
+//     }
 }
 
 $model = new ProfileModel ();
 $controller = new ProfileController ( $model );
 $view = new ProfileView ( $controller, $model );
+
+if (isset ( $_SESSION['id'] ) ) {
+	$model->userId = $_SESSION['id'];
+} else {
+	// should be logged in by here.
+	// see top of profile.php
+	return;
+}
 
 if ($_SERVER ['REQUEST_METHOD'] === 'POST') {
     $controller->handleHttpPost ();
@@ -194,12 +202,12 @@ if ($_SERVER ['REQUEST_METHOD'] === 'POST') {
 Holiday Template
 http://www.templatemo.com/tm-475-holiday
 -->
-	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,400italic,600,700' rel='stylesheet' type='text/css'>
-	<link href="css/font-awesome.min.css" rel="stylesheet">
-	<link href="css/bootstrap.min.css" rel="stylesheet">
-	<link href="css/bootstrap-datetimepicker.min.css" rel="stylesheet">  
-	<link href="css/flexslider.css" rel="stylesheet">
-	<link href="css/templatemo-style.css" rel="stylesheet">
+  <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,400italic,600,700' rel='stylesheet' type='text/css'>
+  <link href="css/font-awesome.min.css" rel="stylesheet">
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/bootstrap-datetimepicker.min.css" rel="stylesheet"> 
+  <link href="css/flexslider.css" rel="stylesheet"> 
+  <link href="css/templatemo-style.css" rel="stylesheet">
 
 	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
 	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -210,36 +218,23 @@ http://www.templatemo.com/tm-475-holiday
 
 </head>
 <body>
-	<!-- Header -->
-	<div class="tm-header">
-		<div class="container">
+  <body class="tm-gray-bg">
+  	<!-- Header -->
+  	<?php 
+	   include "banner.php";
+	?>
+
+	<!-- gray bg -->	
+	<section class="container tm-home-section-1" id="more">
+		<div class="section-margin-top">
 			<div class="row">
-				<div class="col-lg-6 col-md-4 col-sm-3 tm-site-name-container">
-					<a href="index.html" class="tm-site-name">Recado</a>	
-				</div>
-				<div class="col-lg-6 col-md-8 col-sm-9">
-					<div class="mobile-menu-icon">
-						<i class="fa fa-bars"></i>
-					</div>
-					<nav class="tm-nav">
-						<ul>
-						</ul>
-					</nav>		
-				</div>				
-			</div>
-		</div>	  	
-	</div>
-	
-	<!-- white bg -->
-	<section class="section-padding-bottom">
-		<div class="container">
-			<div class="row">
-				<div class="tm-section-header section-margin-top">
+				<div class="tm-section-header">
 					<div class="col-lg-4 col-md-3 col-sm-3"><hr></div>
 					<div class="col-lg-4 col-md-6 col-sm-6"><h2 class="tm-section-title">Profile</h2></div>
 					<div class="col-lg-4 col-md-3 col-sm-3"><hr></div>	
 				</div>				
 			</div>
+
 			<div class="row">
 				<!-- contact form -->
 				<form action="<?php echo ProfileController::PROFILE_URL?>" 
@@ -400,33 +395,27 @@ http://www.templatemo.com/tm-475-holiday
       	// DOM is ready
 		$(function() {
 
-        
 			// https://css-tricks.com/snippets/jquery/smooth-scrolling/
-			$('a[href*=#]:not([href=#])').click(function() {
-				if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'') && location.hostname == this.hostname) {
-					var target = $(this.hash);
-					target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
-					if (target.length) {
-						$('html,body').animate({
-							scrollTop: target.offset().top
-						}, 1000);
-						return false;
-					}
-				}
-			});
-
-		  	// Flexslider
-		  	$('.flexslider').flexslider({
-		  		controlNav: false,
-		  		directionNav: false
+		  	$('a[href*=#]:not([href=#])').click(function() {
+			    if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'') && location.hostname == this.hostname) {
+			      var target = $(this.hash);
+			      target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
+			      if (target.length) {
+			        $('html,body').animate({
+			          scrollTop: target.offset().top
+			        }, 1000);
+			        return false;
+			      }
+			    }
 		  	});
-
-            $('.date').datetimepicker({
-            	format: 'MM/DD/YYYY'
-            });
-            $('.date-time').datetimepicker();
-           
-		  });
+		});
+		
+		// Load Flexslider when everything is loaded.
+		$(window).load(function() {	  		
+		    $('.flexslider').flexslider({
+			    controlNav: false
+		    });
+	  	});
           
 	</script>
 </body>
