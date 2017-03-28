@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Holiday - Contact</title>
+<!--
+Holiday Template
+http://www.templatemo.com/tm-475-holiday
+-->
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,400italic,600,700' rel='stylesheet' type='text/css'>
+	<link href="css/font-awesome.min.css" rel="stylesheet">
+	<link href="css/bootstrap.min.css" rel="stylesheet">
+	<link href="css/bootstrap-datetimepicker.min.css" rel="stylesheet">  
+	<link href="css/flexslider.css" rel="stylesheet">
+	<link href="css/templatemo-style.css" rel="stylesheet">
+
+	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+<body>
+	<!-- Header -->
+	<div class="tm-header">
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-6 col-md-4 col-sm-3 tm-site-name-container">
+					<a href="index.html" class="tm-site-name">Recado</a>	
+				</div>
+				<div class="col-lg-6 col-md-8 col-sm-9">
+					<div class="mobile-menu-icon">
+						<i class="fa fa-bars"></i>
+					</div>
+					<nav class="tm-nav">
+						<ul>
+						    <li><a href="profile.html">Profile</a></li>
+                           <li><a href="searchtasks.html">Search</a></li>
+							<li><a href="#" class="active">My Tasks</a></li>
+							<li><a href="mybids.html">My Bids</a></li>
+                            <li><a href="logout.html">Log Out</a></li>
+                           
+						</ul>
+					</nav>		
+				</div>				
+			</div>
+		</div>	  	
+	</div>
+	
+	<!-- white bg -->
+	<section class="section-padding-bottom">
+		<div class="container">
+			<div class="row">
+				<div class="tm-section-header section-margin-top">
+					<div class="col-lg-4 col-md-3 col-sm-3"><hr></div>
+					<div class="col-lg-4 col-md-6 col-sm-6"><h2 class="tm-section-title">Create a Task</h2></div>
+					<div class="col-lg-4 col-md-3 col-sm-3"><hr></div>	
+				</div>				
+			</div>
+			<div class="row">
+				<!-- contact form -->
+				<form action="#" method="post" class="tm-contact-form">
+					<div class="col-lg-6 col-md-6">
+						<div id="google-map"></div>
+					</div> 
+					<div class="col-lg-6 col-md-6 tm-contact-form-input">
+                        <div class="form-group">
+							<input type="text" id="task_name" class="form-control" placeholder="Task Name" />
+						</div>
+                        <!-- date pickers not working, to fix -->
+                        <div class="input-group date" id="datetimepicker1">
+                            <input type='text' class="form-control" placeholder="Start Date" />
+                            <span class="input-group-addon">
+                                <span class="fa fa-calendar"></span>
+                            </span>
+						</div>
+                        <br />       
+                        <div class="input-group date" id="datetimepicker2">
+                            <input type='text' class="form-control" placeholder="End Date" />
+                            <span class="input-group-addon">
+                                <span class="fa fa-calendar"></span>
+                            </span>
+						</div>
+                        <br />
+					
+                        <div class="form-group">
+							<input type="email" id="location" class="form-control" placeholder="Address" />
+						</div>
+						<div class="form-group">
+							<input type="email" id="postal_code" class="form-control" placeholder="Postal Code" />
+						</div>
+						<div class="form-group">
+							<input type="text" id="listing_price" class="form-control" placeholder="Listing Price" />
+						</div>
+						<div class="form-group">
+							<textarea id="task_desc" class="form-control" rows="6" placeholder="Enter some description about your task"></textarea>
+						</div>
+                        <div class="form-group">
+							            	 <select class="form-control">
+							            	 	<option value="">-Select a Category- </option>
+							            	 	<option value="">Bernard</option>
+												<option value="">Bernaaard</option>
+												<option value="">Bernaaaaaarrrd</option>
+											</select> 
+							          	</div>			
+						<div class="form-group">
+							<button class="tm-submit-btn" type="submit" name="submit">Create a Task</button> 
+						</div>               
+					</div>
+				</form>
+			</div>			
+		</div>
+	</section>
+	<footer class="tm-black-bg">
+		<div class="container">
+			<div class="row">
+				<p class="tm-copyright-text">Copyright &copy; 2084 Your Company Name</p>
+			</div>
+		</div>		
+	</footer>
+	<script type="text/javascript" src="js/jquery-1.11.2.min.js"></script>      		<!-- jQuery -->
+	<script type="text/javascript" src="js/bootstrap.min.js"></script>					<!-- bootstrap js -->
+	<script type="text/javascript" src="js/jquery.flexslider-min.js"></script>			<!-- flexslider js -->
+	<script type="text/javascript" src="js/templatemo-script.js"></script>      		<!-- Templatemo Script -->
+	<script type="text/javascript" src="js/moment.js"></script>							<!-- moment.js -->
+	<script type="text/javascript" src="js/bootstrap-datetimepicker.min.js"></script>	<!-- bootstrap date time picker js, http://eonasdan.github.io/bootstrap-datetimepicker/ -->
+	
+    <script>
+		/* Google map
+      	------------------------------------------------*/
+      	var map = '';
+      	var center;
+
+      	function initialize() {
+	        var mapOptions = {
+	          	zoom: 14,
+	          	center: new google.maps.LatLng(1.2967436, 103.7744816),
+	          	scrollwheel: false
+        	};
+        
+	        map = new google.maps.Map(document.getElementById('google-map'),  mapOptions);
+
+	        google.maps.event.addDomListener(map, 'idle', function() {
+	          calculateCenter();
+	        });
+        
+	        google.maps.event.addDomListener(window, 'resize', function() {
+	          map.setCenter(center);
+	        });
+      	}
+
+	    function calculateCenter() {
+	        center = map.getCenter();
+	    }
+
+	    function loadGoogleMap(){
+	        var script = document.createElement('script');
+	        script.type = 'text/javascript';
+	        script.src = 'https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&' + 'callback=initialize';
+	        document.body.appendChild(script);
+	    }
+	
+      	// DOM is ready
+		$(function() {
+
+        
+			// https://css-tricks.com/snippets/jquery/smooth-scrolling/
+			$('a[href*=#]:not([href=#])').click(function() {
+				if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'') && location.hostname == this.hostname) {
+					var target = $(this.hash);
+					target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
+					if (target.length) {
+						$('html,body').animate({
+							scrollTop: target.offset().top
+						}, 1000);
+						return false;
+					}
+				}
+			});
+
+		  	// Flexslider
+		  	$('.flexslider').flexslider({
+		  		controlNav: false,
+		  		directionNav: false
+		  	});
+
+		  	// Google Map
+		  	loadGoogleMap();
+
+            $('.date').datetimepicker({
+            	format: 'DD/MM/YYYY'
+            });
+            $('.date-time').datetimepicker();
+           
+		  });
+
+          
+	</script>
+</body>
+</html>
