@@ -48,7 +48,7 @@ class LoginView {
 class LoginController {
     const LOGIN_URL = "login.php?action=login";
     const LOGIN_METHOD = "POST";
-    const HOME_URL = "/";
+    const HOME_URL = "/index.php";
     const VALIDATOR_LENGTH = 20;
     const SECONDS_7_DAYS = 604800; //60 * 60 * 24 * 7, 7 days
     const COOKIE_NAME = "remember";
