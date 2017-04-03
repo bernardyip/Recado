@@ -38,7 +38,13 @@ class TasksView {
     }
     
     public function getSearchInput() {
-        return HtmlHelper::makeInput2("text", "searchKey", "", "Search tasks", "");
+        $html = HtmlHelper::makeInput2("text", "searchKey", "", "Search tasks", "");
+        $html = $html . "<br /><h3>Search in category</h3>";
+        $html = $html . HtmlHelper::makeCheckboxInput("cleaning", "Cleaning", 2) . "&nbsp;&nbsp;";
+        $html = $html . HtmlHelper::makeCheckboxInput("delivery", "Delivery", 3) . "&nbsp;&nbsp;";
+        $html = $html . HtmlHelper::makeCheckboxInput("fixing", "Fixing", 4) . "&nbsp;&nbsp;";
+        $html = $html . HtmlHelper::makeCheckboxInput("everything_else", "Everything  Else", 1);
+        return $html;
     }
     
     public function getTasks() {
@@ -116,7 +122,13 @@ class TasksController {
     
     public function searchTask() {
         if ($this->model->isValidForSearch()) {
-            $tasksResult = $this->taskDatabase->findTask($this->model->searchKey);
+            
+            $cleaning = pg_escape_string($_POST['cleaning']);
+            $delivery = pg_escape_string($_POST['delivery']);
+            $fixing = pg_escape_string($_POST['fixing']);
+            $everything_else = pg_escape_string($_POST['everything_else']);
+            
+            $tasksResult = $this->taskDatabase->findTask($this->model->searchKey, $cleaning, $delivery, $fixing, $everything_else);
             $this->model->tasks = $tasksResult->tasks;
         }
     }

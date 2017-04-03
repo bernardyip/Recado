@@ -53,7 +53,7 @@ class TaskDatabase extends Database {
     const SQL_CREATE_TASK = "INSERT INTO public.task (name, description, postal_code, location, task_start_time, task_end_time, listing_price, created_time, updated_time, status, bid_picked, category_id, creator_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id;";
     const SQL_FIND_TASK_RANDOM = "SELECT t.id, t.name FROM public.task t ORDER BY RANDOM();";
     const SQL_FIND_TASK_RANDOM_WITH_LIMIT = "SELECT t.id, t.name FROM public.task t ORDER BY RANDOM() LIMIT $1;";
-    const SQL_FIND_TASK_TITLE_OR_DESCRIPTION = "SELECT * FROM public.task t INNER JOIN public.user u ON u.id = t.creator_id WHERE t.name ILIKE $1 OR t.description ILIKE $1;";
+    const SQL_FIND_TASK_TITLE_OR_DESCRIPTION = "SELECT * FROM public.task t INNER JOIN public.user u ON u.id = t.creator_id WHERE (t.name ILIKE $1 OR t.description ILIKE $1) AND t.category_id IN ($2, $3, $4, $5);";
     
     
     public function __construct() {
@@ -283,10 +283,25 @@ class TaskDatabase extends Database {
         }
     }
     
-    public function findTask($searchTerm) {
+    public function findTask($searchTerm, $cleaning, $delivery, $fixing, $everything_else) {
         $searchTerm = "%" . $searchTerm . "%";
+        
+        $categoryFilter = "";
+        if (!isset($cleaning)) {
+            $cleaning = 0;
+        }
+        if (!isset($delivery)) {
+            $delivery = 0;
+        }
+        if (!isset($fixing)) {
+            $fixing = 0;
+        }
+        if (!isset($everything_else)) {
+            $everything_else;
+        }
+        
         $dbResult = pg_execute ( $this->dbcon, 'SQL_FIND_TASK_TITLE_OR_DESCRIPTION', array (
-                        $searchTerm
+                        $searchTerm, $cleaning, $delivery, $fixing, $everything_else
         ) );
         
         $tasks = null;

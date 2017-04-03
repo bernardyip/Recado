@@ -73,6 +73,11 @@ class HtmlHelper {
         $html = $html . "/>";
         return $html;
     }
+    
+    public static function makeCheckboxInput($name, $display, $category_id) {
+        $html = "<input type='checkbox' value='" . $category_id. "' name='" . $name . "' checked /><span>&nbsp;" . $display. "</span>";
+        return $html;
+    }
 }
 
 ?>
