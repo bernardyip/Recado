@@ -193,11 +193,11 @@ http://www.templatemo.com/tm-475-holiday
 		var geocoder;
 		var results;
 		var status;
-		var lat = 1.2967436;
-		var lng = 103.7744816;
-		var address = '530718';
+		var lat = 1.2967436; //default
+		var lng = 103.7744816; //default 
+		var address = '123456'; //insert zipcode here
 
-		function retrieveLatLng() {
+	function initialize() {
 
 			google.maps.visualRefresh = true;
 			geocoder = new google.maps.Geocoder();
@@ -206,27 +206,27 @@ http://www.templatemo.com/tm-475-holiday
    			   if (status == google.maps.GeocoderStatus.OK) {
     		     lat = results[0].geometry.location.lat();
      		     lng = results[0].geometry.location.lng();
-				 console.log('here' + lat + ' lng ' + lng);
+				 console.log('hereee' + lat + ' lng ' + lng);
+
+                 drawMap();
     	    	}
     			  else {
-  			      alert("Geocode was not successful for the following reason: " + status);
+                      console.log("no geocode found");
 					}
 				});
-
-				initialize();
-
+         
 		}
-      	function initialize() {
-				retrieveLatLng();
+        var data;
+     
+        function drawMap(){
 
-				alert("here" + lat);
-	        	var mapOptions = {
-	          	zoom: 14,
+            	var mapOptions = {
+	          	zoom: 18,
 	          	center: new google.maps.LatLng(lat, lng),
 	          	scrollwheel: false
-        	};
-        
-	        map = new google.maps.Map(document.getElementById('google-map'),  mapOptions);
+        	}
+
+            map = new google.maps.Map(document.getElementById('google-map'),  mapOptions);
 			
 
 	        google.maps.event.addDomListener(map, 'idle', function() {
@@ -236,7 +236,8 @@ http://www.templatemo.com/tm-475-holiday
 	        google.maps.event.addDomListener(window, 'resize', function() {
 	          map.setCenter(center);
 	        });
-      	}
+
+        }
 
 	    function calculateCenter() {
 	        center = map.getCenter();
@@ -245,7 +246,7 @@ http://www.templatemo.com/tm-475-holiday
 	    function loadGoogleMap(){
 	        var script = document.createElement('script');
 	        script.type = 'text/javascript';
-	        script.src = 'https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&' + 'callback=retrieveLatLng';
+	        script.src = 'https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&' + 'callback=initialize';
 	        document.body.appendChild(script);
 
 			
