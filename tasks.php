@@ -116,17 +116,17 @@ class TasksController {
     
     public function searchTask() {
         if ($this->model->isValidForSearch()) {
-            
+            $tasksResult = $this->taskDatabase->findTask($this->model->searchKey);
+            $this->model->tasks = $tasksResult->tasks;
         }
     }
     
     public function handleHttpPost() {
-        if (isset ( $_POST ['searchKey'] ) ) {
-            $this->model->searchKey = $_POST['searchKey'];
-        }
         if (isset ( $_GET ['action'] )) {
             if ($_GET ['action'] === 'search') {
-                $this->searchTask ();
+                $searchTerm = pg_escape_string($_POST['searchKey']);
+                $this->model->searchKey = $searchTerm;
+                $this->searchTask();
             }
         } else {
             // invalid request.

@@ -11,7 +11,7 @@
 			$method = pg_escape_string($_POST['method']);
 			$dbcon = pg_connect('host=localhost dbname=postgres user=postgres password=password');
 			if ($method == 'search') { 
-				pg_prepare($dbcon, 'search_task_query', "SELECT t.id, t.name FROM public.task t WHERE t.name LIKE $1;");
+				pg_prepare($dbcon, 'search_task_query', "SELECT t.id, t.name FROM public.task t WHERE t.name LIKE %$1%;");
 				$result = pg_execute($dbcon, 'search_task_query', array("%".$searchTerm."%"));
 				if (pg_num_rows($result) >= 1) { ?>
 					<h3>Here are the results:</h3>
