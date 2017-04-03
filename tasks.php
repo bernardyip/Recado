@@ -121,16 +121,17 @@ class TasksController {
     }
     
     public function searchTask() {
-        if ($this->model->isValidForSearch()) {
-            
-            $cleaning = pg_escape_string($_POST['cleaning']);
-            $delivery = pg_escape_string($_POST['delivery']);
-            $fixing = pg_escape_string($_POST['fixing']);
-            $everything_else = pg_escape_string($_POST['everything_else']);
-            
+        $cleaning = pg_escape_string($_POST['cleaning']);
+        $delivery = pg_escape_string($_POST['delivery']);
+        $fixing = pg_escape_string($_POST['fixing']);
+        $everything_else = pg_escape_string($_POST['everything_else']);
+        
+        if ($this->model->isValidForSearch()) {  
             $tasksResult = $this->taskDatabase->findTask($this->model->searchKey, $cleaning, $delivery, $fixing, $everything_else);
-            $this->model->tasks = $tasksResult->tasks;
+        } else {
+            $tasksResult = $this->taskDatabase->findTask(null, $cleaning, $delivery, $fixing, $everything_else);
         }
+        $this->model->tasks = $tasksResult->tasks;
     }
     
     public function handleHttpPost() {

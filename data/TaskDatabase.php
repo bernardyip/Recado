@@ -54,7 +54,7 @@ class TaskDatabase extends Database {
     const SQL_FIND_TASK_RANDOM = "SELECT t.id, t.name FROM public.task t ORDER BY RANDOM();";
     const SQL_FIND_TASK_RANDOM_WITH_LIMIT = "SELECT t.id, t.name FROM public.task t ORDER BY RANDOM() LIMIT $1;";
     const SQL_FIND_TASK_TITLE_OR_DESCRIPTION = "SELECT * FROM public.task t INNER JOIN public.user u ON u.id = t.creator_id WHERE (t.name ILIKE $1 OR t.description ILIKE $1) AND t.category_id IN ($2, $3, $4, $5);";
-    
+    const SQL_FIND_TASK_CATEGORY = "SELECT * FROM public.task t INNER JOIN public.user u ON u.id = t.creator_id WHERE t.category_id IN ($2, $3, $4, $1);";
     
     public function __construct() {
         parent::__construct();
@@ -70,6 +70,7 @@ class TaskDatabase extends Database {
         pg_prepare ( $this->dbcon, 'SQL_TASKS_FIND_ALL', TaskDatabase::SQL_TASKS_FIND_ALL );
         pg_prepare ( $this->dbcon, 'SQL_CREATE_TASK', TaskDatabase::SQL_CREATE_TASK );
         pg_prepare ( $this->dbcon, 'SQL_FIND_TASK_TITLE_OR_DESCRIPTION', TaskDatabase::SQL_FIND_TASK_TITLE_OR_DESCRIPTION);
+        pg_prepare ( $this->dbcon, 'SQL_FIND_TASK_CATEGORY', TaskDatabase::SQL_FIND_TASK_CATEGORY);
     }
     
     public function task_myTasks($userId) {
@@ -284,25 +285,30 @@ class TaskDatabase extends Database {
     }
     
     public function findTask($searchTerm, $cleaning, $delivery, $fixing, $everything_else) {
-        $searchTerm = "%" . $searchTerm . "%";
-        
         $categoryFilter = "";
-        if (!isset($cleaning)) {
+        if ($cleaning == "") {
             $cleaning = 0;
         }
-        if (!isset($delivery)) {
+        if ($delivery == "") {
             $delivery = 0;
         }
-        if (!isset($fixing)) {
+        if ($fixing == "") {
             $fixing = 0;
         }
-        if (!isset($everything_else)) {
-            $everything_else;
+        if ($everything_else == "") {
+            $everything_else = 0;
         }
         
-        $dbResult = pg_execute ( $this->dbcon, 'SQL_FIND_TASK_TITLE_OR_DESCRIPTION', array (
-                        $searchTerm, $cleaning, $delivery, $fixing, $everything_else
-        ) );
+        if ($searchTerm == null) {
+            $dbResult = pg_execute ( $this->dbcon, 'SQL_FIND_TASK_CATEGORY', array (
+                            $cleaning, $delivery, $fixing, $everything_else
+            ) );
+        } else {
+            $searchTerm = "%" . $searchTerm . "%";
+            $dbResult = pg_execute ( $this->dbcon, 'SQL_FIND_TASK_TITLE_OR_DESCRIPTION', array (
+                            $searchTerm, $cleaning, $delivery, $fixing, $everything_else
+            ) );
+        }
         
         $tasks = null;
         $nrRows = pg_affected_rows ( $dbResult );
