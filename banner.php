@@ -14,7 +14,7 @@
                             <li><a href="/profile.php"><?php echo $_SESSION['username'] ?></a></li>
                             <li><a href="/tasks.php">Tasks</a></li>
                             <li><a href="/mytasks.php">My Tasks</a></li>
-                            <li><a href="/mybids.html">My Bids</a></li>
+                            <li><a href="/mybids.php">My Bids</a></li>
                             <li><a href="/login.php?action=logout">Log Out</a></li>
                         <?php } else { ?>
                             <li><a href="/login.php">Login</a></li>
