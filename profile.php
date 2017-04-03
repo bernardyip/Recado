@@ -252,22 +252,27 @@ http://www.templatemo.com/tm-475-holiday
 						</div>
 						<?php } ?>
                         <div class="form-group">
-							<?php echo $view->getPasswordField(); ?>
+                        	<br /> Password (for verification): <br />
+                        	<?php echo $view->getPasswordField(); ?>
 							<div name="requiredPassword" style="display:none;"><p style="color:#FF0000;"> This field is required. </p></div>
 						</div>
 						<div class="form-group">
+							<br /> Name: <br />
 							<?php echo $view->getNameField(); ?>
         					<div name="requiredName" style="display:none;"><p style="color:#FF0000;"> This field is required. </p></div>
         				</div>
 						<div class="form-group">
+							<br /> E-mail: <br />
 							<?php echo $view->getEmailField(); ?>
         					<div name="badEmail" style="display:none;"><p style="color:#FF0000;"> Please enter a valid email address. </p></div>
         				</div>
 						<div class="form-group">
+							<br /> Phone: <br />
 							<?php echo $view->getPhoneField(); ?>
         					<div name="badPhone" style="display:none;"><p style="color:#FF0000;"> Enter a valid phone number. </p></div>
         				</div>
 						<div class="form-group">
+							<br /> Bio Details: <br />
         					<?php echo $view->getBioField(); ?>
         				</div>
 						<div class="form-group">
