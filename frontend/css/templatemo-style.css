@@ -982,6 +982,42 @@ hr { border-top: 1px solid #111010; }
 	color: white;
 }
 
+.bid-lost { overflow: hidden }
+.bid-lost-name { 
+	background-color: #db3951;
+	padding: 20px 30px;
+	float: left;
+	width: 75%;
+	text-transform: uppercase;
+}
+.bid-lost-price {
+	float: left;
+	background-color: #a51a2f;
+	font-weight: 600;
+	font-size: 18px;
+	display: block;
+	padding: 17px 30px;
+	width: 25%;
+	transition: all 0.3s;
+	text-align: center;
+	text-decoration: line-through;
+}
+.bid-lost-price:hover,
+.bid-lost-price:focus {
+	color: white;
+	background-color: #c13247;
+}
+.bid-lost-name,
+.bid-lost-price {
+	color: white;
+	height: 60px;
+}
+
+.bid-section-header {
+	margin-bottom: 40px;
+	overflow: hidden;
+}
+
 /*highcharts*/
 
 #chart-container {
