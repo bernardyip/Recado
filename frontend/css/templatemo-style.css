@@ -297,7 +297,7 @@ body { overflow-x: hidden; }
 .section-margin-top { margin-top: 100px; }
 hr { border-top: 1px solid #111010; }
 .tm-section-header {
-	margin-bottom: 70px;
+	margin-bottom: 40px;
 	overflow: hidden;
 }
 .tm-section-title {
