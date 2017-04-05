@@ -14,10 +14,11 @@ class TaskDetail {
     public $updatedTime;
     public $category;
     public $creator;
+    public $taskDisplayPicture;
     
     public function __construct($id, $name, $description, $postalCode, $location, 
             $taskStartTime, $taskEndTime, $listingPrice, $updatedTime, 
-            $category, $creator) {
+            $category, $creator, $taskDisplayPicture) {
         $this->id = (int)$id;
         $this->name = trim($name);
         $this->description = trim($description);
@@ -45,6 +46,7 @@ class TaskDetail {
         }
         $this->category = trim($category);
         $this->creator = trim($creator);
+        $this->taskDisplayPicture = trim($taskDisplayPicture);
     }
 }
 ?>
