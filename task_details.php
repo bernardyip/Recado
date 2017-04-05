@@ -307,10 +307,39 @@ http://www.templatemo.com/tm-475-holiday
 			<div class="row">
 				<!-- Testimonial -->
 				<div class="col-lg-12">
-					<div class="tm-what-we-do-right">
-						<div class="tm-about-box-2 margin-bottom-30">
+					<div class="col-lg-3">
+    					<div class="tm-testimonials-box" style="height: 100%;">
+    						<h3 class="tm-testimonials-title">Bids</h3>
+    						<div class="tm-testimonials-content">
+    
+                            <!-- bid box start -->
+                            	<div class="tm-testimonial">
+                                    <form action="<?php echo $controller->getBidUrl();?>"
+                                    	  onsubmit=""
+                                    	  method="POST">
+                                    	  <?php 
+                                    	   echo HtmlHelper::makeMoneyInput3("newBid", htmlspecialchars($model->myBid), "Submit a bid", "", "0.00")
+                                    	  ?>
+    								    <?php if ($model->taskFinalized) { ?>
+                                        	<button type="submit" name="submit" class="tm-yellow-btn" disabled>Bidding Closed</button>
+    								    <?php } else { ?>
+                                        	<button type="submit" name="submit" class="tm-yellow-btn">Submit a Bid</button>
+    								    <?php } ?>
+                                    </form>
+    		                		
+    							</div>
+                            <!-- bid box end -->    
+                            <?php 
+                                echo $view->getBids();
+                            ?>
+    							                                     	
+    						</div>
+    					</div>
+					</div>
+					<div class="col-lg-4">
+    					<div class="tm-testimonials-box-transparent" style="height: 100%; background-color:none;">
                             <div class="tm-about-box-2-img">
-                                <img src="img/about-2.jpg" alt="image" />
+                                <img src="<?php echo $model->task->taskDisplayPicture ?>" alt="image" />
                                 <p> &nbsp;</p> <!-- cant use <br /> if not will break css -->
                                 <div class="tm-comments-box" style="height: 100%;">
                                     <h3 class="tm-comments-title">Comments</h3>
@@ -336,49 +365,25 @@ http://www.templatemo.com/tm-475-holiday
                                     </div>
                                 </div>
                             </div>
-							<div class="tm-about-box-2-text">
-								<h3 class="tm-about-box-2-title"><?php echo htmlspecialchars($model->task->name) ?></h3>
+                        </div>
+					</div>
+					<div class="col-lg-5">
+    					<div class="tm-testimonials-box-transparent" style="height: 100%;">
+    						<div class="tm-about-box-2-text">
+    							<h3 class="tm-about-box-2-title"><?php echo htmlspecialchars($model->task->name) ?></h3>
                                 <p class="tm-about-box-2-description gray-text">Category: <?php echo htmlspecialchars($model->task->category) ?></p>
                                 <p class="tm-about-box-2-description"><b>LISTING PRICE: <?php echo ConversionHelper::moneyToString($model->task->listingPrice) ?></b></p>
                                 <p class="tm-about-box-2-description"><?php echo htmlspecialchars($model->task->description) ?></p>
                                 <p class="tm-about-box-2-description"><?php echo $view->getTimeString($model->task->taskStartTime) ?> to <?php echo $view->getTimeString($model->task->taskEndTime) ?></p>
                                 <p class="tm-about-box-2-description">Location: <?php echo htmlspecialchars($model->task->location) ?> <br /> S<?php echo $model->task->postalCode ?></p>
-
+    
                                 <div id="google-map"></div>
                                 <br />
-				                <p class="tm-about-box-2-footer gray-text">
+    			                <p class="tm-about-box-2-footer gray-text">
                                     last updated at <?php echo $view->getTimeString($model->task->updatedTime) ?> by <?php echo htmlspecialchars($model->task->creator) ?>
-							</div>		                
+    						</div>
 						</div>
-						
 					</div>
-					<div class="tm-testimonials-box" style="height: 100%;">
-						<h3 class="tm-testimonials-title">Bids</h3>
-						<div class="tm-testimonials-content">
-
-                        <!-- bid box start -->
-                        	<div class="tm-testimonial">
-                                <form action="<?php echo $controller->getBidUrl();?>"
-                                	  onsubmit=""
-                                	  method="POST">
-                                	  <?php 
-                                	   echo HtmlHelper::makeMoneyInput3("newBid", htmlspecialchars($model->myBid), "Submit a bid", "", "0.00")
-                                	  ?>
-								    <?php if ($model->taskFinalized) { ?>
-                                    	<button type="submit" name="submit" class="tm-yellow-btn" disabled>Bidding Closed</button>
-								    <?php } else { ?>
-                                    	<button type="submit" name="submit" class="tm-yellow-btn">Submit a Bid</button>
-								    <?php } ?>
-                                </form>
-		                		
-							</div>
-                        <!-- bid box end -->    
-                        <?php 
-                            echo $view->getBids();
-                        ?>
-							                                     	
-						</div>
-					</div>	
 				</div>							
 			</div>			
 		</div>

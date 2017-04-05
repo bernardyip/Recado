@@ -32,7 +32,7 @@ class TaskDatabase extends Database {
     
     // SQL Queries
     const SQL_TASK_FIND_MYTASKS_WITH_USERID = "" .
-            "SELECT t.id, t.name, t.description, t.task_start_time, b1.amount AS max_bid, u.id AS max_bidder_id, u.username AS max_bidder_username " .
+            "SELECT t.id, t.name, t.description, t.task_start_time, t.category_id, b1.amount AS max_bid, u.id AS max_bidder_id, u.username AS max_bidder_username " .
             "FROM public.task t " . 
             "LEFT OUTER JOIN public.bid b1 " .
                 "ON t.id = b1.task_id AND b1.amount >= ALL(" . 
@@ -41,12 +41,12 @@ class TaskDatabase extends Database {
             "WHERE t.creator_id=$1 ORDER BY t.id;";
     
     const SQL_TASKS_FIND_ALL = "".
-            "SELECT t.id, t.name, t.description, t.creator_id, u.username " .
+            "SELECT t.id, t.name, t.description, t.category_id, t.creator_id, u.username " .
             "FROM public.task t INNER JOIN public.user u " .
                 "ON t.creator_id = u.id;";
     
     const SQL_TASKDETAILS_FIND_TASK = "" .
-            "SELECT t.id, t.name, t.description, t.postal_code, t.location, t.task_start_time, t.task_end_time, t.listing_price, t.updated_time, c.name AS category_name, u.name AS username " .
+            "SELECT t.id, t.name, t.description, t.postal_code, t.location, t.task_start_time, t.task_end_time, t.listing_price, t.updated_time, t.category_id, c.name AS category_name, u.name AS username " .
             "FROM public.task t " .
             "INNER JOIN public.category c ON t.category_id = c.id ".
             "INNER JOIN public.user u ON t.creator_id = u.id " .
@@ -64,8 +64,8 @@ class TaskDatabase extends Database {
     const SQL_FIND_TASK_COUNT_WITH_CATEGORY = "SELECT COUNT(*) AS count FROM public.task t WHERE t.category_id=$1;";
     const SQL_FIND_TASK_COUNT = "SELECT COUNT(*) AS count FROM public.task t;";
     const SQL_CREATE_TASK = "INSERT INTO public.task (name, description, postal_code, location, task_start_time, task_end_time, listing_price, created_time, updated_time, status, bid_picked, category_id, creator_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id;";
-    const SQL_FIND_TASK_RANDOM = "SELECT t.id, t.name FROM public.task t ORDER BY RANDOM();";
-    const SQL_FIND_TASK_RANDOM_WITH_LIMIT = "SELECT t.id, t.name FROM public.task t ORDER BY RANDOM() LIMIT $1;";
+    const SQL_FIND_TASK_RANDOM = "SELECT t.id, t.name, t.category_id FROM public.task t ORDER BY RANDOM();";
+    const SQL_FIND_TASK_RANDOM_WITH_LIMIT = "SELECT t.id, t.name, t.category_id FROM public.task t ORDER BY RANDOM() LIMIT $1;";
     
     
     public function __construct() {
@@ -116,7 +116,7 @@ class TaskDatabase extends Database {
             for ($i = 0; $i < $nrRows; $i++) {
                 $task = pg_fetch_array( $dbResult );
                 $tasks[$i] = new TaskInfo($task['id'], 
-                        $task['name'], $task['description'], "/img/index-03.jpg",
+                        $task['name'], $task['description'], $this->getDisplayPicturePath($task['id'], $task['category_id']),
                         $task['creator_id'], $task['username']);
             }
         }
@@ -137,7 +137,7 @@ class TaskDatabase extends Database {
             for ($i = 0; $i < $nrRows; $i++) {
                 $task = pg_fetch_array( $dbResult );
                 $tasks[$i] = new MyTaskInfo($task['id'], $task['name'], $task['description'], $task['task_start_time'], 
-                        "/img/tours-05.jpg", $task['max_bidder_id'], $task['max_bidder_username'], $task['max_bid']);
+                        $this->getDisplayPicturePath($task['id'], $task['category_id']), $task['max_bidder_id'], $task['max_bidder_username'], $task['max_bid']);
             }
         }
         
@@ -172,7 +172,8 @@ class TaskDatabase extends Database {
                 $task = pg_fetch_array( $dbResult );
                 $tasks[$i] = new TaskDetail($task['id'], $task['name'], $task['description'], 
                         $task['postal_code'], $task['location'], $task['task_start_time'], $task['task_end_time'], 
-                        $task['listing_price'], $task['updated_time'], $task['category_name'], $task['username']);
+                        $task['listing_price'], $task['updated_time'], $task['category_name'], $task['username'],
+                        $this->getDisplayPicturePath($task['id'], $task['category_id']));
             }
         }
         
@@ -239,11 +240,19 @@ class TaskDatabase extends Database {
             $tasks = array();
             for ($i = 0; $i < $nrRows; $i++) {
                 $task = pg_fetch_array( $dbResult );
-                $tasks[$i] = new TaskOverview($task['id'], $task['name'], "/img/index-01.jpg");
+                $tasks[$i] = new TaskOverview($task['id'], $task['name'], $this->getDisplayPicturePath($task['id'], $task['category_id']));
             }
         }
         
         return new TaskDatabaseResult(TaskDatabaseResult::TASK_FIND_SUCCESS, $tasks, $nrRows);
+    }
+    
+    private function getDisplayPicturePath($taskId, $categoryId) {
+        $documentRoot = $_SERVER['DOCUMENT_ROOT'];
+        $taskDisplayPicture = $documentRoot . "\\img\\task\\$taskId.jpg";
+        $defaultDisplayPicture = $documentRoot . "\\img\\category\\$categoryId.jpg";
+        if (file_exists($taskDisplayPicture)) return "/img/task/$taskId.jpg";
+        else return "/img/category/$categoryId.jpg";
     }
     
     public function findTasksWithCategoryId($categoryId, $limitTo = 0) {

@@ -516,6 +516,12 @@ hr { border-top: 1px solid #111010; }
 	background-color: #E8BA0F;
 	float: left;
 }
+.tm-testimonials-box-transparent {
+	width: 272px;
+	height: 530px;
+	background-color: none;
+	float: left;
+}
 .tm-testimonials-title {
 	background-color: rgb(96, 104, 116);
 	color: white;

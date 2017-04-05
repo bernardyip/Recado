@@ -74,7 +74,7 @@ class TasksView {
                 $html = $html . "<br />";
             } else {
                 $html = $html . "<div class=\"tm-tours-box-2\">";
-                $html = $html . "<img src=\"" . htmlspecialchars($task->taskDisplayPicture) . "\" alt=\"image\" class=\"img-responsive\">";
+                $html = $html . "<img src=\"" . htmlspecialchars($task->taskDisplayPicture) . "\" alt=\"image\" class=\"img-responsive\" style=\"width: 100%;\">";
                 $html = $html . "<div class=\"tm-tours-box-2-info\">";
                 $html = $html . "<p>" . htmlspecialchars($task->taskName) . "</p>";
                 $html = $html . "<br />";
