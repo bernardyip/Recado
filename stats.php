@@ -15,8 +15,8 @@ if (!isset($_SESSION['username'])) {
 }
 
 class StatsModel {
-    //public $totalTasks
-	//public $averageBid
+    public $totalTasks;
+	public $averageBid;
 	
     public function __construct() {
         
@@ -75,7 +75,7 @@ class StatsController {
 	public function getTotalTasks() {
 		$taskResult = $this->taskDatabase->findTaskCount();
         if ($taskResult->status === TaskDatabaseResult::TASK_FIND_SUCCESS) {
-            //$this->model->totalTasks = $taskResult->count;
+            $this->model->totalTasks = $taskResult->count;
 			return $taskResult->count;
         }
 		
