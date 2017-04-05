@@ -114,6 +114,13 @@ class StatsController {
 			$this->model->openTasks = $taskResult->count;
         }
 	}
+	
+	public function getPastCreatedTasks($catID, $days) {
+		$taskResult = $this->taskDatabase->findRecentlyCreatedTaskCount($catID, $days);
+        if ($taskResult->status === TaskDatabaseResult::TASK_FIND_SUCCESS) {
+			return $taskResult->count;
+        }
+	}
     
 }
 
@@ -226,7 +233,7 @@ http://www.templatemo.com/tm-475-holiday
 								<p class="gray-text">28 March 2084</p>
 							</div>
 							<div class="tm-tours-box-1-info-right">
-								<p class="gray-text tours-1-description">TASK DESCRIPTIONNNNNN</p>	
+								<p class="gray-text tours-1-description">TASK DESCRIPTIONNNNNN <?php echo $controller->getPastCreatedTasks(2, 1); ?>	</p>	
 							</div>							
 						</div>
 					</div>					
@@ -571,16 +578,16 @@ Highcharts.chart('chart1', {
 
     series: [{
         name: 'Cleaning',
-        data: [43934, 52503, 57177, 69658,  154175]
+        data: [<?php echo $controller->getPastCreatedTasks(2, 4); ?>, <?php echo $controller->getPastCreatedTasks(2, 3); ?>, <?php echo $controller->getPastCreatedTasks(2, 2); ?>, <?php echo $controller->getPastCreatedTasks(2, 1); ?>, <?php echo $controller->getPastCreatedTasks(2, 0); ?>]
     }, {
         name: 'Delivery',
-        data: [24916, 24064, 29742, 29851, 40434]
+        data: [<?php echo $controller->getPastCreatedTasks(3, 4); ?>, <?php echo $controller->getPastCreatedTasks(3, 3); ?>, <?php echo $controller->getPastCreatedTasks(3, 2); ?>, <?php echo $controller->getPastCreatedTasks(3, 1); ?>, <?php echo $controller->getPastCreatedTasks(3, 0); ?>]
     }, {
         name: 'Fixing',
-        data: [11744, 17722, 16005, 19771, 39387]
+        data: [<?php echo $controller->getPastCreatedTasks(4, 4); ?>, <?php echo $controller->getPastCreatedTasks(4, 3); ?>, <?php echo $controller->getPastCreatedTasks(4, 2); ?>, <?php echo $controller->getPastCreatedTasks(4, 1); ?>, <?php echo $controller->getPastCreatedTasks(4, 0); ?>]
     }, {
         name: 'Everything Else',
-        data: [12908, 5948, 8105, 11248, 18111]
+        data: [<?php echo $controller->getPastCreatedTasks(1, 4); ?>, <?php echo $controller->getPastCreatedTasks(1, 3); ?>, <?php echo $controller->getPastCreatedTasks(1, 2); ?>, <?php echo $controller->getPastCreatedTasks(1, 1); ?>, <?php echo $controller->getPastCreatedTasks(1, 0); ?>]
     }]
 
 });
