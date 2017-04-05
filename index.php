@@ -27,7 +27,7 @@ class IndexView {
     }
     
     public function getUsernameField() {
-        return HtmlHelper::makeInput2( "text", "username", htmlspecialchars($this->model->username), "Username", "", true);
+        return HtmlHelper::makeInput2( "text", "username", "", "Username", "", true);
     }
     
     public function getPasswordField() {
@@ -39,15 +39,15 @@ class IndexView {
     }
     
     public function getNameField() {
-        return HtmlHelper::makeInput2( "text", "name", htmlspecialchars($this->model->name), "Name", "");
+        return HtmlHelper::makeInput2( "text", "name", "", "Name", "");
     }
     
     public function getEmailField() {
-        return HtmlHelper::makeInput2( "email", "email", htmlspecialchars($this->model->email), "Email Address", "");
+        return HtmlHelper::makeInput2( "email", "email", "", "Email Address", "");
     }
     
     public function getPhoneField() {
-        return HtmlHelper::makeInput2( "tel", "phone", htmlspecialchars($this->model->phone), "Phone Number", "");
+        return HtmlHelper::makeInput2( "tel", "phone", "", "Phone Number", "");
     }
     
     public function createLinkForTaskDetail($taskId) {
