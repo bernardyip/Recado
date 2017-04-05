@@ -16,7 +16,15 @@ if (!isset($_SESSION['username'])) {
 
 class StatsModel {
     public $totalTasks;
+	public $totalBids;
 	public $averageBid;
+	public $totalOnline;
+	public $totalUsers;
+	public $openTasks;
+	public $etcTasks;
+	public $cleaningTasks;
+	public $deliveryTasks;
+	public $fixingTasks;
 	
     public function __construct() {
         
@@ -55,40 +63,57 @@ class StatsController {
         $this->taskDatabase = new TaskDatabase();
         $this->userDatabase = new UserDatabase();
         $this->bidDatabase = new BidDatabase();
+		$this->getStats();
     }
-   
     
-    public function getAverageBid() {
+	public function getStats() {
+		$this->getBidStats();
+		$this->getUserStats();;
+		$this->getTaskStats();
+	}
+    
+    public function getBidStats() {
         $bidsResult = $this->bidDatabase->findAverageBid();
         if ($bidsResult->status === BidDatabaseResult::BID_FIND_SUCCESS) {            
-            return $bidsResult->bids;            
+            $this->model->averageBid = $bidsResult->bids;            
         }
-    }
-	
-	public function getTotalBids() {
-        $bidsResult = $this->bidDatabase->findTotalBids();
+		$bidsResult = $this->bidDatabase->findTotalBids();
         if ($bidsResult->status === BidDatabaseResult::BID_FIND_SUCCESS) {            
-            return $bidsResult->bids;            
+            $this->model->totalBids = $bidsResult->bids;            
         }
     }
 	
-	public function getTotalTasks() {
+	public function getUserStats() {
+		$this->model->totalOnline = $this->userDatabase->getOnlineUserCount();
+		$this->model->totalUsers = $this->userDatabase->getTotalUserCount();
+	}
+    
+	public function getTaskStats() {
 		$taskResult = $this->taskDatabase->findTaskCount();
         if ($taskResult->status === TaskDatabaseResult::TASK_FIND_SUCCESS) {
             $this->model->totalTasks = $taskResult->count;
-			return $taskResult->count;
+        }	
+		$taskResult = $this->taskDatabase->findTasksWithCategoryId(1, 0);
+        if ($taskResult->status === TaskDatabaseResult::TASK_FIND_SUCCESS) {
+            $this->model->etcTasks = $taskResult->count;
         }
-		
-	}
-	
-	public function getBiddableTasks() {
+		$taskResult = $this->taskDatabase->findTasksWithCategoryId(2, 0);
+        if ($taskResult->status === TaskDatabaseResult::TASK_FIND_SUCCESS) {
+            $this->model->cleaningTasks = $taskResult->count;
+        }
+		$taskResult = $this->taskDatabase->findTasksWithCategoryId(3, 0);
+        if ($taskResult->status === TaskDatabaseResult::TASK_FIND_SUCCESS) {
+            $this->model->deliveryTasks = $taskResult->count;
+        }
+		$taskResult = $this->taskDatabase->findTasksWithCategoryId(4, 0);
+        if ($taskResult->status === TaskDatabaseResult::TASK_FIND_SUCCESS) {
+            $this->model->fixingTasks = $taskResult->count;
+        }
 		$taskResult = $this->taskDatabase->findBiddableTaskCount();
         if ($taskResult->status === TaskDatabaseResult::TASK_FIND_SUCCESS) {
-			return $taskResult->count;
+			$this->model->openTasks = $taskResult->count;
         }
-		
 	}
-    
     
 }
 
@@ -150,7 +175,7 @@ http://www.templatemo.com/tm-475-holiday
   		</div>	  	
   	</div>
 	
-
+	
 	<!-- gray bg -->	
 	<section class="container tm-home-section-1" id="more">
 		
@@ -176,7 +201,7 @@ http://www.templatemo.com/tm-475-holiday
 								Total Tasks: 
 							</div>
 							<a href="#" class="tm-tours-box-1-link-right">
-								<?php 	echo $controller->getTotalTasks(); ?>						
+								<?php 	echo $model->totalTasks; ?>						
 							</a>							
 						</div>
 						<div class="tm-tours-box-1-link">
@@ -184,7 +209,7 @@ http://www.templatemo.com/tm-475-holiday
 								Total Bids: 
 							</div>
 							<a href="#" class="tm-tours-box-1-link-right">
-								<?php 	echo $controller->getTotalBids(); ?> 								
+								<?php 	echo $model->totalBids; ?> 								
 							</a>							
 						</div>
 						<div class="tm-tours-box-1-link">
@@ -192,7 +217,7 @@ http://www.templatemo.com/tm-475-holiday
 								Average Bid Amount: 
 							</div>
 							<a href="#" class="tm-tours-box-1-link-right">														
-								$<?php 	echo $controller->getAverageBid(); ?>                               								
+								$<?php 	echo $model->averageBid; ?>                               								
 							</a>							
 						</div>
 						<div class="tm-tours-box-1-info">
@@ -231,7 +256,7 @@ http://www.templatemo.com/tm-475-holiday
 								current online users: 
 							</div>
 							<a href="#" class="tm-tours-box-1-link-right">
-								33							
+								<?php 	echo $model->totalOnline; ?>			
 							</a>							
 						</div>
 						<div class="tm-tours-box-1-link">
@@ -239,7 +264,7 @@ http://www.templatemo.com/tm-475-holiday
 								total users: 
 							</div>
 							<a href="#" class="tm-tours-box-1-link-right">
-								2,500								
+								<?php 	echo $model->totalUsers; ?>				
 							</a>							
 						</div>
 						<div class="tm-tours-box-1-link">
@@ -247,7 +272,7 @@ http://www.templatemo.com/tm-475-holiday
 								tasks open for bidding: 
 							</div>
 							<a href="#" class="tm-tours-box-1-link-right">
-								<?php 	echo $controller->getBiddableTasks(); ?>								
+								<?php 	echo $model->openTasks; ?>								
 							</a>							
 						</div>
 						
@@ -598,10 +623,10 @@ Highcharts.chart('chart2', {
         name: 'Browser share',
         innerSize: '50%',
         data: [
-            ['Delivery',   10.38],
-            ['Cleaning',       56.33],
-            ['Fixing', 24.03],
-            ['Everything Else',    4.77]
+            ['Delivery', <?php echo round(($model->deliveryTasks/$model->totalTasks), 2); ?>],
+            ['Cleaning', <?php echo round(($model->cleaningTasks/$model->totalTasks), 2); ?>],
+            ['Fixing', <?php echo round(($model->fixingTasks/$model->totalTasks), 2); ?>],
+            ['Everything Else', <?php echo round(($model->etcTasks/$model->totalTasks), 2); ?>]
           
         ]
     }]
