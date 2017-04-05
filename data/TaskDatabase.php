@@ -63,6 +63,7 @@ class TaskDatabase extends Database {
     const SQL_FIND_TASK_WITH_CATEGORY = "SELECT * FROM public.task t WHERE t.category_id=$1;";
     const SQL_FIND_TASK_COUNT_WITH_CATEGORY = "SELECT COUNT(*) AS count FROM public.task t WHERE t.category_id=$1;";
     const SQL_FIND_TASK_COUNT = "SELECT COUNT(*) AS count FROM public.task t;";
+	const SQL_FIND_RECENTLY_CREATED_COUNT = "SELECT COUNT(*) from public.task t WHERE t.category_id=$1 AND t.created_time::date = (CURRENT_DATE - INTERVAL '1 day' * $2);";
     const SQL_CREATE_TASK = "INSERT INTO public.task (name, description, postal_code, location, task_start_time, task_end_time, listing_price, created_time, updated_time, status, bid_picked, category_id, creator_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id;";
     const SQL_FIND_TASK_RANDOM = "SELECT t.id, t.name FROM public.task t ORDER BY RANDOM();";
     const SQL_FIND_TASK_RANDOM_WITH_LIMIT = "SELECT t.id, t.name FROM public.task t ORDER BY RANDOM() LIMIT $1;";
@@ -78,6 +79,7 @@ class TaskDatabase extends Database {
         pg_prepare ( $this->dbcon, 'SQL_FIND_TASK_WITH_CATEGORY', TaskDatabase::SQL_FIND_TASK_WITH_CATEGORY );
         pg_prepare ( $this->dbcon, 'SQL_FIND_TASK_COUNT_WITH_CATEGORY', TaskDatabase::SQL_FIND_TASK_COUNT_WITH_CATEGORY );
         pg_prepare ( $this->dbcon, 'SQL_FIND_TASK_COUNT', TaskDatabase::SQL_FIND_TASK_COUNT );
+		pg_prepare ( $this->dbcon, 'SQL_FIND_RECENTLY_CREATED_COUNT', TaskDatabase::SQL_FIND_RECENTLY_CREATED_COUNT );
 		pg_prepare ( $this->dbcon, 'SQL_FIND_BIDDABLE_TASK', TaskDatabase::SQL_FIND_BIDDABLE_TASK );
         pg_prepare ( $this->dbcon, 'SQL_FIND_TASK_RANDOM', TaskDatabase::SQL_FIND_TASK_RANDOM );
         pg_prepare ( $this->dbcon, 'SQL_FIND_TASK_RANDOM_WITH_LIMIT', TaskDatabase::SQL_FIND_TASK_RANDOM_WITH_LIMIT );
@@ -282,6 +284,21 @@ class TaskDatabase extends Database {
     public function findTaskCountWithCategoryId($categoryId) {
         $dbResult = pg_execute ( $this->dbcon, 'SQL_FIND_TASK_COUNT_WITH_CATEGORY', array (
                 $categoryId
+        ) );
+
+        $count = 0;
+        if (pg_affected_rows ( $dbResult ) >= 1) {
+            $result = pg_fetch_array( $dbResult );
+            $count = $result['count'];
+        }
+        
+        return new TaskDatabaseResult(TaskDatabaseResult::TASK_FIND_SUCCESS, array(), $count);
+    }
+	
+	public function findRecentlyCreatedTaskCount($categoryId, $days) {
+        $dbResult = pg_execute ( $this->dbcon, 'SQL_FIND_RECENTLY_CREATED_COUNT', array (
+                $categoryId,
+				$days
         ) );
 
         $count = 0;
