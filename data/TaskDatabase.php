@@ -66,7 +66,7 @@ class TaskDatabase extends Database {
     const SQL_CREATE_TASK = "INSERT INTO public.task (name, description, postal_code, location, task_start_time, task_end_time, listing_price, created_time, updated_time, status, bid_picked, category_id, creator_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id;";
     const SQL_FIND_TASK_RANDOM = "SELECT t.id, t.name FROM public.task t ORDER BY RANDOM();";
     const SQL_FIND_TASK_RANDOM_WITH_LIMIT = "SELECT t.id, t.name FROM public.task t ORDER BY RANDOM() LIMIT $1;";
-	const SQL_FIND_BIDDABLE_TASK = "SELECT COUNT(*) FROM task t WHERE t.bid_Picked = 'false';";
+	const SQL_FIND_BIDDABLE_TASK = "SELECT COUNT(*) as count FROM public.task t WHERE t.bid_Picked = 'false';";
     
     
     public function __construct() {
