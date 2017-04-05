@@ -21,6 +21,7 @@ class TaskDetailsModel {
     public $comments;
     public $bids;
     public $myBid;
+    public $commentToEdit;
     
     public $newComment;
     public $newBid;
@@ -68,8 +69,12 @@ class TaskDetailsView {
                 $html = $html . "<div class=\"tm-testimonial\">" .
                                 "<p>" . htmlspecialchars($comment->comment) . "</p>" .
                                 "<p class=\"comments-time\">" . $this->getTimeString($comment->createdTime) . "</p>" .
-                                "<strong class=\"text-uppercase\">" . htmlspecialchars($comment->username) . "</strong>" .
-                                "</div>";
+                                "<strong class=\"text-uppercase\">" . htmlspecialchars($comment->username) . "</strong>";
+                if ($this->controller->isCreatorOrAdminForComment($comment)) {
+                    $html = $html . "<br />(<a href=\"/task_details.php?task=" . $this->model->taskId . "&action=deleteComment&commentId=" . $comment->id . "\">delete</a>/";
+                    $html = $html . "<a href=\"/task_details.php?task=" . $this->model->taskId . "&action=editComment&commentId=" . $comment->id . "\">edit</a>)";
+                }
+                $html = $html . "</div>";
             }
         }
         return $html;
@@ -150,6 +155,13 @@ class TaskDetailsController {
         }
     }
     
+    private function getComment($commentId) {
+        $commentsResult = $this->commentDatabase->taskDetails_getComment($commentId);
+        if ($commentsResult->status === CommentDatabaseResult::COMMENT_FIND_SUCCESS) {
+            $this->model->commentToEdit = $commentsResult->comments[0];
+        }
+    }
+    
     private function placeBid() {
         if ($this->model->isValidForAddingBid() && !$this->taskDatabase->taskDetails_isTaskFinalized($this->model->taskId)) {
             $bidsResult = $this->bidDatabase->taskDetails_placeBid(
@@ -187,16 +199,24 @@ class TaskDetailsController {
     }
     
     private function deleteComment($commentId) {
-        
+        if ($this->isCreatorOrAdminForComment($this->model->commentToEdit)) {
+            // delete comment
+            // status message 
+        }
     }
     
     private function editComment($commentId, $edittedComment) {
-        
+        if ($this->isCreatorOrAdminForComment($this->model->commentToEdit)) {
+            // edit comment
+            // status message 
+            $this->redirectToThisTask();
+        }
     }
     
     private function deleteTask() {
         if ($this->isCreatorOrAdmin()) {
             // delete task
+            $this->redirectToTasks();
         }
     }
     
@@ -211,6 +231,12 @@ class TaskDetailsController {
                 $this->model->message = "Failed to select bid :(";
             }
         }
+    }
+    
+    public function isCreatorOrAdminForComment($comment) {
+        return $this->model->userId === 1 || 
+                $this->model->task->$creatorId === $this->model->userId ||
+                $comment->userId === $this->model->userId;
     }
     
     public function isCreatorOrAdmin() {
@@ -233,11 +259,13 @@ class TaskDetailsController {
                 $this->placeBid();
             } else if ($_GET ['action'] === 'addComment') {
                 $this->addComment();
-            } else if ($_GET ['action'] === 'deleteComment') {
-                
             } else if ($_GET ['action'] === 'editComment') {
-            
-            }
+                if (isset($_GET['commentId'])) {
+                    $commentId = (int)$_GET['commentId'];
+                    $this->getComment($commentId);
+                    $this->editComment($commentId, $this->model->newComment);
+                }
+            } 
             $this->refreshModel();
         } else {
             // invalid request.
@@ -263,17 +291,34 @@ class TaskDetailsController {
                     $this->selectBid($userId);
                     $this->refreshModel();
                 }
+            } else if ($_GET ['action'] === 'deleteComment') {
+                if (isset($_GET['commentId'])) {
+                    $commentId = (int)$_GET['commentId'];
+                    $this->getComment($commentId);
+                    $this->deleteComment($commentId);
+                    $this->refreshModel();
+                }
+            } else if ($_GET ['action'] === 'editComment') {
+                if (isset($_GET['commentId'])) {
+                    $commentId = (int)$_GET['commentId'];
+                    $this->getComment($commentId);
+                }
             }
         }
     }
     
+    public function redirectToThisTask() {
+        header ( "Refresh: 0; URL=/task_details.php?task=$taskId" );
+        die();
+    }
+    
     public function redirectToEditTask($taskId) {
-        header ( "Refresh: 1; URL=/edit_tasks.php?task=$taskId" );
+        header ( "Refresh: 0; URL=/edit_tasks.php?task=$taskId" );
         die();
     }
     
     public function redirectToTasks() {
-        header ( "Refresh: 1; URL=/tasks.php" );
+        header ( "Refresh: 0; URL=/tasks.php" );
         die();
     }
     
@@ -283,6 +328,10 @@ class TaskDetailsController {
     
     public function getCommentUrl() {
         return "/task_details.php?task=" . $this->model->taskId . "&action=addComment";
+    }
+    
+    public function getEditCommentUrl() {
+        return "/task_details.php?task=" . $this->model->taskId . "&action=editComment&commentId=" . (int)$_GET['commentId'];
     }
 }
 
@@ -355,6 +404,29 @@ http://www.templatemo.com/tm-475-holiday
 	<!-- white bg -->
 	<section class="tm-white-bg section-padding-bottom">
 		<div class="container">
+		<?php if (isset($_GET['action']) && $_GET ['action'] === 'editComment') {?>
+			<div class="row">
+				<div class="tm-section-header section-margin-top">
+					<div class="col-lg-4 col-md-3 col-sm-3"><hr></div>
+					<div class="col-lg-4 col-md-6 col-sm-6">
+						<h2 class="tm-section-title"><?php echo htmlspecialchars($model->task->name) ?></h2>
+						<br /><br />
+                        <div class="tm-testimonial">
+                            <form action="<?php echo $controller->getEditCommentUrl();?>"
+                            	  onsubmit=""
+                            	  method="POST">
+                            	  <?php 
+                            	  echo HtmlHelper::makeTextArea2( "newComment", htmlspecialchars($model->commentToEdit->comment), 3, "Give a comment");
+                            	  ?>
+                                <button type="submit" name="submit" class="tm-green-btn">Make changes</button>
+                            </form>
+                            
+                        </div>
+					</div>
+					<div class="col-lg-4 col-md-3 col-sm-3"><hr></div>	
+				</div>				
+			</div>
+		<?php } else { ?>
 			<div class="row">
 				<div class="tm-section-header section-margin-top">
 					<div class="col-lg-4 col-md-3 col-sm-3"><hr></div>
@@ -456,6 +528,7 @@ http://www.templatemo.com/tm-475-holiday
 				</div>							
 			</div>			
 		</div>
+		<?php } ?>
 	</section>
 	<?php 
 	   include 'footer.php'

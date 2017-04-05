@@ -26,11 +26,17 @@ class CommentDatabase extends Database {
     
     // SQL Queries
     const SQL_TASKDETAILS_FIND_COMMENTS_WITH_TASKID = "" .
-            "SELECT c.id, c.comment, c.created_time, u.username " .
+            "SELECT c.id, c.comment, c.created_time, u.id AS user_id, u.username " .
             "FROM public.comment c " .
             "INNER JOIN public.user u ON c.user_id = u.id " .
             "WHERE c.task_id=$1 " .
             "ORDER BY c.created_time DESC;";
+    
+    const SQL_TASKDETAILS_FIND_COMMENT = "" .
+            "SELECT c.id, c.comment, c.created_time, u.id AS user_id, u.username " .
+            "FROM public.comment c " .
+            "INNER JOIN public.user u ON c.user_id = u.id " .
+            "WHERE c.id=$1;";
     
     const SQL_TASKDETAILS_ADD_COMMENT_FOR_TASKID_BY_USERID = "" .
             "INSERT INTO public.comment (comment, created_time, user_id, task_id) VALUES " .
@@ -45,6 +51,7 @@ class CommentDatabase extends Database {
         pg_prepare ( $this->dbcon, 'SQL_FIND_COMMENTS_WITH_TASKID', CommentDatabase::SQL_FIND_COMMENTS_WITH_TASKID );
         pg_prepare ( $this->dbcon, 'SQL_TASKDETAILS_FIND_COMMENTS_WITH_TASKID', CommentDatabase::SQL_TASKDETAILS_FIND_COMMENTS_WITH_TASKID );
         pg_prepare ( $this->dbcon, 'SQL_TASKDETAILS_ADD_COMMENT_FOR_TASKID_BY_USERID', CommentDatabase::SQL_TASKDETAILS_ADD_COMMENT_FOR_TASKID_BY_USERID );
+        pg_prepare ( $this->dbcon, 'SQL_TASKDETAILS_FIND_COMMENT', CommentDatabase::SQL_TASKDETAILS_FIND_COMMENT );
     }
     
     public function taskDetails_addComment($taskId, $userId, $comment) {
@@ -62,6 +69,27 @@ class CommentDatabase extends Database {
         } else {
             return new BidDatabaseResult(CommentDatabaseResult::COMMENT_CREATE_FAIL, null);
         }
+    }
+    
+    public function taskDetails_getComment($commentId) {
+
+        $dbResult = pg_execute ( $this->dbcon, 'SQL_TASKDETAILS_FIND_COMMENT', array (
+                $commentId
+        ) );
+
+        $comments = null;
+        $nrRows = pg_affected_rows ( $dbResult );
+        if ($nrRows >= 1) {
+            $comments = array();
+            for ($i = 0; $i < $nrRows; $i++) {
+                $comment = pg_fetch_array( $dbResult );
+                $comments[$i] = new TaskComment($comment['id'], $comment['comment'], 
+                        $comment['created_time'], $comment['user_id'], $comment['username']);
+            }
+            return new CommentDatabaseResult(CommentDatabaseResult::COMMENT_FIND_SUCCESS, $comments);
+        }
+        
+        return new CommentDatabaseResult(CommentDatabaseResult::COMMENT_FIND_FAIL, null);
     }
     
     public function taskDetails_getComments($taskId) {
@@ -86,7 +114,7 @@ class CommentDatabase extends Database {
             for ($i = 0; $i < $nrRows; $i++) {
                 $comment = pg_fetch_array( $dbResult );
                 $comments[$i] = new TaskComment($comment['id'], $comment['comment'], 
-                        $comment['created_time'], $comment['username']);
+                        $comment['created_time'], $comment['user_id'], $comment['username']);
             }
         }
         
