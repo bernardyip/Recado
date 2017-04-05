@@ -77,14 +77,17 @@ class TaskDetailsView {
     
     public function getBids() {
         $html = "";
-        // SELECT/UNSELECT THIS USER for owner of task only
         if (!is_null($this->model->bids)) {
             foreach ($this->model->bids as $bid) {
                 $html = $html . "<div class=\"tm-testimonial\">" .
     							"<p class=\"bid-amount\">" . ConversionHelper::moneyToString($bid->amount) . "</p>" .
-    		                	"<strong class=\"text-uppercase\">" . htmlspecialchars($bid->username) . "</strong>" .
-                                "<p class=\"bid-select\">select this user</p>" . 
-    							"</div>";
+    		                	"<strong class=\"text-uppercase\">" . htmlspecialchars($bid->username) . "</strong>";
+                if ($this->controller->isCreator() && !$this->model->task->bidPicked) {
+                    $html = $html . "<br /><a href=\"/task_details.php?task=" . $bid->taskId . 
+                                    "&action=selectBid&userId=" . $bid->userId . 
+                                    "\" class=\"bid-select\">select bid</a>";
+                }
+                $html = $html . "</div>";
             }
         }
         return $html;
@@ -104,7 +107,7 @@ class TaskDetailsController {
         $this->bidDatabase = new BidDatabase();
     }
     
-    private function getTask() {
+    public function getTask() {
         $taskResult = $this->taskDatabase->taskDetails_getTask($this->model->taskId);
         if ($taskResult->status === TaskDatabaseResult::TASK_FIND_SUCCESS) {
             $this->model->taskFinalized = $this->taskDatabase->taskDetails_isTaskFinalized($this->model->taskId);
@@ -127,9 +130,16 @@ class TaskDetailsController {
     }
     
     private function getBids() {
-        $bidsResult = $this->bidDatabase->taskDetails_getBids($this->model->taskId);
-        if ($bidsResult->status === BidDatabaseResult::BID_FIND_SUCCESS) {
-            $this->model->bids = $bidsResult->bids;
+        if ($this->model->task->bidPicked) {
+            $bidsResult = $this->bidDatabase->taskDetails_getWinningBid($this->model->taskId);
+            if ($bidsResult->status === BidDatabaseResult::BID_FIND_SUCCESS) {
+                $this->model->bids = $bidsResult->bids;
+            }
+        } else {
+            $bidsResult = $this->bidDatabase->taskDetails_getBids($this->model->taskId);
+            if ($bidsResult->status === BidDatabaseResult::BID_FIND_SUCCESS) {
+                $this->model->bids = $bidsResult->bids;
+            }
         }
     }
     
@@ -138,10 +148,6 @@ class TaskDetailsController {
         if ($commentsResult->status === CommentDatabaseResult::COMMENT_FIND_SUCCESS) {
             $this->model->comments = $commentsResult->comments;
         }
-    }
-    
-    private function updateTask() {
-        
     }
     
     private function placeBid() {
@@ -180,6 +186,41 @@ class TaskDetailsController {
         }
     }
     
+    private function deleteComment($commentId) {
+        
+    }
+    
+    private function editComment($commentId, $edittedComment) {
+        
+    }
+    
+    private function deleteTask() {
+        if ($this->isCreatorOrAdmin()) {
+            // delete task
+        }
+    }
+    
+    private function selectBid($userId) {
+        if ($this->isCreator() && !$this->model->task->bidPicked) {
+            $bidsResult = $this->bidDatabase->taskDetails_selectBid($this->model->taskId, $userId);
+            if ($bidsResult->status === BidDatabaseResult::BID_UPDATE_SUCCESS) {
+                $this->model->operationSuccessful = true;
+                $this->model->message = "Successfully selected bid!";
+            } else {
+                $this->model->operationSuccessful = false;
+                $this->model->message = "Failed to select bid :(";
+            }
+        }
+    }
+    
+    public function isCreatorOrAdmin() {
+        return $this->model->userId === 1 || $this->isCreator();
+    }
+    
+    public function isCreator() {
+        return $this->model->task->creatorId === $this->model->userId;
+    }
+    
     public function handleHttpPost() {
         if (isset ($_POST ['newBid'])) {
             $this->model->newBid = floatval($_POST ['newBid']);
@@ -190,11 +231,14 @@ class TaskDetailsController {
         if (isset ( $_GET ['action'] )) {
             if ($_GET ['action'] === 'placeBid') {
                 $this->placeBid();
-                $this->getTask();
             } else if ($_GET ['action'] === 'addComment') {
                 $this->addComment();
-                $this->getTask();
+            } else if ($_GET ['action'] === 'deleteComment') {
+                
+            } else if ($_GET ['action'] === 'editComment') {
+            
             }
+            $this->refreshModel();
         } else {
             // invalid request.
             http_response_code ( 400 );
@@ -202,8 +246,30 @@ class TaskDetailsController {
         }
     }
     
-    public function handleHttpGet() {
+    private function refreshModel() {
         $this->getTask();
+    }
+    
+    public function handleHttpGet() {
+        
+        if (isset ( $_GET ['action'] )) {
+            if ($_GET ['action'] === 'edit') {
+                $this->redirectToEditTask();
+            } else if ($_GET ['action'] === 'delete') {
+                $this->deleteTask();
+            } else if ($_GET ['action'] === 'selectBid') {
+                if (isset($_GET['userId'])) {
+                    $userId = (int)$_GET['userId'];
+                    $this->selectBid($userId);
+                    $this->refreshModel();
+                }
+            }
+        }
+    }
+    
+    public function redirectToEditTask($taskId) {
+        header ( "Refresh: 1; URL=/edit_tasks.php?task=$taskId" );
+        die();
     }
     
     public function redirectToTasks() {
@@ -240,6 +306,8 @@ if (!isset($_GET['task'])) {
 if ($model->taskId <= 0) {
     $controller->redirectToTasks();
 }
+
+$controller->getTask();
 
 if ($_SERVER ['REQUEST_METHOD'] === 'POST') {
     $controller->handleHttpPost ();
@@ -317,12 +385,10 @@ http://www.templatemo.com/tm-475-holiday
                                     <form action="<?php echo $controller->getBidUrl();?>"
                                     	  onsubmit=""
                                     	  method="POST">
-                                    	  <?php 
-                                    	   echo HtmlHelper::makeMoneyInput3("newBid", htmlspecialchars($model->myBid), "Submit a bid", "", "0.00")
-                                    	  ?>
     								    <?php if ($model->taskFinalized) { ?>
                                         	<button type="submit" name="submit" class="tm-yellow-btn" disabled>Bidding Closed</button>
     								    <?php } else { ?>
+    								    	<?php echo HtmlHelper::makeMoneyInput3("newBid", htmlspecialchars($model->myBid), "Submit a bid", "", "0.00") ?>
                                         	<button type="submit" name="submit" class="tm-yellow-btn">Submit a Bid</button>
     								    <?php } ?>
                                     </form>
@@ -330,6 +396,9 @@ http://www.templatemo.com/tm-475-holiday
     							</div>
                             <!-- bid box end -->    
                             <?php 
+                                if ($model->taskFinalized) {
+                                    echo "<strong class=\"text-uppercase\">Winning Bid:</strong>";
+                                }
                                 echo $view->getBids();
                             ?>
     							                                     	
