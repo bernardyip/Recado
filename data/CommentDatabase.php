@@ -26,14 +26,14 @@ class CommentDatabase extends Database {
     
     // SQL Queries
     const SQL_TASKDETAILS_FIND_COMMENTS_WITH_TASKID = "" .
-            "SELECT c.id, c.comment, c.created_time, u.id AS user_id, u.username " .
+            "SELECT c.id, c.comment, c.created_time, c.task_id, u.id AS user_id, u.username " .
             "FROM public.comment c " .
             "INNER JOIN public.user u ON c.user_id = u.id " .
             "WHERE c.task_id=$1 " .
             "ORDER BY c.created_time DESC;";
     
     const SQL_TASKDETAILS_FIND_COMMENT = "" .
-            "SELECT c.id, c.comment, c.created_time, u.id AS user_id, u.username " .
+            "SELECT c.id, c.comment, c.created_time, c.task_id, u.id AS user_id, u.username " .
             "FROM public.comment c " .
             "INNER JOIN public.user u ON c.user_id = u.id " .
             "WHERE c.id=$1;";
@@ -124,7 +124,7 @@ class CommentDatabase extends Database {
             for ($i = 0; $i < $nrRows; $i++) {
                 $comment = pg_fetch_array( $dbResult );
                 $comments[$i] = new TaskComment($comment['id'], $comment['comment'], 
-                        $comment['created_time'], $comment['user_id'], $comment['username']);
+                        $comment['created_time'], $comment['user_id'], $comment['task_id'], $comment['username']);
             }
             return new CommentDatabaseResult(CommentDatabaseResult::COMMENT_FIND_SUCCESS, $comments);
         }
@@ -154,7 +154,7 @@ class CommentDatabase extends Database {
             for ($i = 0; $i < $nrRows; $i++) {
                 $comment = pg_fetch_array( $dbResult );
                 $comments[$i] = new TaskComment($comment['id'], $comment['comment'], 
-                        $comment['created_time'], $comment['user_id'], $comment['username']);
+                        $comment['created_time'], $comment['user_id'], $comment['task_id'], $comment['username']);
             }
         }
         

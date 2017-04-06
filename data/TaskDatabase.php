@@ -188,9 +188,9 @@ class TaskDatabase extends Database {
                         $task['listing_price'], $task['updated_time'], $task['category_name'], $task['user_id'], $task['username'],
                         $task['bid_picked'], $this->getDisplayPicturePath($task['id'], $task['category_id']));
             }
+            return new TaskDatabaseResult(TaskDatabaseResult::TASK_FIND_SUCCESS, $tasks, $nrRows);
         }
-        
-        return new TaskDatabaseResult(TaskDatabaseResult::TASK_FIND_SUCCESS, $tasks, $nrRows);
+            return new TaskDatabaseResult(TaskDatabaseResult::TASK_FIND_FAIL, $tasks, $nrRows);
     }
     
     public function findTaskWithId($taskId) {

@@ -18,6 +18,8 @@ class UserDatabaseResult extends DatabaseResult {
     const AUTH_DELETE_FAIL = 37;
     const PROFILE_UPDATE_SUCCESS = 24;
     const PROFILE_UPDATE_FAILED = 33;
+    const PROFILE_RETRIEVE_SUCCESS = 26;
+    const PROFILE_RETRIEVE_FAILURE = 35;
     
     public $user;
     public $auth;
@@ -142,6 +144,19 @@ class UserDatabase extends Database {
             }
         }
         return $result;
+    }
+
+    public function getUser($username) {
+    	$_username = pg_escape_string ( $username );
+    	
+    	$dbResult = pg_execute ( $this->dbcon, 'SQL_FIND_USER', array (
+    			$_username ) );
+    	if (pg_affected_rows ( $dbResult ) >= 1) {
+    		$user = pg_fetch_array ( $dbResult );
+    		return new UserDatabaseResult(UserDatabaseResult::PROFILE_RETRIEVE_SUCCESS, $user, null);
+    	} else {
+    		return new UserDatabaseResult(UserDatabaseResult::PROFILE_RETRIEVE_FAILURE, $user, null);
+    	}
     }
     
     public function update($username, $password, $name, $phone, $bio, $email) {
