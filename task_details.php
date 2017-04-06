@@ -10,7 +10,7 @@ session_start();
 
 // user needs to be logged in
 if (!isset($_SESSION['username'])) {
-    header('Refresh: 0; URL=http://localhost/login.php?next=' . urlencode("/task_details.php"));
+    header('Refresh: 0; URL=http://localhost/login.php?next=' . urlencode($_SERVER['REQUEST_URI']));
     die();
 }
 
@@ -120,6 +120,9 @@ class TaskDetailsController {
             $this->getMyBid();
             $this->getBids();
             $this->getComments();
+        } else {
+            // fail to find task
+            $this->redirectToTasks();
         }
     }
     
