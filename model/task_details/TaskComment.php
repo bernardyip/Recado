@@ -7,9 +7,10 @@ class TaskComment {
     public $comment;
     public $createdTime;
     public $userId;
+    public $taskId;
     public $username;
     
-    public function __construct($id, $comment, $createdTime, $userId, $username) {
+    public function __construct($id, $comment, $createdTime, $userId, $taskId, $username) {
         $this->id = (int)$id;
         $this->comment = trim($comment);
         
@@ -20,6 +21,7 @@ class TaskComment {
         }
 
         $this->userId = (int)$userId;
+        $this->taskId = (int)$taskId;
         $this->username = trim($username);
     }
 }
