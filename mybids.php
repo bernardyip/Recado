@@ -133,10 +133,10 @@ class MyBidsView {
 				$html = $html . "<br />";
 			} else {
 				$html = $html . "<div class=\"tm-tours-box-1\">";
-				$html = $html . "<div class=\"tm-tours-box-1-link\">";
-				$html = $html . "<div class=\"tm-tours-box-1-link-left\">" . htmlspecialchars($bid->taskName);
+				$html = $html . "<div class=\"bid-win\">";
+				$html = $html . "<div class=\"bid-win-price\">" . htmlspecialchars($bid->taskName);
 				$html = $html . "</div>";
-				$html = $html . "<a href=\"#\" class=\"tm-tours-box-1-link-right\">" . ConversionHelper::moneyToString($bid->bidPrice). "</a>";
+				$html = $html . "<a href=\"#\" class=\"bid-win-price\">" . ConversionHelper::moneyToString($bid->bidPrice). "</a>";
 				$html = $html . "</div>";
 				$html = $html . "<div class=\"tm-tours-box-1-info\">";
 				$html = $html . "<div class=\"tm-tours-box-1-info-left\">";

@@ -1005,7 +1005,17 @@ hr { border-top: 1px solid #111010; }
 	color: white;
 }
 
+.bid-win,
 .bid-lost { overflow: hidden }
+
+.bid-win-name { 
+	background-color: #39dbaf;
+	padding: 20px 30px;
+	float: left;
+	width: 75%;
+	text-transform: uppercase;
+}
+
 .bid-lost-name { 
 	background-color: #db3951;
 	padding: 20px 30px;
@@ -1013,6 +1023,19 @@ hr { border-top: 1px solid #111010; }
 	width: 75%;
 	text-transform: uppercase;
 }
+
+.bid-win-price {
+	float: left;
+	background-color: #1aa59e;
+	font-weight: 600;
+	font-size: 18px;
+	display: block;
+	padding: 17px 30px;
+	width: 25%;
+	transition: all 0.3s;
+	text-align: center;
+}
+
 .bid-lost-price {
 	float: left;
 	background-color: #a51a2f;
@@ -1025,11 +1048,21 @@ hr { border-top: 1px solid #111010; }
 	text-align: center;
 	text-decoration: line-through;
 }
+.bid-win-price:hover,
+.bid-win-price:focus{
+	color: white;
+	background-color: #32c196;
+}
 .bid-lost-price:hover,
 .bid-lost-price:focus {
 	color: white;
 	background-color: #c13247;
 }
+.bid-win-name {
+	height: 60px;
+}
+
+.bid-win-price,
 .bid-lost-name,
 .bid-lost-price {
 	color: white;
