@@ -42,6 +42,13 @@ class CommentDatabase extends Database {
             "INSERT INTO public.comment (comment, created_time, user_id, task_id) VALUES " .
             "($1, $2, $3, $4);";
     
+    const SQL_TASKDETAILS_EDIT_COMMENT = "" .
+            "UPDATE public.comment SET comment=$1, created_time=$2 " .
+            "WHERE id=$3;";
+    
+    const SQL_TASKDETAILS_DELETE_COMMENT = "" .
+            "DELETE FROM public.comment WHERE id=$1;";
+    
     const SQL_FIND_COMMENTS_WITH_TASKID_WITH_LIMIT = "SELECT * FROM public.comment c WHERE c.task_id=$1 LIMIT $2;";
     const SQL_FIND_COMMENTS_WITH_TASKID = "SELECT * FROM public.comment c WHERE c.task_id=$1;";
     
@@ -52,6 +59,8 @@ class CommentDatabase extends Database {
         pg_prepare ( $this->dbcon, 'SQL_TASKDETAILS_FIND_COMMENTS_WITH_TASKID', CommentDatabase::SQL_TASKDETAILS_FIND_COMMENTS_WITH_TASKID );
         pg_prepare ( $this->dbcon, 'SQL_TASKDETAILS_ADD_COMMENT_FOR_TASKID_BY_USERID', CommentDatabase::SQL_TASKDETAILS_ADD_COMMENT_FOR_TASKID_BY_USERID );
         pg_prepare ( $this->dbcon, 'SQL_TASKDETAILS_FIND_COMMENT', CommentDatabase::SQL_TASKDETAILS_FIND_COMMENT );
+        pg_prepare ( $this->dbcon, 'SQL_TASKDETAILS_EDIT_COMMENT', CommentDatabase::SQL_TASKDETAILS_EDIT_COMMENT );
+        pg_prepare ( $this->dbcon, 'SQL_TASKDETAILS_DELETE_COMMENT', CommentDatabase::SQL_TASKDETAILS_DELETE_COMMENT );
     }
     
     public function taskDetails_addComment($taskId, $userId, $comment) {
@@ -68,6 +77,37 @@ class CommentDatabase extends Database {
             return new BidDatabaseResult(CommentDatabaseResult::COMMENT_CREATE_SUCCESS, null);
         } else {
             return new BidDatabaseResult(CommentDatabaseResult::COMMENT_CREATE_FAIL, null);
+        }
+    }
+    
+    public function taskDetails_editComment($commentId, $newComment) {
+
+        $current_datetime = (new DateTime ( null, new DateTimeZone ( "Asia/Singapore" ) ))->format ( 'Y-m-d\TH:i:s\Z' );
+        $dbResult = pg_execute ( $this->dbcon, 'SQL_TASKDETAILS_EDIT_COMMENT', array (
+                $newComment,
+                $current_datetime,
+                $commentId
+        ) );
+
+        $nrRows = pg_affected_rows ( $dbResult );
+        if ($nrRows >= 1) {
+            return new BidDatabaseResult(CommentDatabaseResult::COMMENT_UPDATE_SUCCESS, null);
+        } else {
+            return new BidDatabaseResult(CommentDatabaseResult::COMMENT_UPDATE_FAIL, null);
+        }
+    }
+    
+    public function taskDetails_deleteComment($commentId) {
+
+        $dbResult = pg_execute ( $this->dbcon, 'SQL_TASKDETAILS_DELETE_COMMENT', array (
+                $commentId
+        ) );
+
+        $nrRows = pg_affected_rows ( $dbResult );
+        if ($nrRows >= 1) {
+            return new BidDatabaseResult(CommentDatabaseResult::COMMENT_DELETE_SUCCESS, null);
+        } else {
+            return new BidDatabaseResult(CommentDatabaseResult::COMMENT_DELETE_FAIL, null);
         }
     }
     

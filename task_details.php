@@ -200,15 +200,27 @@ class TaskDetailsController {
     
     private function deleteComment($commentId) {
         if ($this->isCreatorOrAdminForComment($this->model->commentToEdit)) {
-            // delete comment
-            // status message 
+            $deleteResult = $this->commentDatabase->taskDetails_deleteComment($commentId);
+            if ($deleteResult->status === CommentDatabaseResult::COMMENT_DELETE_SUCCESS) {
+                $this->model->operationSuccessful = true;
+                $this->model->message = "Successfully deleted comment!";
+            } else {
+                $this->model->operationSuccessful = false;
+                $this->model->message = "Failed to delete comment :(";
+            }
         }
     }
     
     private function editComment($commentId, $edittedComment) {
         if ($this->isCreatorOrAdminForComment($this->model->commentToEdit)) {
-            // edit comment
-            // status message 
+            $editResult = $this->commentDatabase->taskDetails_editComment($commentId, $edittedComment);
+            if ($editResult->status === CommentDatabaseResult::COMMENT_UPDATE_SUCCESS) {
+                $this->model->operationSuccessful = true;
+                $this->model->message = "Successfully editted comment!";
+            } else {
+                $this->model->operationSuccessful = false;
+                $this->model->message = "Failed to edit comment :(";
+            }
             $this->redirectToThisTask();
         }
     }
@@ -281,9 +293,7 @@ class TaskDetailsController {
     public function handleHttpGet() {
         
         if (isset ( $_GET ['action'] )) {
-            if ($_GET ['action'] === 'edit') {
-                $this->redirectToEditTask();
-            } else if ($_GET ['action'] === 'delete') {
+            if ($_GET ['action'] === 'delete') {
                 $this->deleteTask();
             } else if ($_GET ['action'] === 'selectBid') {
                 if (isset($_GET['userId'])) {
@@ -308,12 +318,7 @@ class TaskDetailsController {
     }
     
     public function redirectToThisTask() {
-        header ( "Refresh: 0; URL=/task_details.php?task=$taskId" );
-        die();
-    }
-    
-    public function redirectToEditTask($taskId) {
-        header ( "Refresh: 0; URL=/edit_tasks.php?task=$taskId" );
+        header ( "Refresh: 0; URL=/task_details.php?task=" . $this->model->taskId );
         die();
     }
     
@@ -332,6 +337,14 @@ class TaskDetailsController {
     
     public function getEditCommentUrl() {
         return "/task_details.php?task=" . $this->model->taskId . "&action=editComment&commentId=" . (int)$_GET['commentId'];
+    }
+    
+    public function getDeleteTaskUrl() {
+        return "/task_details.php?task=" . $this->model->taskId . "&action=delete";
+    }
+    
+    public function getEditTaskUrl() {
+        return "/edit_tasks.php?task=" . $this->model->taskId;
     }
 }
 
@@ -441,7 +454,26 @@ http://www.templatemo.com/tm-475-holiday
 						<?php     } ?>
 						<?php } ?>
 					</div>
-					<div class="col-lg-4 col-md-3 col-sm-3"><hr></div>	
+					<div class="col-lg-4 col-md-3 col-sm-3"><hr><br />
+						<?php if ($controller->isCreatorOrAdmin()) { ?>
+    					<div class="tm-tours-box-1" style="margin-bottom: 0px;">
+    						<div class="tm-tours-box-1-link">
+    							<?php if ($model->task->bidPicked) { ?>
+    							<p class="tm-tours-box-1-link-right" style="width: 50%; background-color:#b0b0b0; color:#808080">
+    								Edit
+    							</p>
+    							<?php } else { ?>
+    							<a href="<?php echo $controller->getEditTaskUrl() ?>" class="tm-tours-box-1-link-right" style="width: 50%;">
+    								Edit
+    							</a>
+    							<?php } ?>
+    							<a href="<?php echo $controller->getDeleteTaskUrl() ?>" class="tm-tours-box-1-link-right" style="width: 50%;">
+    								Delete
+    							</a>
+    						</div>
+    					</div>
+    					<?php } ?>
+					</div>	
 				</div>				
 			</div>
 			<div class="row">
