@@ -55,6 +55,27 @@ class BidDatabase extends Database {
     const SQL_FIND_BID_WITH_TASKID_MAX_AMOUNT_AND_EARLIEST = "SELECT * FROM public.bid b WHERE b.task_id=$1 ORDER BY b.amount DESC, b.bid_time LIMIT 1;";
     const SQL_FIND_BID_WITH_TASKID_MAX_AMOUNT_AND_LATEST = "SELECT * FROM public.bid b WHERE b.task_id=$1 ORDER BY b.amount DESC, b.bid_time DESC LIMIT 1;";
     
+    const SQL_FIND_TASKDETAILS_THAT_BIDSWON_BY_USERID = "" .
+			"SELECT t.id, t.name, t.description, t.task_end_time, b.amount " .
+			"FROM public.task t " .
+			"INNER JOIN public.bid b ON t.id = b.task_id " .
+			"LEFT OUTER JOIN public.user u ON b.user_id = u.id " .
+			"WHERE b.selected = 'TRUE' AND b.user_id=$1 ORDER BY t.task_end_time DESC;";
+    
+    const SQL_FIND_TASKDETAILS_THAT_BIDSLOST_BY_USERID = "" .
+	      "SELECT t.id, t.name, t.description, t.task_end_time, b.amount " .
+	      "FROM public.task t " .
+	      "INNER JOIN public.bid b ON t.id = b.task_id " .
+	      "LEFT OUTER JOIN public.user u ON b.user_id = u.id " .
+	      "WHERE b.selected = 'FALSE' AND t.bid_picked = 'TRUE' AND b.user_id=$1 ORDER BY t.task_end_time DESC;";
+	    
+    const SQL_FIND_TASKDETAILS_THAT_BIDSINPROGRESS_BY_USERID = "" .
+	      "SELECT t.id, t.name, t.description, t.task_end_time, b.amount " .
+	      "FROM public.task t " .
+	      "INNER JOIN public.bid b ON t.id = b.task_id " .
+	      "LEFT OUTER JOIN public.user u ON b.user_id = u.id " .
+	      "WHERE b.selected = 'FALSE' AND t.bid_picked = 'FALSE' AND b.user_id=$1 ORDER BY t.task_end_time DESC;";
+        
     public function __construct() {
         parent::__construct();
         pg_prepare ( $this->dbcon, 'SQL_FIND_BID_WITH_TASKID_WITH_LIMIT', BidDatabase::SQL_FIND_BID_WITH_USERID_WITH_LIMIT );
@@ -68,6 +89,9 @@ class BidDatabase extends Database {
         pg_prepare ( $this->dbcon, 'SQL_TASKDETAILS_UPDATE_BID_BY_USER_FOR_TASK', BidDatabase::SQL_TASKDETAILS_UPDATE_BID_BY_USER_FOR_TASK );
         pg_prepare ( $this->dbcon, 'SQL_TASKDETAILS_FIND_BID_BY_USERID_TASKID', BidDatabase::SQL_TASKDETAILS_FIND_BID_BY_USERID_TASKID );
         pg_prepare ( $this->dbcon, 'SQL_TASKDETAILS_REMOVE_BID_BY_USER_FOR_TASK', BidDatabase::SQL_TASKDETAILS_REMOVE_BID_BY_USER_FOR_TASK );
+        pg_prepare ( $this->dbcon, 'SQL_FIND_TASKDETAILS_THAT_BIDSWON_BY_USERID', BidDatabase::SQL_TASKDETAILS_REMOVE_BID_BY_USER_FOR_TASK );
+        pg_prepare ( $this->dbcon, 'SQL_FIND_TASKDETAILS_THAT_BIDSLOST_BY_USERID', BidDatabase::SQL_TASKDETAILS_REMOVE_BID_BY_USER_FOR_TASK );
+        pg_prepare ( $this->dbcon, 'SQL_FIND_TASKDETAILS_THAT_BIDSINPROGRESS_BY_USERID', BidDatabase::SQL_TASKDETAILS_REMOVE_BID_BY_USER_FOR_TASK );
     }
     
     private function bidExists($taskId, $userId) {
@@ -265,6 +289,62 @@ class BidDatabase extends Database {
         return new BidDatabaseResult(BidDatabaseResult::BID_FIND_SUCCESS, $bids);
     }
     
+    public function taskDetails_getMyBidsWon($userId) {
+    	
+    	$dbResult = pg_execute ( $this->dbcon, 'SQL_FIND_TASKDETAILS_THAT_BIDSWON_BY_USERID', array (
+    			$userId
+    	) );
+    	
+    	$bids = null;
+    	$nrRows = pg_affected_rows ( $dbResult );
+    	if ($nrRows >= 1) {
+    		$bids = array();
+    		for ($i = 0; $i < $nrRows; $i++) {
+    			$bid = pg_fetch_array( $dbResult );
+    			$bids[$i] = new TaskBid($bid['user_id'], $bid['task_id'], $bid['username'], $bid['amount']);
+    		}
+    	}
+    	
+    	return new BidDatabaseResult(BidDatabaseResult::BID_FIND_SUCCESS, $bids);
+    }
+
+    public function taskDetails_getMyBidsLost($userId) {
+    	
+    	$dbResult = pg_execute ( $this->dbcon, 'SQL_FIND_TASKDETAILS_THAT_BIDSLOST_BY_USERID', array (
+    			$userId
+    	) );
+    	
+    	$bids = null;
+    	$nrRows = pg_affected_rows ( $dbResult );
+    	if ($nrRows >= 1) {
+    		$bids = array();
+    		for ($i = 0; $i < $nrRows; $i++) {
+    			$bid = pg_fetch_array( $dbResult );
+    			$bids[$i] = new TaskBid($bid['user_id'], $bid['task_id'], $bid['username'], $bid['amount']);
+    		}
+    	}
+    	
+    	return new BidDatabaseResult(BidDatabaseResult::BID_FIND_SUCCESS, $bids);
+    }
+    
+    public function taskDetails_getMyBidsInProgress($userId) {
+    	
+    	$dbResult = pg_execute ( $this->dbcon, 'SQL_FIND_TASKDETAILS_THAT_BIDSINPROGRESS_BY_USERID', array (
+    			$userId
+    	) );
+    	
+    	$bids = null;
+    	$nrRows = pg_affected_rows ( $dbResult );
+    	if ($nrRows >= 1) {
+    		$bids = array();
+    		for ($i = 0; $i < $nrRows; $i++) {
+    			$bid = pg_fetch_array( $dbResult );
+    			$bids[$i] = new TaskBid($bid['user_id'], $bid['task_id'], $bid['username'], $bid['amount']);
+    		}
+    	}
+    	
+    	return new BidDatabaseResult(BidDatabaseResult::BID_FIND_SUCCESS, $bids);
+    }
 }
 
 ?>
