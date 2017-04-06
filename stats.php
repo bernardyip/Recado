@@ -158,29 +158,9 @@ http://www.templatemo.com/tm-475-holiday
   </head>
   <body class="tm-gray-bg">
   	<!-- Header -->
-  	<div class="tm-header">
-  		<div class="container">
-  			<div class="row">
-  				<div class="col-lg-6 col-md-4 col-sm-3 tm-site-name-container">
-  					<a href="index.html" class="tm-site-name">Recado</a>	
-  				</div>
-	  			<div class="col-lg-6 col-md-8 col-sm-9">
-	  				<div class="mobile-menu-icon">
-		              <i class="fa fa-bars"></i>
-		            </div>
-	  				<nav class="tm-nav">
-                       <ul>
-				        <li><a href="profile.html">Profile</a></li>
-                        <li><a href="searchtasks.html">Search</a></li>
-				  	    <li><a href="#" class="active">My Tasks</a></li>
-						<li><a href="mybids.html">My Bids</a></li>
-                        <li><a href="logout.html">Log Out</a></li> 
-                        </ul>
-					</nav>		
-	  			</div>				
-  			</div>
-  		</div>	  	
-  	</div>
+	<?php 
+	   include 'banner.php';
+	?>
 	
 	
 	<!-- gray bg -->	
@@ -198,43 +178,36 @@ http://www.templatemo.com/tm-475-holiday
              <!-- START row of 1 -->
 			<div class="row">
                 <div class="tm-section-header">
-					<div class="col-lg-6 col-md-6 col-sm-6"><h2 class="tm-section-title">QUICK SUMMARY</h2></div>
-					</div>
+					<div class="col-lg-6 col-md-6 col-sm-6"></div>
+				</div>
 				<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
 					<div class="tm-tours-box-1">
-					
+						<div class="tm-tours-box-1-info">
+							<h2 class="tm-section-title">QUICK SUMMARY</h2>					
+						</div>
 						<div class="tm-tours-box-1-link">
 							<div class="tm-tours-box-1-link-left">
 								Total Tasks: 
 							</div>
-							<a href="#" class="tm-tours-box-1-link-right">
+							<p class="tm-tours-box-1-link-right">
 								<?php 	echo $model->totalTasks; ?>						
-							</a>							
+							</p>							
 						</div>
 						<div class="tm-tours-box-1-link">
 							<div class="tm-tours-box-1-link-left">
 								Total Bids: 
 							</div>
-							<a href="#" class="tm-tours-box-1-link-right">
+							<p class="tm-tours-box-1-link-right">
 								<?php 	echo $model->totalBids; ?> 								
-							</a>							
+							</p>							
 						</div>
 						<div class="tm-tours-box-1-link">
 							<div class="tm-tours-box-1-link-left">
 								Average Bid Amount: 
 							</div>
-							<a href="#" class="tm-tours-box-1-link-right">														
+							<p class="tm-tours-box-1-link-right">														
 								$<?php 	echo $model->averageBid; ?>                               								
-							</a>							
-						</div>
-						<div class="tm-tours-box-1-info">
-							<div class="tm-tours-box-1-info-left">
-								<p class="text-uppercase margin-bottom-20">TASK NAME</p>	
-								<p class="gray-text">28 March 2084</p>
-							</div>
-							<div class="tm-tours-box-1-info-right">
-								<p class="gray-text tours-1-description">TASK DESCRIPTIONNNNNN <?php echo $controller->getPastCreatedTasks(2, 1); ?>	</p>	
-							</div>							
+							</p>							
 						</div>
 					</div>					
 				</div>
@@ -253,44 +226,34 @@ http://www.templatemo.com/tm-475-holiday
 			   <!-- START row of 2 -->
 			<div class="row">
                 <div class="tm-section-header">
-					<div class="col-lg-6 col-md-6 col-sm-6"><h2 class="tm-section-title">ON RECADO</h2></div>
-					</div>
 				<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
 					<div class="tm-tours-box-1">
-					
+						<div class="tm-tours-box-1-info">
+							<h2 class="tm-section-title">ON RECADO</h2>					
+						</div>
 						<div class="tm-tours-box-1-link">
 							<div class="tm-tours-box-1-link-left">
 								current online users: 
 							</div>
-							<a href="#" class="tm-tours-box-1-link-right">
+							<p class="tm-tours-box-1-link-right">
 								<?php 	echo $model->totalOnline; ?>			
-							</a>							
+							</p>							
 						</div>
 						<div class="tm-tours-box-1-link">
 							<div class="tm-tours-box-1-link-left">
 								total users: 
 							</div>
-							<a href="#" class="tm-tours-box-1-link-right">
+							<p class="tm-tours-box-1-link-right">
 								<?php 	echo $model->totalUsers; ?>				
-							</a>							
+							</p>							
 						</div>
 						<div class="tm-tours-box-1-link">
 							<div class="tm-tours-box-1-link-left">
 								tasks open for bidding: 
 							</div>
-							<a href="#" class="tm-tours-box-1-link-right">
+							<p class="tm-tours-box-1-link-right">
 								<?php 	echo $model->openTasks; ?>								
-							</a>							
-						</div>
-						
-						<div class="tm-tours-box-1-info">
-							<div class="tm-tours-box-1-info-left">
-								<p class="text-uppercase margin-bottom-20">TASK NAME</p>	
-								<p class="gray-text">28 March 2084</p>
-							</div>
-							<div class="tm-tours-box-1-info-right">
-								<p class="gray-text tours-1-description">TASK DESCRIPTIONNNNNN</p>	
-							</div>							
+							</p>							
 						</div>
 					</div>					
 				</div>
@@ -306,16 +269,11 @@ http://www.templatemo.com/tm-475-holiday
 
             <!-- END row of 2 --> 
             </div>
+        </div>
 	</section>		
-	
-	
-	<footer class="tm-black-bg">
-		<div class="container">
-			<div class="row">
-				<p class="tm-copyright-text">Copyright &copy; 2084 Your Company Name</p>
-			</div>
-		</div>		
-	</footer>
+	<?php 
+	   include 'footer.php';
+	?>
 	<script type="text/javascript" src="js/jquery-1.11.2.min.js"></script>      		<!-- jQuery -->
   	<script type="text/javascript" src="js/moment.js"></script>							<!-- moment.js -->
 	<script type="text/javascript" src="js/bootstrap.min.js"></script>					<!-- bootstrap js -->
