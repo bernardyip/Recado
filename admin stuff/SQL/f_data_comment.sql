@@ -8,3 +8,4 @@ insert into public.comment (comment, created_time, user_id, task_id) values ('An
 insert into public.comment (comment, created_time, user_id, task_id) values ('Are tools provided?', '2017-05-17T16:41:31Z', 7, 10);
 insert into public.comment (comment, created_time, user_id, task_id) values ('What kind of TV is it? Do you have a mount?', '2017-08-29T19:15:48Z', 15, 5);
 insert into public.comment (comment, created_time, user_id, task_id) values ( 'No, you will need a truck to help with the moving.', '2016-09-17T08:17:56Z', 10, 17);
+
