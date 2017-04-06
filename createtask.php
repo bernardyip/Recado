@@ -9,7 +9,7 @@ session_start();
 
 // user needs to be logged in
 if (!isset($_SESSION['username'])) {
-    header('Refresh: 0; URL=http://localhost/login.php?next=' . urlencode("/createtask.php"));
+    header('Refresh: 0; URL=http://localhost/login.php?next=' . urlencode($_SERVER['REQUEST_URI']));
     die();
 }
 
