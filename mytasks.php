@@ -9,7 +9,7 @@ session_start();
 
 // user needs to be logged in
 if (!isset($_SESSION['username'])) {
-    header('Refresh: 0; URL=http://localhost/login.php?next=' . urlencode("/mytasks.php"));
+    header('Refresh: 0; URL=http://localhost/login.php?next=' . urlencode($_SERVER['REQUEST_URI']));
     die();
 }
 
@@ -73,7 +73,7 @@ class MyTasksView {
                 $html = $html . "<br />";
             } else {
                 $html = $html . "<div class=\"tm-tours-box-1\">";
-                $html = $html . "<img src=\"" . htmlspecialchars($task->taskDisplayPicture) . "\" alt=\"image\" class=\"img-responsive\">";
+                $html = $html . "<img src=\"" . htmlspecialchars($task->taskDisplayPicture) . "\" alt=\"image\" class=\"img-responsive\" style=\"width: 100%;\">";
                 $html = $html . "<div class=\"tm-tours-box-1-info\">";
                 $html = $html . "<div class=\"tm-tours-box-1-info-left\">";
                 $html = $html . "<a href=\"/task_details.php?task=$task->taskId\" class=\"text-uppercase margin-bottom-20\">" . htmlspecialchars($task->taskName) . "</a>";

@@ -47,7 +47,7 @@ CREATE TABLE public.task (
 	task_end_time TIMESTAMP WITH TIME ZONE NOT NULL,
 	listing_price MONEY,
 	created_time TIMESTAMP WITH TIME ZONE NOT NULL,
-	updated_time TIMESTAMP WITH TIME ZONE,
+	updated_time TIMESTAMP WITH TIME ZONE NOT NULL,
 	status CHARACTER(32) NOT NULL,
 	bid_picked BOOLEAN NOT NULL,
 	category_id INTEGER REFERENCES public.category(id) ON DELETE CASCADE NOT NULL,
@@ -58,12 +58,12 @@ CREATE TABLE public.task (
 );
 
 CREATE TABLE public.bid (
-	id SERIAL PRIMARY KEY,
 	amount MONEY NOT NULL,
 	bid_time TIMESTAMP WITH TIME ZONE NOT NULL,
 	selected BOOLEAN NOT NULL DEFAULT FALSE,
 	user_id INTEGER REFERENCES public.user(id) ON DELETE CASCADE NOT NULL,
-	task_id INTEGER REFERENCES public.task(id) ON DELETE CASCADE NOT NULL
+	task_id INTEGER REFERENCES public.task(id) ON DELETE CASCADE NOT NULL,
+  PRIMARY KEY (user_id, task_id)
 );
 
 CREATE TABLE public.comment (

@@ -48,7 +48,7 @@ class LoginView {
 class LoginController {
     const LOGIN_URL = "login.php?action=login";
     const LOGIN_METHOD = "POST";
-    const HOME_URL = "/";
+    const HOME_URL = "/index.php";
     const VALIDATOR_LENGTH = 20;
     const SECONDS_7_DAYS = 604800; //60 * 60 * 24 * 7, 7 days
     const COOKIE_NAME = "remember";
@@ -125,7 +125,7 @@ class LoginController {
     private function removeLoginCookieForUser() {
         if ( isset ($_COOKIE[LoginController::COOKIE_NAME]) ) {
             setcookie(LoginController::COOKIE_NAME, 
-                    $resultAuthCookie->auth->selector . ":" . $resultAuthCookie->auth->validator,
+                    "",
                     time() - LoginController::SECONDS_7_DAYS, "/", "localhost", false, false);
         }
     }
@@ -261,24 +261,9 @@ http://www.templatemo.com/tm-475-holiday
 </head>
 <body>
 	<!-- Header -->
-	<div class="tm-header">
-		<div class="container">
-			<div class="row">
-				<div class="col-lg-6 col-md-4 col-sm-3 tm-site-name-container">
-					<a href="index.html" class="tm-site-name">Recado</a>	
-				</div>
-				<div class="col-lg-6 col-md-8 col-sm-9">
-					<div class="mobile-menu-icon">
-						<i class="fa fa-bars"></i>
-					</div>
-					<nav class="tm-nav">
-						<ul>
-						</ul>
-					</nav>		
-				</div>				
-			</div>
-		</div>	  	
-	</div>
+	<?php 
+	   include 'banner.php';
+	?>
 	
 	<!-- white bg -->
 	<section class="section-padding-bottom">
