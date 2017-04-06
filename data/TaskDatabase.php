@@ -70,10 +70,11 @@ class TaskDatabase extends Database {
     const SQL_FIND_TASK_COUNT_WITH_CATEGORY = "SELECT COUNT(*) AS count FROM public.task t WHERE t.category_id=$1;";
     const SQL_FIND_TASK_COUNT = "SELECT COUNT(*) AS count FROM public.task t;";
     const SQL_CREATE_TASK = "INSERT INTO public.task (name, description, postal_code, location, task_start_time, task_end_time, listing_price, created_time, updated_time, status, bid_picked, category_id, creator_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id;";
+    const SQL_FIND_TASK_TITLE_OR_DESCRIPTION = "SELECT * FROM public.task t INNER JOIN public.user u ON u.id = t.creator_id WHERE (t.name ILIKE $1 OR t.description ILIKE $1) AND t.category_id IN ($2, $3, $4, $5);";
+    const SQL_FIND_TASK_CATEGORY = "SELECT * FROM public.task t INNER JOIN public.user u ON u.id = t.creator_id WHERE t.category_id IN ($2, $3, $4, $1);";
     const SQL_FIND_TASK_RANDOM = "SELECT t.id, t.name, t.category_id FROM public.task t ORDER BY RANDOM();";
     const SQL_FIND_TASK_RANDOM_WITH_LIMIT = "SELECT t.id, t.name, t.category_id FROM public.task t ORDER BY RANDOM() LIMIT $1;";
-    
-    
+
     public function __construct() {
         parent::__construct();
         pg_prepare ( $this->dbcon, 'SQL_TASK_FIND_MYTASKS_WITH_USERID', TaskDatabase::SQL_TASK_FIND_MYTASKS_WITH_USERID );
@@ -87,6 +88,8 @@ class TaskDatabase extends Database {
         pg_prepare ( $this->dbcon, 'SQL_FIND_TASK_RANDOM_WITH_LIMIT', TaskDatabase::SQL_FIND_TASK_RANDOM_WITH_LIMIT );
         pg_prepare ( $this->dbcon, 'SQL_TASKS_FIND_ALL', TaskDatabase::SQL_TASKS_FIND_ALL );
         pg_prepare ( $this->dbcon, 'SQL_CREATE_TASK', TaskDatabase::SQL_CREATE_TASK );
+        pg_prepare ( $this->dbcon, 'SQL_FIND_TASK_TITLE_OR_DESCRIPTION', TaskDatabase::SQL_FIND_TASK_TITLE_OR_DESCRIPTION);
+        pg_prepare ( $this->dbcon, 'SQL_FIND_TASK_CATEGORY', TaskDatabase::SQL_FIND_TASK_CATEGORY);
         pg_prepare ( $this->dbcon, 'SQL_TASKDETAILS_FIND_TASK', TaskDatabase::SQL_TASKDETAILS_FIND_TASK );
         pg_prepare ( $this->dbcon, 'SQL_TASKDETAILS_FIND_FINALIZED_TASK', TaskDatabase::SQL_TASKDETAILS_FIND_FINALIZED_TASK );
     }
@@ -361,6 +364,47 @@ class TaskDatabase extends Database {
         }
     }
     
+    public function findTask($searchTerm, $cleaning, $delivery, $fixing, $everything_else) {
+        $categoryFilter = "";
+        if ($cleaning == "") {
+            $cleaning = 0;
+        }
+        if ($delivery == "") {
+            $delivery = 0;
+        }
+        if ($fixing == "") {
+            $fixing = 0;
+        }
+        if ($everything_else == "") {
+            $everything_else = 0;
+        }
+        
+        if ($searchTerm == null) {
+            $dbResult = pg_execute ( $this->dbcon, 'SQL_FIND_TASK_CATEGORY', array (
+                            $cleaning, $delivery, $fixing, $everything_else
+            ) );
+        } else {
+            $searchTerm = "%" . $searchTerm . "%";
+            $dbResult = pg_execute ( $this->dbcon, 'SQL_FIND_TASK_TITLE_OR_DESCRIPTION', array (
+                            $searchTerm, $cleaning, $delivery, $fixing, $everything_else
+            ) );
+        }
+        
+        $tasks = null;
+        $nrRows = pg_affected_rows ( $dbResult );
+        if ($nrRows > 0) {
+            $tasks = array();
+            for ($i = 0; $i < $nrRows; $i++) {
+                $task = pg_fetch_array( $dbResult );
+                $tasks[$i] = new TaskInfo($task['id'],
+                                $task['name'], $task['description'], $this->getDisplayPicturePath($task['id'], $task['category_id']),
+                                $task['creator_id'], $task['username']);
+            }
+        }
+        
+        return new TaskDatabaseResult(TaskDatabaseResult::TASK_FIND_SUCCESS, $tasks, $nrRows);
+    }
+
     public function editTask($id, $name, $description, $postalCode, $location, $taskStartTime,
             $taskEndTime, $listingPrice, $categoryId) {
         
