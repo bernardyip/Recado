@@ -32,6 +32,11 @@
                             <?php } else { ?>
                                 <li><a href="/mybids.php">My Bids</a></li>
                             <?php } ?>
+                            <?php if (strpos($page, "/stats.php") !== false) { ?>
+                                <li><a href="#" class="active">Statistics</a></li>
+                            <?php } else { ?>
+                                <li><a href="/stats.php">Statistics</a></li>
+                            <?php } ?>
                             <li><a href="/login.php?action=logout">Log Out</a></li>
                         <?php } else { ?>
                             <li><a href="/login.php">Login</a></li>
