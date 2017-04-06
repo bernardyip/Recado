@@ -397,7 +397,7 @@ class TaskDatabase extends Database {
             for ($i = 0; $i < $nrRows; $i++) {
                 $task = pg_fetch_array( $dbResult );
                 $tasks[$i] = new TaskInfo($task['id'],
-                                $task['name'], $task['description'], "/img/index-03.jpg",
+                                $task['name'], $task['description'], $this->getDisplayPicturePath($task['id'], $task['category_id']),
                                 $task['creator_id'], $task['username']);
             }
         }
