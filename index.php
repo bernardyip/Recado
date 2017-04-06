@@ -360,7 +360,7 @@ http://www.templatemo.com/tm-475-holiday
 			<div class="row">
 				<div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
 					<div class="tm-about-box-1">
-						<a href="#"><img src="img/about-4.jpg" alt="img" class="tm-about-box-1-img"></a>
+						<img src="img/about-4.jpg" alt="img" class="tm-about-box-1-img">
 						<h3 class="tm-about-box-1-title">Choose A Task</h3>
 						<p class="margin-bottom-15 gray-text">That fits your schedule</p>
 						
@@ -368,7 +368,7 @@ http://www.templatemo.com/tm-475-holiday
 				</div>
 				<div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
 					<div class="tm-about-box-1">
-						<a href="#"><img src="img/about-5.jpg" alt="img" class="tm-about-box-1-img"></a>
+						<img src="img/about-5.jpg" alt="img" class="tm-about-box-1-img">
 						<h3 class="tm-about-box-1-title">Place a Bid</h3>
 						<p class="margin-bottom-15 gray-text">Let us know how much you are willing to do the task for</p>
 						
@@ -376,7 +376,7 @@ http://www.templatemo.com/tm-475-holiday
 				</div>
 				<div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
 					<div class="tm-about-box-1">
-						<a href="#"><img src="img/about-6.jpg" alt="img" class="tm-about-box-1-img"></a>
+						<img src="img/about-6.jpg" alt="img" class="tm-about-box-1-img">
 						<h3 class="tm-about-box-1-title">Get Stuff Done</h3>
 						<p class="margin-bottom-15 gray-text">And cash out!</p>
 					
@@ -384,7 +384,7 @@ http://www.templatemo.com/tm-475-holiday
 				</div>
 				<div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
 					<div class="tm-about-box-1">
-						<a href="#"><img src="img/about-7.jpg" alt="img" class="tm-about-box-1-img"></a>
+						<img src="img/about-7.jpg" alt="img" class="tm-about-box-1-img">
 						<h3 class="tm-about-box-1-title">Create a Task</h3>
 						<p class="margin-bottom-15 gray-text">You can also put up tasks for people to do for you.</p>
 				
