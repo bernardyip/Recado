@@ -5,6 +5,7 @@ include_once '/model/task/MyTask.php';
 include_once '/model/task/MyBid.php';
 include_once '/model/index/TaskOverview.php';
 include_once '/model/mytasks/MyTaskInfo.php';
+include_once '/model/task_details/TaskDetail.php';
 
 class TaskDatabaseResult extends DatabaseResult {
     const TASK_FIND_SUCCESS = 10;
@@ -31,7 +32,7 @@ class TaskDatabase extends Database {
     
     // SQL Queries
     const SQL_TASK_FIND_MYTASKS_WITH_USERID = "" .
-            "SELECT t.id, t.name, t.description, t.task_start_time, b1.amount AS max_bid, u.id AS max_bidder_id, u.username AS max_bidder_username " .
+            "SELECT t.id, t.name, t.description, t.task_start_time, t.category_id, b1.amount AS max_bid, u.id AS max_bidder_id, u.username AS max_bidder_username " .
             "FROM public.task t " . 
             "LEFT OUTER JOIN public.bid b1 " .
                 "ON t.id = b1.task_id AND b1.amount >= ALL(" . 
@@ -40,9 +41,27 @@ class TaskDatabase extends Database {
             "WHERE t.creator_id=$1 ORDER BY t.id;";
     
     const SQL_TASKS_FIND_ALL = "".
-            "SELECT t.id, t.name, t.description, t.creator_id, u.username " .
+            "SELECT t.id, t.name, t.description, t.category_id, t.creator_id, u.username " .
             "FROM public.task t INNER JOIN public.user u " .
                 "ON t.creator_id = u.id;";
+    
+    const SQL_TASKDETAILS_FIND_TASK = "" .
+            "SELECT t.id, t.name, t.description, t.postal_code, t.location, t.task_start_time, t.task_end_time, t.listing_price, t.updated_time, t.category_id, t.bid_picked, c.name AS category_name, u.id AS user_id, u.name AS username " .
+            "FROM public.task t " .
+            "INNER JOIN public.category c ON t.category_id = c.id ".
+            "INNER JOIN public.user u ON t.creator_id = u.id " .
+            "WHERE t.id=$1";
+    
+    const SQL_TASKDETAILS_FIND_FINALIZED_TASK = "" .
+            "SELECT t.id " .
+            "FROM public.task t " .
+            "WHERE t.id=$1 AND t.bid_picked=true";
+    
+    const SQL_EDIT_TASK = "" . 
+        "UPDATE public.task SET name=$1, description=$2, postal_code=$3, location=$4, " . 
+        "task_start_time=$5, task_end_time=$6, listing_price=$7, updated_time=$8, category_id=$9" . 
+        "WHERE id=$10";
+    
     
     const SQL_FIND_TASK_WITH_ID = "SELECT * FROM public.task t WHERE t.id=$1;";
     const SQL_FIND_TASK_WITH_USERID = "SELECT * FROM public.task t WHERE t.creator_id=$1;";
@@ -51,11 +70,11 @@ class TaskDatabase extends Database {
     const SQL_FIND_TASK_COUNT_WITH_CATEGORY = "SELECT COUNT(*) AS count FROM public.task t WHERE t.category_id=$1;";
     const SQL_FIND_TASK_COUNT = "SELECT COUNT(*) AS count FROM public.task t;";
     const SQL_CREATE_TASK = "INSERT INTO public.task (name, description, postal_code, location, task_start_time, task_end_time, listing_price, created_time, updated_time, status, bid_picked, category_id, creator_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id;";
-    const SQL_FIND_TASK_RANDOM = "SELECT t.id, t.name FROM public.task t ORDER BY RANDOM();";
-    const SQL_FIND_TASK_RANDOM_WITH_LIMIT = "SELECT t.id, t.name FROM public.task t ORDER BY RANDOM() LIMIT $1;";
     const SQL_FIND_TASK_TITLE_OR_DESCRIPTION = "SELECT * FROM public.task t INNER JOIN public.user u ON u.id = t.creator_id WHERE (t.name ILIKE $1 OR t.description ILIKE $1) AND t.category_id IN ($2, $3, $4, $5);";
     const SQL_FIND_TASK_CATEGORY = "SELECT * FROM public.task t INNER JOIN public.user u ON u.id = t.creator_id WHERE t.category_id IN ($2, $3, $4, $1);";
-    
+    const SQL_FIND_TASK_RANDOM = "SELECT t.id, t.name, t.category_id FROM public.task t ORDER BY RANDOM();";
+    const SQL_FIND_TASK_RANDOM_WITH_LIMIT = "SELECT t.id, t.name, t.category_id FROM public.task t ORDER BY RANDOM() LIMIT $1;";
+
     public function __construct() {
         parent::__construct();
         pg_prepare ( $this->dbcon, 'SQL_TASK_FIND_MYTASKS_WITH_USERID', TaskDatabase::SQL_TASK_FIND_MYTASKS_WITH_USERID );
@@ -71,6 +90,8 @@ class TaskDatabase extends Database {
         pg_prepare ( $this->dbcon, 'SQL_CREATE_TASK', TaskDatabase::SQL_CREATE_TASK );
         pg_prepare ( $this->dbcon, 'SQL_FIND_TASK_TITLE_OR_DESCRIPTION', TaskDatabase::SQL_FIND_TASK_TITLE_OR_DESCRIPTION);
         pg_prepare ( $this->dbcon, 'SQL_FIND_TASK_CATEGORY', TaskDatabase::SQL_FIND_TASK_CATEGORY);
+        pg_prepare ( $this->dbcon, 'SQL_TASKDETAILS_FIND_TASK', TaskDatabase::SQL_TASKDETAILS_FIND_TASK );
+        pg_prepare ( $this->dbcon, 'SQL_TASKDETAILS_FIND_FINALIZED_TASK', TaskDatabase::SQL_TASKDETAILS_FIND_FINALIZED_TASK );
     }
     
     public function task_myTasks($userId) {
@@ -104,7 +125,7 @@ class TaskDatabase extends Database {
             for ($i = 0; $i < $nrRows; $i++) {
                 $task = pg_fetch_array( $dbResult );
                 $tasks[$i] = new TaskInfo($task['id'], 
-                        $task['name'], $task['description'], "/img/index-03.jpg",
+                        $task['name'], $task['description'], $this->getDisplayPicturePath($task['id'], $task['category_id']),
                         $task['creator_id'], $task['username']);
             }
         }
@@ -125,12 +146,47 @@ class TaskDatabase extends Database {
             for ($i = 0; $i < $nrRows; $i++) {
                 $task = pg_fetch_array( $dbResult );
                 $tasks[$i] = new MyTaskInfo($task['id'], $task['name'], $task['description'], $task['task_start_time'], 
-                        "/img/tours-05.jpg", $task['max_bidder_id'], $task['max_bidder_username'], $task['max_bid']);
+                        $this->getDisplayPicturePath($task['id'], $task['category_id']), $task['max_bidder_id'], $task['max_bidder_username'], $task['max_bid']);
             }
         }
         
         return new TaskDatabaseResult(TaskDatabaseResult::TASK_FIND_SUCCESS, $tasks, $nrRows);
         
+    }
+    
+    public function taskDetails_isTaskFinalized($taskId) {
+        $dbResult = pg_execute ( $this->dbcon, 'SQL_TASKDETAILS_FIND_FINALIZED_TASK', array (
+                $taskId
+            ) );
+
+        $nrRows = pg_affected_rows ( $dbResult );
+        if ($nrRows > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    public function taskDetails_getTask($taskId) {
+        
+        $dbResult = pg_execute ( $this->dbcon, 'SQL_TASKDETAILS_FIND_TASK', array (
+                $taskId
+            ) );
+
+        $tasks = null;
+        $nrRows = pg_affected_rows ( $dbResult );
+        if ($nrRows > 0) {
+            $tasks = array();
+            for ($i = 0; $i < $nrRows; $i++) {
+                $task = pg_fetch_array( $dbResult );
+                $tasks[$i] = new TaskDetail($task['id'], $task['name'], $task['description'], 
+                        $task['postal_code'], $task['location'], $task['task_start_time'], $task['task_end_time'], 
+                        $task['listing_price'], $task['updated_time'], $task['category_name'], $task['user_id'], $task['username'],
+                        $task['bid_picked'], $this->getDisplayPicturePath($task['id'], $task['category_id']));
+            }
+        }
+        
+        return new TaskDatabaseResult(TaskDatabaseResult::TASK_FIND_SUCCESS, $tasks, $nrRows);
     }
     
     public function findTaskWithId($taskId) {
@@ -193,11 +249,19 @@ class TaskDatabase extends Database {
             $tasks = array();
             for ($i = 0; $i < $nrRows; $i++) {
                 $task = pg_fetch_array( $dbResult );
-                $tasks[$i] = new TaskOverview($task['id'], $task['name'], "/img/index-01.jpg");
+                $tasks[$i] = new TaskOverview($task['id'], $task['name'], $this->getDisplayPicturePath($task['id'], $task['category_id']));
             }
         }
         
         return new TaskDatabaseResult(TaskDatabaseResult::TASK_FIND_SUCCESS, $tasks, $nrRows);
+    }
+    
+    private function getDisplayPicturePath($taskId, $categoryId) {
+        $documentRoot = $_SERVER['DOCUMENT_ROOT'];
+        $taskDisplayPicture = $documentRoot . "\\img\\task\\$taskId.jpg";
+        $defaultDisplayPicture = $documentRoot . "\\img\\category\\$categoryId.jpg";
+        if (file_exists($taskDisplayPicture)) return "/img/task/$taskId.jpg";
+        else return "/img/category/$categoryId.jpg";
     }
     
     public function findTasksWithCategoryId($categoryId, $limitTo = 0) {
@@ -256,6 +320,22 @@ class TaskDatabase extends Database {
         }
         
         return new TaskDatabaseResult(TaskDatabaseResult::TASK_FIND_SUCCESS, array(), $count);
+    }
+    
+    public function deleteTask($taskId) {
+        
+        $dbResult = pg_execute ( $this->dbcon, 'SQL_DELETE_TASK', array (
+                $id
+        ) );
+        
+        if (pg_affected_rows($dbResult) > 0) {
+            $result = pg_fetch_array( $dbResult );
+            return new TaskDatabaseResult(
+                    TaskDatabaseResult::TASK_DELETE_SUCCESS, 
+                    null, 1);
+        } else {
+            return new TaskDatabaseResult(TaskDatabaseResult::TASK_DELETE_FAIL, null, 0);
+        }
     }
     
     public function createTask($name, $description, $postalCode, $location, $taskStartTime,
@@ -324,6 +404,32 @@ class TaskDatabase extends Database {
         
         return new TaskDatabaseResult(TaskDatabaseResult::TASK_FIND_SUCCESS, $tasks, $nrRows);
     }
+
+    public function editTask($id, $name, $description, $postalCode, $location, $taskStartTime,
+            $taskEndTime, $listingPrice, $categoryId) {
+        
+        $updatedTime = new DateTime ( null, new DateTimeZone ( "Asia/Singapore" ) );
+        $dbResult = pg_execute ( $this->dbcon, 'SQL_CREATE_TASK', array (
+                $name, $description, $postalCode, $location, $taskStartTime->format ( 'Y-m-d\TH:i:s\Z' ), 
+                $taskEndTime->format ( 'Y-m-d\TH:i:s\Z' ), $listingPrice, 
+                $updatedTime->format ( 'Y-m-d\TH:i:s\Z' ), 
+                $categoryId, $id
+        ) );
+        
+        if (pg_affected_rows($dbResult) > 0) {
+            $result = pg_fetch_array( $dbResult );
+            return new TaskDatabaseResult(
+                    TaskDatabaseResult::TASK_UPDATE_SUCCESS, 
+                    array(
+                        new Task($result['id'], $name, $description, $postalCode, $location, 
+                                $taskStartTime, $taskEndTime, $listingPrice, $createdTime, 
+                                $updatedTime, $status, false, $categoryId, $creatorId)
+                    ), 1);
+        } else {
+            return new TaskDatabaseResult(TaskDatabaseResult::TASK_UPDATE_FAIL, null, 0);
+        }
+    }
+    
 }
 
 ?>

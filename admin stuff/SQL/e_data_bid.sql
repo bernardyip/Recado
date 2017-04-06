@@ -1,3 +1,4 @@
+
 insert into public.bid (amount, bid_time, selected, user_id, task_id) values (9, '2017-08-18T10:36:46Z', false, 5, 3);
 insert into public.bid (amount, bid_time, selected, user_id, task_id) values (10, '2016-05-07T20:16:36Z', false, 4, 14);
 insert into public.bid (amount, bid_time, selected, user_id, task_id) values (20, '2017-12-20T16:58:12Z', false, 18, 1);
@@ -18,7 +19,6 @@ insert into public.bid (amount, bid_time, selected, user_id, task_id) values (10
 insert into public.bid (amount, bid_time, selected, user_id, task_id) values (43, '2016-06-15T08:38:12Z', false, 19, 9);
 insert into public.bid (amount, bid_time, selected, user_id, task_id) values (40, '2016-12-02T02:58:23Z', false, 16, 9);
 insert into public.bid (amount, bid_time, selected, user_id, task_id) values (10, '2016-05-16T23:03:28Z', false, 2, 10);
-insert into public.bid (amount, bid_time, selected, user_id, task_id) values (43, '2016-06-13T18:41:40Z', false, 12, 9);
 insert into public.bid (amount, bid_time, selected, user_id, task_id) values (30, '2017-08-22T07:31:54Z', false, 9, 11);
 insert into public.bid (amount, bid_time, selected, user_id, task_id) values (50, '2016-05-26T08:47:49Z', false, 7, 20);
 insert into public.bid (amount, bid_time, selected, user_id, task_id) values (50, '2017-05-24T19:15:09Z', false, 17, 20);
@@ -28,7 +28,6 @@ insert into public.bid (amount, bid_time, selected, user_id, task_id) values (85
 insert into public.bid (amount, bid_time, selected, user_id, task_id) values (8, '2017-10-11T23:13:20Z', false, 10, 16);
 insert into public.bid (amount, bid_time, selected, user_id, task_id) values (100, '2016-10-12T15:44:15Z', false, 18, 2);
 insert into public.bid (amount, bid_time, selected, user_id, task_id) values (80, '2016-09-10T08:03:04Z', false, 4, 17);
-insert into public.bid (amount, bid_time, selected, user_id, task_id) values (100, '2016-06-09T10:07:29Z', false, 13, 12);
 insert into public.bid (amount, bid_time, selected, user_id, task_id) values (47, '2017-05-20T22:25:25Z', false, 14, 20);
 insert into public.bid (amount, bid_time, selected, user_id, task_id) values (5, '2016-03-06T14:06:02Z', false, 3, 15);
 insert into public.bid (amount, bid_time, selected, user_id, task_id) values (20, '2016-08-25T02:29:24Z', false, 12, 5);
@@ -37,5 +36,4 @@ insert into public.bid (amount, bid_time, selected, user_id, task_id) values (20
 insert into public.bid (amount, bid_time, selected, user_id, task_id) values (80, '2017-09-11T01:03:40Z', false, 11, 17);
 insert into public.bid (amount, bid_time, selected, user_id, task_id) values (70, '2016-09-14T08:22:18Z', false, 15, 17);
 insert into public.bid (amount, bid_time, selected, user_id, task_id) values (7, '2017-05-15T20:41:26Z', false, 4, 10);
-insert into public.bid (amount, bid_time, selected, user_id, task_id) values (38, '2016-06-09T04:50:24Z', false, 19, 9);
 

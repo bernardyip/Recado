@@ -27,7 +27,7 @@ class IndexView {
     }
     
     public function getUsernameField() {
-        return HtmlHelper::makeInput2( "text", "username", htmlspecialchars($this->model->username), "Username", "", true);
+        return HtmlHelper::makeInput2( "text", "username", "", "Username", "", true);
     }
     
     public function getPasswordField() {
@@ -39,15 +39,15 @@ class IndexView {
     }
     
     public function getNameField() {
-        return HtmlHelper::makeInput2( "text", "name", htmlspecialchars($this->model->name), "Name", "");
+        return HtmlHelper::makeInput2( "text", "name", "", "Name", "");
     }
     
     public function getEmailField() {
-        return HtmlHelper::makeInput2( "email", "email", htmlspecialchars($this->model->email), "Email Address", "");
+        return HtmlHelper::makeInput2( "email", "email", "", "Email Address", "");
     }
     
     public function getPhoneField() {
-        return HtmlHelper::makeInput2( "tel", "phone", htmlspecialchars($this->model->phone), "Phone Number", "");
+        return HtmlHelper::makeInput2( "tel", "phone", "", "Phone Number", "");
     }
     
     public function createLinkForTaskDetail($taskId) {
@@ -243,7 +243,7 @@ http://www.templatemo.com/tm-475-holiday
 				    $task = $model->tasks[0];
 				    ?>
 				<div class="tm-home-box-1 tm-home-box-1-2 tm-home-box-1-center">
-					<img src="<?php echo $task->taskDisplayPicture?>" alt="image" class="img-responsive">
+					<img src="<?php echo $task->taskDisplayPicture?>" alt="image" class="img-responsive" style="width: 100%;">
 					<a href="<?php echo $view->createLinkForTaskDetail($task->taskId)?>">
 						<div class="tm-yellow-gradient-bg tm-city-price-container">
 							<span><?php echo $task->taskName ?></span>
@@ -260,7 +260,7 @@ http://www.templatemo.com/tm-475-holiday
 				    $task = $model->tasks[1];
 				?> 
 				<div class="tm-home-box-1 tm-home-box-1-2 tm-home-box-1-center">
-					<img src="<?php echo $task->taskDisplayPicture?>" alt="image" class="img-responsive">
+					<img src="<?php echo $task->taskDisplayPicture?>" alt="image" class="img-responsive" style="width: 100%;">
 					<a href="<?php echo $view->createLinkForTaskDetail($task->taskId)?>">
 						<div class="tm-green-gradient-bg tm-city-price-container">
 							<span><?php echo $task->taskName ?></span>
@@ -277,7 +277,7 @@ http://www.templatemo.com/tm-475-holiday
 				    $task = $model->tasks[2];
 				?> 
 				<div class="tm-home-box-1 tm-home-box-1-2 tm-home-box-1-center">
-					<img src="<?php echo $task->taskDisplayPicture?>" alt="image" class="img-responsive">
+					<img src="<?php echo $task->taskDisplayPicture?>" alt="image" class="img-responsive" style="width: 100%;">
 					<a href="<?php echo $view->createLinkForTaskDetail($task->taskId)?>">
 						<div class="tm-red-gradient-bg tm-city-price-container">
 							<span><?php echo $task->taskName ?></span>
@@ -298,7 +298,7 @@ http://www.templatemo.com/tm-475-holiday
 				    $task = $model->tasks[4];
 				?> 
 				<div class="tm-home-box-1 tm-home-box-1-2 tm-home-box-1-center">
-					<img src="<?php echo $task->taskDisplayPicture?>" alt="image" class="img-responsive">
+					<img src="<?php echo $task->taskDisplayPicture?>" alt="image" class="img-responsive" style="width: 100%;">
 					<a href="<?php echo $view->createLinkForTaskDetail($task->taskId)?>">
 						<div class="tm-yellow-gradient-bg tm-city-price-container">
 							<span><?php echo $task->taskName ?></span>
@@ -315,7 +315,7 @@ http://www.templatemo.com/tm-475-holiday
 				    $task = $model->tasks[4];
 				?> 
 				<div class="tm-home-box-1 tm-home-box-1-2 tm-home-box-1-center">
-					<img src="<?php echo $task->taskDisplayPicture?>" alt="image" class="img-responsive">
+					<img src="<?php echo $task->taskDisplayPicture?>" alt="image" class="img-responsive" style="width: 100%;">
 					<a href="<?php echo $view->createLinkForTaskDetail($task->taskId)?>">
 						<div class="tm-green-gradient-bg tm-city-price-container">
 							<span><?php echo $task->taskName ?></span>
@@ -332,7 +332,7 @@ http://www.templatemo.com/tm-475-holiday
 				    $task = $model->tasks[5];
 				?> 
 				<div class="tm-home-box-1 tm-home-box-1-2 tm-home-box-1-center">
-					<img src="<?php echo $task->taskDisplayPicture?>" alt="image" class="img-responsive">
+					<img src="<?php echo $task->taskDisplayPicture?>" alt="image" class="img-responsive" style="width: 100%;">
 					<a href="<?php echo $view->createLinkForTaskDetail($task->taskId)?>">
 						<div class="tm-red-gradient-bg tm-city-price-container">
 							<span><?php echo $task->taskName ?></span>

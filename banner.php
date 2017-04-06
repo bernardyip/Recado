@@ -11,10 +11,27 @@
 	  				<nav class="tm-nav" style="float: right;">
 						<ul>
                         <?php if (isset($_SESSION['username'])) { ?>
-                            <li><a href="/profile.php"><?php echo $_SESSION['username'] ?></a></li>
-                            <li><a href="/tasks.php">Tasks</a></li>
-                            <li><a href="/mytasks.php">My Tasks</a></li>
-                            <li><a href="/mybids.html">My Bids</a></li>
+                            <?php $page = $_SERVER['SCRIPT_NAME']; ?>
+                            <?php if (strpos($page, "/profile.php") !== false) { ?>
+                                <li><a href="#" class="active"><?php echo $_SESSION['username'] ?></a></li>
+                            <?php } else { ?>
+                                <li><a href="/profile.php"><?php echo $_SESSION['username'] ?></a></li>
+                            <?php } ?>
+                            <?php if (strpos($page, "/tasks.php") !== false) { ?>
+                                <li><a href="#" class="active">Tasks</a></li>
+                            <?php } else { ?>
+                                <li><a href="/tasks.php">Tasks</a></li>
+                            <?php } ?>
+                            <?php if (strpos($page, "/mytasks.php") !== false) { ?>
+                                <li><a href="#" class="active">My Tasks</a></li>
+                            <?php } else { ?>
+                                <li><a href="/mytasks.php">My Tasks</a></li>
+                            <?php } ?>
+                            <?php if (strpos($page, "/mybids.php") !== false) { ?>
+                                <li><a href="#" class="active">My Bids</a></li>
+                            <?php } else { ?>
+                                <li><a href="/mybids.php">My Bids</a></li>
+                            <?php } ?>
                             <li><a href="/login.php?action=logout">Log Out</a></li>
                         <?php } else { ?>
                             <li><a href="/login.php">Login</a></li>
