@@ -66,6 +66,8 @@ class BidDatabase extends Database {
     const SQL_FIND_BID_WITH_USERID = "SELECT * FROM public.bid b WHERE b.user_id=$1;";
     const SQL_FIND_BID_WITH_TASKID_MAX_AMOUNT_AND_EARLIEST = "SELECT * FROM public.bid b WHERE b.task_id=$1 ORDER BY b.amount DESC, b.bid_time LIMIT 1;";
     const SQL_FIND_BID_WITH_TASKID_MAX_AMOUNT_AND_LATEST = "SELECT * FROM public.bid b WHERE b.task_id=$1 ORDER BY b.amount DESC, b.bid_time DESC LIMIT 1;";
+	const SQL_GET_AVERAGE_BID = "SELECT ROUND(AVG(amount::numeric), 2) AS average FROM public.bid;";
+	const SQL_COUNT_TOTAL_BIDS = "SELECT COUNT(*) AS total from public.bid;";
     
     public function __construct() {
         parent::__construct();
@@ -75,6 +77,8 @@ class BidDatabase extends Database {
         pg_prepare ( $this->dbcon, 'SQL_FIND_BID_WITH_USERID', BidDatabase::SQL_FIND_BID_WITH_USERID );
         pg_prepare ( $this->dbcon, 'SQL_FIND_BID_WITH_TASKID_MAX_AMOUNT_AND_EARLIEST', BidDatabase::SQL_FIND_BID_WITH_TASKID_MAX_AMOUNT_AND_EARLIEST );
         pg_prepare ( $this->dbcon, 'SQL_FIND_BID_WITH_TASKID_MAX_AMOUNT_AND_LATEST', BidDatabase::SQL_FIND_BID_WITH_TASKID_MAX_AMOUNT_AND_LATEST );
+		pg_prepare ( $this->dbcon, 'SQL_GET_AVERAGE_BID', BidDatabase::SQL_GET_AVERAGE_BID );
+		pg_prepare ( $this->dbcon, 'SQL_COUNT_TOTAL_BIDS', BidDatabase::SQL_COUNT_TOTAL_BIDS );
         pg_prepare ( $this->dbcon, 'SQL_TASKDETAILS_FIND_BID_WITH_TASKID', BidDatabase::SQL_TASKDETAILS_FIND_BID_WITH_TASKID );
         pg_prepare ( $this->dbcon, 'SQL_TASKDETAILS_ADD_BID_BY_USER_FOR_TASK', BidDatabase::SQL_TASKDETAILS_ADD_BID_BY_USER_FOR_TASK );
         pg_prepare ( $this->dbcon, 'SQL_TASKDETAILS_UPDATE_BID_BY_USER_FOR_TASK', BidDatabase::SQL_TASKDETAILS_UPDATE_BID_BY_USER_FOR_TASK );
@@ -319,7 +323,33 @@ class BidDatabase extends Database {
         
         return new BidDatabaseResult(BidDatabaseResult::BID_FIND_SUCCESS, $bids);
     }
+	
+	public function findAverageBid() {
+        $dbResult = pg_execute ( $this->dbcon, 'SQL_GET_AVERAGE_BID', array (
+        ) );
+
+		$bids = 0;
+        if (pg_affected_rows ( $dbResult ) >= 1) {
+            $bid = pg_fetch_array( $dbResult );
+			$bids = $bid['average'];           
+        }
+        
+        return new BidDatabaseResult(BidDatabaseResult::BID_FIND_SUCCESS, $bids);
+    }
     
+	public function findTotalBids() {
+        $dbResult = pg_execute ( $this->dbcon, 'SQL_COUNT_TOTAL_BIDS', array (
+        ) );
+
+		$bids = 0;
+        if (pg_affected_rows ( $dbResult ) >= 1) {
+            $bid = pg_fetch_array( $dbResult );
+			$bids = $bid['total'];           
+        }
+        
+        return new BidDatabaseResult(BidDatabaseResult::BID_FIND_SUCCESS, $bids);
+    }
+	
 }
 
 ?>
