@@ -227,8 +227,13 @@ class TaskDetailsController {
     
     private function deleteTask() {
         if ($this->isCreatorOrAdmin()) {
-            // delete task
-            $this->redirectToTasks();
+            $taskResult = $this->taskDatabase->deleteTask($this->model->taskId);
+            if ($taskResult->status === TaskDatabaseResult::TASK_DELETE_SUCCESS) {
+                $this->redirectToTasks();
+            } else {
+                $this->model->operationSuccessful = false;
+                $this->model->message = "Failed to delete task :(";
+            }
         }
     }
     

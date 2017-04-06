@@ -62,6 +62,8 @@ class TaskDatabase extends Database {
         "task_start_time=$5, task_end_time=$6, listing_price=$7, updated_time=$8, category_id=$9" . 
         "WHERE id=$10";
     
+    const SQL_DELETE_TASK = "" .
+        "DELETE FROM public.task t WHERE t.id=$1;";
     
     const SQL_FIND_TASK_WITH_ID = "SELECT * FROM public.task t WHERE t.id=$1;";
     const SQL_FIND_TASK_WITH_USERID = "SELECT * FROM public.task t WHERE t.creator_id=$1;";
@@ -89,6 +91,8 @@ class TaskDatabase extends Database {
         pg_prepare ( $this->dbcon, 'SQL_CREATE_TASK', TaskDatabase::SQL_CREATE_TASK );
         pg_prepare ( $this->dbcon, 'SQL_TASKDETAILS_FIND_TASK', TaskDatabase::SQL_TASKDETAILS_FIND_TASK );
         pg_prepare ( $this->dbcon, 'SQL_TASKDETAILS_FIND_FINALIZED_TASK', TaskDatabase::SQL_TASKDETAILS_FIND_FINALIZED_TASK );
+        pg_prepare ( $this->dbcon, 'SQL_EDIT_TASK', TaskDatabase::SQL_EDIT_TASK );
+        pg_prepare ( $this->dbcon, 'SQL_DELETE_TASK', TaskDatabase::SQL_DELETE_TASK );
     }
     
     public function task_myTasks($userId) {
@@ -322,7 +326,7 @@ class TaskDatabase extends Database {
     public function deleteTask($taskId) {
         
         $dbResult = pg_execute ( $this->dbcon, 'SQL_DELETE_TASK', array (
-                $id
+                $taskId
         ) );
         
         if (pg_affected_rows($dbResult) > 0) {
@@ -365,7 +369,7 @@ class TaskDatabase extends Database {
             $taskEndTime, $listingPrice, $categoryId) {
         
         $updatedTime = new DateTime ( null, new DateTimeZone ( "Asia/Singapore" ) );
-        $dbResult = pg_execute ( $this->dbcon, 'SQL_CREATE_TASK', array (
+        $dbResult = pg_execute ( $this->dbcon, 'SQL_EDIT_TASK', array (
                 $name, $description, $postalCode, $location, $taskStartTime->format ( 'Y-m-d\TH:i:s\Z' ), 
                 $taskEndTime->format ( 'Y-m-d\TH:i:s\Z' ), $listingPrice, 
                 $updatedTime->format ( 'Y-m-d\TH:i:s\Z' ), 
