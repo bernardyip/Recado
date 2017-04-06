@@ -2,6 +2,7 @@
 include_once '/data/Database.php';
 include_once '/model/Bid.php';
 include_once '/model/task_details/TaskBid.php';
+include_once '/model/mybids/BidDetails.php';
 
 class BidDatabaseResult extends DatabaseResult {
     const BID_FIND_SUCCESS = 10;
@@ -89,9 +90,9 @@ class BidDatabase extends Database {
         pg_prepare ( $this->dbcon, 'SQL_TASKDETAILS_UPDATE_BID_BY_USER_FOR_TASK', BidDatabase::SQL_TASKDETAILS_UPDATE_BID_BY_USER_FOR_TASK );
         pg_prepare ( $this->dbcon, 'SQL_TASKDETAILS_FIND_BID_BY_USERID_TASKID', BidDatabase::SQL_TASKDETAILS_FIND_BID_BY_USERID_TASKID );
         pg_prepare ( $this->dbcon, 'SQL_TASKDETAILS_REMOVE_BID_BY_USER_FOR_TASK', BidDatabase::SQL_TASKDETAILS_REMOVE_BID_BY_USER_FOR_TASK );
-        pg_prepare ( $this->dbcon, 'SQL_FIND_TASKDETAILS_THAT_BIDSWON_BY_USERID', BidDatabase::SQL_TASKDETAILS_REMOVE_BID_BY_USER_FOR_TASK );
-        pg_prepare ( $this->dbcon, 'SQL_FIND_TASKDETAILS_THAT_BIDSLOST_BY_USERID', BidDatabase::SQL_TASKDETAILS_REMOVE_BID_BY_USER_FOR_TASK );
-        pg_prepare ( $this->dbcon, 'SQL_FIND_TASKDETAILS_THAT_BIDSINPROGRESS_BY_USERID', BidDatabase::SQL_TASKDETAILS_REMOVE_BID_BY_USER_FOR_TASK );
+        pg_prepare ( $this->dbcon, 'SQL_FIND_TASKDETAILS_THAT_BIDSWON_BY_USERID', BidDatabase::SQL_FIND_TASKDETAILS_THAT_BIDSWON_BY_USERID);
+        pg_prepare ( $this->dbcon, 'SQL_FIND_TASKDETAILS_THAT_BIDSLOST_BY_USERID', BidDatabase::SQL_FIND_TASKDETAILS_THAT_BIDSLOST_BY_USERID);
+        pg_prepare ( $this->dbcon, 'SQL_FIND_TASKDETAILS_THAT_BIDSINPROGRESS_BY_USERID', BidDatabase::SQL_FIND_TASKDETAILS_THAT_BIDSINPROGRESS_BY_USERID);
     }
     
     private function bidExists($taskId, $userId) {
@@ -301,7 +302,7 @@ class BidDatabase extends Database {
     		$bids = array();
     		for ($i = 0; $i < $nrRows; $i++) {
     			$bid = pg_fetch_array( $dbResult );
-    			$bids[$i] = new TaskBid($bid['user_id'], $bid['task_id'], $bid['username'], $bid['amount']);
+    			$bids[$i] = new BidDetails($bid['id'], $bid['name'], $bid['description'], $bid['task_end_time'], $bid['amount']);
     		}
     	}
     	
@@ -320,7 +321,7 @@ class BidDatabase extends Database {
     		$bids = array();
     		for ($i = 0; $i < $nrRows; $i++) {
     			$bid = pg_fetch_array( $dbResult );
-    			$bids[$i] = new TaskBid($bid['user_id'], $bid['task_id'], $bid['username'], $bid['amount']);
+    			$bids[$i] = new BidDetails($bid['id'], $bid['name'], $bid['description'], $bid['task_end_time'], $bid['amount']);
     		}
     	}
     	
@@ -339,7 +340,7 @@ class BidDatabase extends Database {
     		$bids = array();
     		for ($i = 0; $i < $nrRows; $i++) {
     			$bid = pg_fetch_array( $dbResult );
-    			$bids[$i] = new TaskBid($bid['user_id'], $bid['task_id'], $bid['username'], $bid['amount']);
+    			$bids[$i] = new BidDetails($bid['id'], $bid['name'], $bid['description'], $bid['task_end_time'], $bid['amount']);
     		}
     	}
     	

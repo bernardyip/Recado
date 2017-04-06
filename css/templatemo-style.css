@@ -132,6 +132,7 @@ body { overflow-x: hidden; }
 }
 
 /* Section 1, index.html */
+.tm-tabs-bg { background-color: #F2F2F2; }
 .tm-gray-bg { background-color: #E5E5E5; }
 .tm-home-section-1 {
 	position: relative;
@@ -254,6 +255,8 @@ body { overflow-x: hidden; }
 	margin-left: auto;
 }
 .input-group-addon { border-radius: 0; }
+
+#bidsTabs,
 #hotelCarTabs {
 	border-bottom: none;
 	height: 52px;
@@ -262,6 +265,13 @@ body { overflow-x: hidden; }
 	width: 50%;
 	height: 100%;
 }
+
+#bidsTabs li {
+  width: calc(100% / 3);
+  height: 100%;
+}
+
+#bidsTabs > li > a,
 #hotelCarTabs > li > a {
 	margin-right: 0;
 	padding-top: 15px;
@@ -274,11 +284,16 @@ body { overflow-x: hidden; }
 	color: #5C4905;
 	font-weight: 600;
 }
+#bidsTabs > li > a:hover,
+#bidsTabs > li > a:focus
 #hotelCarTabs > li > a:hover,
 #hotelCarTabs > li > a:focus {
 	border: none;
 	background: #F9E58B;
 }
+#bidsTabs > li.active > a, 
+#bidsTabs > li.active > a:focus, 
+#bidsTabs > li.active > a:hover,
 #hotelCarTabs > li.active > a, 
 #hotelCarTabs > li.active > a:focus, 
 #hotelCarTabs > li.active > a:hover
