@@ -46,6 +46,8 @@ class UserDatabase extends Database {
     const SQL_FIND_USERID = "SELECT * FROM public.user u WHERE u.id=$1;";
     const SQL_FIND_USER_FROM_AUTH = "SELECT * FROM public.user_auth_tokens t WHERE t.selector=$1 AND t.token=$2 AND t.expires >= NOW();";
     const SQL_CREATE_USER_AUTH = "INSERT INTO public.user_auth_tokens(selector, token, userid, expires) VALUES(random_string($1), $2, $3, $4) RETURNING id, selector;";
+	const SQL_COUNT_ONLINE_USERS = "SELECT COUNT(*) AS online FROM public.user_auth_tokens;";
+	const SQL_COUNT_TOTAL_USERS = "SELECT COUNT(*) AS total FROM public.user;";
     
     public function __construct() {
         parent::__construct();
@@ -57,6 +59,8 @@ class UserDatabase extends Database {
         pg_prepare ( $this->dbcon, 'SQL_CREATE_USER_AUTH', UserDatabase::SQL_CREATE_USER_AUTH );
         pg_prepare ( $this->dbcon, 'SQL_FIND_USER_FROM_AUTH', UserDatabase::SQL_FIND_USER_FROM_AUTH );
         pg_prepare ( $this->dbcon, 'SQL_FIND_USERID', UserDatabase::SQL_FIND_USERID );
+		pg_prepare ( $this->dbcon, 'SQL_COUNT_ONLINE_USERS', UserDatabase::SQL_COUNT_ONLINE_USERS );
+		pg_prepare ( $this->dbcon, 'SQL_COUNT_TOTAL_USERS', UserDatabase::SQL_COUNT_TOTAL_USERS );
     }
     
     public function login($username, $password) {
@@ -291,6 +295,31 @@ class UserDatabase extends Database {
         }
         
     }
+	
+	public function getOnlineUserCount() {       
+        $dbResult = pg_execute ( $this->dbcon, 'SQL_COUNT_ONLINE_USERS', array (
+        ) );
+
+        $count = 0;
+        if (pg_affected_rows ( $dbResult ) >= 1) {
+            $result = pg_fetch_array( $dbResult );
+            $count = $result['online'];
+        }
+        return $count;
+    }
+	
+	public function getTotalUserCount() {       
+        $dbResult = pg_execute ( $this->dbcon, 'SQL_COUNT_TOTAL_USERS', array (
+        ) );
+
+        $count = 0;
+        if (pg_affected_rows ( $dbResult ) >= 1) {
+            $result = pg_fetch_array( $dbResult );
+            $count = $result['total'];
+        }
+        return $count;
+    }
+	
     /*
      * public function getUsers() {
      * $sqlGetUser = "SELECT * FROM users";
