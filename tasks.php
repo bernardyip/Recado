@@ -39,7 +39,7 @@ class TasksView {
     
     public function getSearchInput() {
         $html = HtmlHelper::makeInput2("text", "searchKey", "", "Search tasks", "");
-        $html = $html . "<br /><h3>Search in category</h3>";
+        $html = $html . "<br /><h3>Search in category</h3><br />";
         $html = $html . HtmlHelper::makeCheckboxInput("cleaning", "Cleaning", 2) . "&nbsp;&nbsp;";
         $html = $html . HtmlHelper::makeCheckboxInput("delivery", "Delivery", 3) . "&nbsp;&nbsp;";
         $html = $html . HtmlHelper::makeCheckboxInput("fixing", "Fixing", 4) . "&nbsp;&nbsp;";
@@ -214,7 +214,7 @@ http://www.templatemo.com/tm-475-holiday
                 		class="hotel-search-form">
 					<div class="tm-form-inner">
                         <div class="col-lg-2"></div>
-    					<div class="col-lg-6 col-md 6">
+    					<div class="col-lg-6 col-md 6" style="margin-bottom: 30px;">
     						<?php echo $view->getSearchInput(); ?>
                      	</div>
                         <div class="col-lg-2">
