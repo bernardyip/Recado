@@ -125,7 +125,7 @@ class LoginController {
     private function removeLoginCookieForUser() {
         if ( isset ($_COOKIE[LoginController::COOKIE_NAME]) ) {
             setcookie(LoginController::COOKIE_NAME, 
-                    $resultAuthCookie->auth->selector . ":" . $resultAuthCookie->auth->validator,
+                    "",
                     time() - LoginController::SECONDS_7_DAYS, "/", "localhost", false, false);
         }
     }
