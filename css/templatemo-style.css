@@ -949,3 +949,102 @@ hr { border-top: 1px solid #111010; }
 	transition: all 0.3s;
 	text-align: center;
 }
+
+.bid-amount {
+	font-size: 26px;
+}
+
+.bid-select {
+	color:white;
+}
+
+.bid-button {
+	width: 130px;
+	height: 30px;
+	background-color: #2dc970;
+	border: medium none;
+	color: white;
+	font-size: 12px;
+	margin: 12px auto;
+	text-transform: uppercase;
+	box-shadow: 0px 0px 1px 0px rgba(0, 0, 0, 0.3);
+}
+
+.tm-comments-box {
+
+	background-color: lightblue;
+	
+}
+.tm-comments-title {
+	background-color: rgb(96, 104, 116);
+	color: white;
+	padding: 20px;
+	text-align: center;
+	text-transform: uppercase;
+	font-weight: 300;
+}
+.tm-comments-content {
+	padding: 30px;
+	padding-top: 15px;
+	text-align: center;
+	font-style: italic;
+}
+.comments-button {
+	width: 130px;
+	height: 30px;
+	background-color: rgb(96, 104, 116);
+	border: medium none;
+	color: white;
+	font-size: 12px;
+	margin: 12px auto;
+	text-transform: uppercase;
+	box-shadow: 0px 0px 1px 0px rgba(0, 0, 0, 0.3);
+}
+
+.comments-time {
+	color: white;
+}
+
+.bid-lost { overflow: hidden }
+.bid-lost-name { 
+	background-color: #db3951;
+	padding: 20px 30px;
+	float: left;
+	width: 75%;
+	text-transform: uppercase;
+}
+.bid-lost-price {
+	float: left;
+	background-color: #a51a2f;
+	font-weight: 600;
+	font-size: 18px;
+	display: block;
+	padding: 17px 30px;
+	width: 25%;
+	transition: all 0.3s;
+	text-align: center;
+	text-decoration: line-through;
+}
+.bid-lost-price:hover,
+.bid-lost-price:focus {
+	color: white;
+	background-color: #c13247;
+}
+.bid-lost-name,
+.bid-lost-price {
+	color: white;
+	height: 60px;
+}
+
+.bid-section-header {
+	margin-bottom: 40px;
+	overflow: hidden;
+}
+
+/*highcharts*/
+
+#chart-container {
+	width: 100%;
+	height: 300px;
+	margin: 0 auto
+}
