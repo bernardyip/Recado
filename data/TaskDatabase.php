@@ -46,7 +46,7 @@ class TaskDatabase extends Database {
                 "ON t.creator_id = u.id;";
     
     const SQL_TASKDETAILS_FIND_TASK = "" .
-            "SELECT t.id, t.name, t.description, t.postal_code, t.location, t.task_start_time, t.task_end_time, t.listing_price, t.updated_time, t.category_id, c.name AS category_name, u.name AS username " .
+            "SELECT t.id, t.name, t.description, t.postal_code, t.location, t.task_start_time, t.task_end_time, t.listing_price, t.updated_time, t.category_id, t.bid_picked, c.name AS category_name, u.id AS user_id, u.name AS username " .
             "FROM public.task t " .
             "INNER JOIN public.category c ON t.category_id = c.id ".
             "INNER JOIN public.user u ON t.creator_id = u.id " .
@@ -56,6 +56,12 @@ class TaskDatabase extends Database {
             "SELECT t.id " .
             "FROM public.task t " .
             "WHERE t.id=$1 AND t.bid_picked=true";
+    
+    const SQL_EDIT_TASK = "" . 
+        "UPDATE public.task SET name=$1, description=$2, postal_code=$3, location=$4, " . 
+        "task_start_time=$5, task_end_time=$6, listing_price=$7, updated_time=$8, category_id=$9" . 
+        "WHERE id=$10";
+    
     
     const SQL_FIND_TASK_WITH_ID = "SELECT * FROM public.task t WHERE t.id=$1;";
     const SQL_FIND_TASK_WITH_USERID = "SELECT * FROM public.task t WHERE t.creator_id=$1;";
@@ -172,8 +178,8 @@ class TaskDatabase extends Database {
                 $task = pg_fetch_array( $dbResult );
                 $tasks[$i] = new TaskDetail($task['id'], $task['name'], $task['description'], 
                         $task['postal_code'], $task['location'], $task['task_start_time'], $task['task_end_time'], 
-                        $task['listing_price'], $task['updated_time'], $task['category_name'], $task['username'],
-                        $this->getDisplayPicturePath($task['id'], $task['category_id']));
+                        $task['listing_price'], $task['updated_time'], $task['category_name'], $task['user_id'], $task['username'],
+                        $task['bid_picked'], $this->getDisplayPicturePath($task['id'], $task['category_id']));
             }
         }
         
@@ -313,6 +319,22 @@ class TaskDatabase extends Database {
         return new TaskDatabaseResult(TaskDatabaseResult::TASK_FIND_SUCCESS, array(), $count);
     }
     
+    public function deleteTask($taskId) {
+        
+        $dbResult = pg_execute ( $this->dbcon, 'SQL_DELETE_TASK', array (
+                $id
+        ) );
+        
+        if (pg_affected_rows($dbResult) > 0) {
+            $result = pg_fetch_array( $dbResult );
+            return new TaskDatabaseResult(
+                    TaskDatabaseResult::TASK_DELETE_SUCCESS, 
+                    null, 1);
+        } else {
+            return new TaskDatabaseResult(TaskDatabaseResult::TASK_DELETE_FAIL, null, 0);
+        }
+    }
+    
     public function createTask($name, $description, $postalCode, $location, $taskStartTime,
             $taskEndTime, $listingPrice, $categoryId, $creatorId) {
         
@@ -336,6 +358,31 @@ class TaskDatabase extends Database {
                     ), 1);
         } else {
             return new TaskDatabaseResult(TaskDatabaseResult::TASK_CREATE_FAIL, null, 0);
+        }
+    }
+    
+    public function editTask($id, $name, $description, $postalCode, $location, $taskStartTime,
+            $taskEndTime, $listingPrice, $categoryId) {
+        
+        $updatedTime = new DateTime ( null, new DateTimeZone ( "Asia/Singapore" ) );
+        $dbResult = pg_execute ( $this->dbcon, 'SQL_CREATE_TASK', array (
+                $name, $description, $postalCode, $location, $taskStartTime->format ( 'Y-m-d\TH:i:s\Z' ), 
+                $taskEndTime->format ( 'Y-m-d\TH:i:s\Z' ), $listingPrice, 
+                $updatedTime->format ( 'Y-m-d\TH:i:s\Z' ), 
+                $categoryId, $id
+        ) );
+        
+        if (pg_affected_rows($dbResult) > 0) {
+            $result = pg_fetch_array( $dbResult );
+            return new TaskDatabaseResult(
+                    TaskDatabaseResult::TASK_UPDATE_SUCCESS, 
+                    array(
+                        new Task($result['id'], $name, $description, $postalCode, $location, 
+                                $taskStartTime, $taskEndTime, $listingPrice, $createdTime, 
+                                $updatedTime, $status, false, $categoryId, $creatorId)
+                    ), 1);
+        } else {
+            return new TaskDatabaseResult(TaskDatabaseResult::TASK_UPDATE_FAIL, null, 0);
         }
     }
     
