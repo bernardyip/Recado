@@ -162,6 +162,11 @@ class TaskDetailsController {
         $commentsResult = $this->commentDatabase->taskDetails_getComment($commentId);
         if ($commentsResult->status === CommentDatabaseResult::COMMENT_FIND_SUCCESS) {
             $this->model->commentToEdit = $commentsResult->comments[0];
+            if ($this->model->commentToEdit->taskId !== $this->model->taskId) {
+                $this->redirectToThisTask();
+            }
+        } else {
+            $this->redirectToThisTask();
         }
     }
     
