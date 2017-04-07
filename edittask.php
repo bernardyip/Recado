@@ -410,7 +410,7 @@ http://www.templatemo.com/tm-475-holiday
                         	<?php echo HtmlHelper::makeInput2("text", "location", htmlspecialchars($model->getTaskLocation()), "Where the task held at?", "") ?>
 						</div>
 						<div class="form-group">
-							<?php echo HtmlHelper::makeInput2("number", "postal_code", htmlspecialchars($model->getTaskPostalCode()), "Postal Code", "Six digit zip code")?>
+							<?php echo HtmlHelper::makeInputOnChange2("number", "postal_code", htmlspecialchars($model->getTaskPostalCode()), "Postal Code", "Six digit zip code", "evalPostalCode()")?>
 						</div>
 						<div class="form-group">
 							<?php echo HtmlHelper::makeMoneyInput2("listing_price", htmlspecialchars($model->getTaskListingPrice()), "Listing Price", "")?>
@@ -440,19 +440,61 @@ http://www.templatemo.com/tm-475-holiday
 	<script type="text/javascript" src="js/bootstrap-datetimepicker.min.js"></script>	<!-- bootstrap date time picker js, http://eonasdan.github.io/bootstrap-datetimepicker/ -->
 	
     <script>
+        function validatePostalCode() {
+            var postalCode = document.getElementsByName("postal_code")[0].value;
+        	var regex = /^[0-9]{6}$/;
+            var valid = regex.test(postalCode);
+        	return valid;
+        }
+    
+      	function evalPostalCode() {
+          	if (validatePostalCode()) {
+                var postalCode = document.getElementsByName("postal_code")[0].value;
+                address = postalCode;
+                initialize();
+          	}
+      	}
 		/* Google map
       	------------------------------------------------*/
       	var map = '';
       	var center;
+		var geocoder;
+		var results;
+		var status;
+		var lat = 1.2967436; //default
+		var lng = 103.7744816; //default 
+		var address = '<?php echo $model->task->postalCode ?>'; //insert zipcode here
 
-      	function initialize() {
-	        var mapOptions = {
-	          	zoom: 14,
-	          	center: new google.maps.LatLng(1.2967436, 103.7744816),
-	          	scrollwheel: false
+		function initialize() {
+			google.maps.visualRefresh = true;
+			geocoder = new google.maps.Geocoder();
+
+            geocoder.geocode( { 'address': address }, function(results, status) {
+                if (status == google.maps.GeocoderStatus.OK) {
+                    lat = results[0].geometry.location.lat();
+                    lng = results[0].geometry.location.lng();
+                    console.log('hereee' + lat + ' lng ' + lng);
+                    
+                    drawMap();
+                }
+                else {
+                	console.log("no geocode found");
+                }
+            });
+         
+		}
+        var data;
+     
+        function drawMap(){
+
+        	var mapOptions = {
+              	zoom: 18,
+              	center: new google.maps.LatLng(lat, lng),
+              	scrollwheel: false
         	};
-        
-	        map = new google.maps.Map(document.getElementById('google-map'),  mapOptions);
+
+            map = new google.maps.Map(document.getElementById('google-map'),  mapOptions);
+			
 
 	        google.maps.event.addDomListener(map, 'idle', function() {
 	          calculateCenter();
@@ -461,7 +503,8 @@ http://www.templatemo.com/tm-475-holiday
 	        google.maps.event.addDomListener(window, 'resize', function() {
 	          map.setCenter(center);
 	        });
-      	}
+
+        }
 
 	    function calculateCenter() {
 	        center = map.getCenter();
@@ -470,7 +513,7 @@ http://www.templatemo.com/tm-475-holiday
 	    function loadGoogleMap(){
 	        var script = document.createElement('script');
 	        script.type = 'text/javascript';
-	        script.src = 'https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&' + 'callback=initialize';
+	        script.src = 'https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&key=AIzaSyC-7O4_OGbw3MEe-PCjVxNM-zcsB04UOWE' + '&callback=initialize';
 	        document.body.appendChild(script);
 	    }
 	

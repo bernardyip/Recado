@@ -591,15 +591,43 @@ http://www.templatemo.com/tm-475-holiday
       	------------------------------------------------*/
       	var map = '';
       	var center;
+		var geocoder;
+		var results;
+		var status;
+		var lat = 1.2967436; //default
+		var lng = 103.7744816; //default 
+		var address = '<?php echo $model->task->postalCode ?>'; //insert zipcode here
 
-      	function initialize() {
-	        var mapOptions = {
-	          	zoom: 14,
-	          	center: new google.maps.LatLng(1.2967436, 103.7744816),
-	          	scrollwheel: false
+		function initialize() {
+			google.maps.visualRefresh = true;
+			geocoder = new google.maps.Geocoder();
+
+            geocoder.geocode( { 'address': address }, function(results, status) {
+                if (status == google.maps.GeocoderStatus.OK) {
+                    lat = results[0].geometry.location.lat();
+                    lng = results[0].geometry.location.lng();
+                    console.log('hereee' + lat + ' lng ' + lng);
+                    
+                    drawMap();
+                }
+                else {
+                	console.log("no geocode found");
+                }
+            });
+         
+		}
+        var data;
+     
+        function drawMap(){
+
+        	var mapOptions = {
+              	zoom: 18,
+              	center: new google.maps.LatLng(lat, lng),
+              	scrollwheel: false
         	};
-        
-	        map = new google.maps.Map(document.getElementById('google-map'),  mapOptions);
+
+            map = new google.maps.Map(document.getElementById('google-map'),  mapOptions);
+			
 
 	        google.maps.event.addDomListener(map, 'idle', function() {
 	          calculateCenter();
@@ -608,7 +636,8 @@ http://www.templatemo.com/tm-475-holiday
 	        google.maps.event.addDomListener(window, 'resize', function() {
 	          map.setCenter(center);
 	        });
-      	}
+
+        }
 
 	    function calculateCenter() {
 	        center = map.getCenter();
@@ -617,10 +646,10 @@ http://www.templatemo.com/tm-475-holiday
 	    function loadGoogleMap(){
 	        var script = document.createElement('script');
 	        script.type = 'text/javascript';
-	        script.src = 'https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&' + 'callback=initialize';
+	        script.src = 'https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&key=AIzaSyC-7O4_OGbw3MEe-PCjVxNM-zcsB04UOWE' + '&callback=initialize';
 	        document.body.appendChild(script);
 	    }
-
+	    
 		$(function() {
 
 			// https://css-tricks.com/snippets/jquery/smooth-scrolling/
