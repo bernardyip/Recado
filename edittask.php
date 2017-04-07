@@ -22,6 +22,7 @@ class EditTaskModel {
     public $newTaskEndDateTime;
     public $newTaskListingPrice;
     public $newTaskCategoryId;
+    public $newTaskDisplayPicture;
 
     public $taskId;
     public $userId;
@@ -184,11 +185,13 @@ class EditTaskController {
                     $this->model->newTaskStartDateTime, $this->model->newTaskEndDateTime, 
                     $this->model->newTaskListingPrice, $this->model->newTaskCategoryId);
             if ($edittedTask->status === TaskDatabaseResult::TASK_UPDATE_SUCCESS) {
+                $this->moveTmpUploadToImg($edittedTask->tasks[0]->id);
                 $this->redirectToEdittedTask($edittedTask->tasks[0]);
             } else {
                 $this->model->message = "Task update failed :(";
             }
         }
+        $this->deleteTmpUpload();
     }
     
     public function isCreatorOrAdmin() {
@@ -211,6 +214,24 @@ class EditTaskController {
     private function redirectToEdittedTask($edittedTask) {
         header ( "Refresh: 1; URL=/task_details.php?task=" . $edittedTask->id );
         die();
+    }
+    
+    private function moveTmpUploadToImg($taskId) {
+        if (!is_null($this->model->newTaskDisplayPicture)) {
+            $image = $this->model->newTaskDisplayPicture;
+            if (file_exists($_SERVER['DOCUMENT_ROOT'] . "/img/task/$taskId.jpg")) {
+                unlink($_SERVER['DOCUMENT_ROOT'] . "/img/task/$taskId.jpg");
+            }
+            move_uploaded_file($image['tmp_name'], $_SERVER['DOCUMENT_ROOT'] . "/img/task/$taskId.jpg");
+        }
+    }
+    
+    private function deleteTmpUpload() {
+        if (!is_null($this->model->newTaskDisplayPicture)) {
+            if (file_exists($this->model->newTaskDisplayPicture['tmp_name'])) {
+                unlink($this->model->newTaskDisplayPicture['tmp_name']);
+            }
+        }
     }
     
     public function handleHttpPost() {
@@ -239,6 +260,12 @@ class EditTaskController {
         }
         if (isset ( $_POST ['category'] ) ) {
             $this->model->newTaskCategoryId = $_POST['category'];
+        }
+        if (isset ( $_FILES ['display_picture'] ) ) {
+            $extension = pathinfo($_FILES ['display_picture']['name'], PATHINFO_EXTENSION);
+            if (getimagesize($_FILES['display_picture']['tmp_name']) !== false && $extension === "jpg") {
+                $this->model->newTaskDisplayPicture = $_FILES ['display_picture'];
+            }
         }
         
         if (isset ( $_GET ['action'] )) {
@@ -335,6 +362,7 @@ http://www.templatemo.com/tm-475-holiday
 				<!-- contact form -->
 				<form action="<?php echo $controller->getEditUrl()?>" method="POST"
 						onsubmit=""
+						enctype="multipart/form-data"
 						class="tm-contact-form">
 					<div class="col-lg-6 col-md-6">
 						<div id="google-map"></div>
@@ -347,6 +375,9 @@ http://www.templatemo.com/tm-475-holiday
 						<?php } ?>
                         <div class="form-group">
 							<?php echo HtmlHelper::makeInput2("text", "name", htmlspecialchars($model->getTaskName()), "Task Name", "") ?>
+						</div>
+						<div class="form-group">
+							<?php echo HtmlHelper::makeFileInput2(".jpg", "display_picture", "", "Display Picture (.jpg only)", "Display Picture (.jpg only)")?>
 						</div>
                         <div class="form-group">
 							<?php echo HtmlHelper::makeInput2("datetime-local", "task_start_time", $model->getStartTime(), "", "") ?>

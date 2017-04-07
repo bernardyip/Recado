@@ -60,7 +60,7 @@ class TaskDatabase extends Database {
     const SQL_EDIT_TASK = "" . 
         "UPDATE public.task SET name=$1, description=$2, postal_code=$3, location=$4, " . 
         "task_start_time=$5, task_end_time=$6, listing_price=$7, updated_time=$8, category_id=$9" . 
-        "WHERE id=$10";
+        "WHERE id=$10 RETURNING created_time, status, bid_picked, creator_id";
     
     const SQL_DELETE_TASK = "" .
         "DELETE FROM public.task t WHERE t.id=$1;";
@@ -382,8 +382,8 @@ class TaskDatabase extends Database {
                     TaskDatabaseResult::TASK_UPDATE_SUCCESS, 
                     array(
                         new Task($id, $name, $description, $postalCode, $location, 
-                                $taskStartTime, $taskEndTime, $listingPrice, $createdTime, 
-                                $updatedTime, $status, false, $categoryId, $creatorId)
+                                $taskStartTime, $taskEndTime, $listingPrice, $result['created_time'], 
+                                $updatedTime, $result['status'], $result['bid_picked'], $categoryId, $result['creator_id'])
                     ), 1);
         } else {
             return new TaskDatabaseResult(TaskDatabaseResult::TASK_UPDATE_FAIL, null, 0);
