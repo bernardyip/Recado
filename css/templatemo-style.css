@@ -424,6 +424,12 @@ hr { border-top: 1px solid #111010; }
 .margin-bottom-30 { margin-bottom: 30px; }
 .gray-text { color: #B1B1B1; }
 .tours-1-description { line-height: 1.8; }
+.tours-1-bid {
+	line-height: 1.8;
+	white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 .tm-tours-box-1-link { overflow: hidden }
 .tm-tours-box-1-link-left { 
 	background-color: #1CA7C8;
