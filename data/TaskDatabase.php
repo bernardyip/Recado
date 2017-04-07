@@ -46,7 +46,7 @@ class TaskDatabase extends Database {
                 "ON t.creator_id = u.id;";
     
     const SQL_TASKDETAILS_FIND_TASK = "" .
-            "SELECT t.id, t.name, t.description, t.postal_code, t.location, t.task_start_time, t.task_end_time, t.listing_price, t.updated_time, t.category_id, t.bid_picked, c.name AS category_name, u.id AS user_id, u.name AS username " .
+            "SELECT t.id, t.name, t.description, t.postal_code, t.location, t.task_start_time, t.task_end_time, t.listing_price, t.updated_time, t.bid_picked, c.id AS category_id, c.name AS category_name, u.id AS user_id, u.name AS username " .
             "FROM public.task t " .
             "INNER JOIN public.category c ON t.category_id = c.id ".
             "INNER JOIN public.user u ON t.creator_id = u.id " .
@@ -182,7 +182,7 @@ class TaskDatabase extends Database {
                 $task = pg_fetch_array( $dbResult );
                 $tasks[$i] = new TaskDetail($task['id'], $task['name'], $task['description'], 
                         $task['postal_code'], $task['location'], $task['task_start_time'], $task['task_end_time'], 
-                        $task['listing_price'], $task['updated_time'], $task['category_name'], $task['user_id'], $task['username'],
+                        $task['listing_price'], $task['updated_time'], $task['category_id'], $task['category_name'], $task['user_id'], $task['username'],
                         $task['bid_picked'], $this->getDisplayPicturePath($task['id'], $task['category_id']));
             }
         }
@@ -381,7 +381,7 @@ class TaskDatabase extends Database {
             return new TaskDatabaseResult(
                     TaskDatabaseResult::TASK_UPDATE_SUCCESS, 
                     array(
-                        new Task($result['id'], $name, $description, $postalCode, $location, 
+                        new Task($id, $name, $description, $postalCode, $location, 
                                 $taskStartTime, $taskEndTime, $listingPrice, $createdTime, 
                                 $updatedTime, $status, false, $categoryId, $creatorId)
                     ), 1);

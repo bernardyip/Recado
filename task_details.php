@@ -349,7 +349,7 @@ class TaskDetailsController {
     }
     
     public function getEditTaskUrl() {
-        return "/edit_tasks.php?task=" . $this->model->taskId;
+        return "/edittask.php?task=" . $this->model->taskId;
     }
 }
 
