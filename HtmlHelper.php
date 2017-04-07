@@ -47,6 +47,24 @@ class HtmlHelper {
         return $html;
     }
     
+    public static function makeInputOnChange2($type, $name, $value, $placeholder, $title, $onChange, $autofocus = false) {
+        $html = "<input class=\"form-control\" type=\"$type\" name=\"$name\" placeholder=\"$placeholder\" title=\"$title\" value=\"$value\" onchange=\"$onChange\"";
+        if ($autofocus) {
+            $html = $html . " autofocus ";
+        }
+        $html = $html . "/>";
+        return $html;
+    }
+    
+    public static function makeFileInput2($extension, $name, $value, $placeholder, $title, $autofocus = false) {
+        $html = "<input class=\"form-control\" accept=\"$extension\" type=\"file\" name=\"$name\" placeholder=\"$placeholder\" title=\"$title\" value=\"$value\"";
+        if ($autofocus) {
+            $html = $html . " autofocus ";
+        }
+        $html = $html . "/>";
+        return $html;
+    }
+    
     public static function makeInput($type, $name, $value, $placeholder, $title, $autofocus = false) {
         $html = "<input type=\"$type\" name=\"$name\" placeholder=\"$placeholder\" title=\"$title\" value=\"$value\"";
         if ($autofocus) {

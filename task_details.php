@@ -234,9 +234,14 @@ class TaskDetailsController {
     }
     
     private function deleteTask() {
-        if ($this->isCreatorOrAdmin()) {
-            // delete task
-            $this->redirectToTasks();
+        if ($this->isCreatorOrAdmin() && !$this->model->task->bidPicked) {
+            $taskResult = $this->taskDatabase->deleteTask($this->model->taskId);
+            if ($taskResult->status === TaskDatabaseResult::TASK_DELETE_SUCCESS) {
+                $this->redirectToTasks();
+            } else {
+                $this->model->operationSuccessful = false;
+                $this->model->message = "Failed to delete task :(";
+            }
         }
     }
     
@@ -352,7 +357,7 @@ class TaskDetailsController {
     }
     
     public function getEditTaskUrl() {
-        return "/edit_tasks.php?task=" . $this->model->taskId;
+        return "/edittask.php?task=" . $this->model->taskId;
     }
 }
 
@@ -470,14 +475,17 @@ http://www.templatemo.com/tm-475-holiday
     							<p class="tm-tours-box-1-link-right" style="width: 50%; background-color:#b0b0b0; color:#808080">
     								Edit
     							</p>
+    							<p class="tm-tours-box-1-link-right" style="width: 50%; background-color:#b0b0b0; color:#808080">
+    								Delete
+    							</p>
     							<?php } else { ?>
     							<a href="<?php echo $controller->getEditTaskUrl() ?>" class="tm-tours-box-1-link-right" style="width: 50%;">
     								Edit
     							</a>
-    							<?php } ?>
     							<a href="<?php echo $controller->getDeleteTaskUrl() ?>" class="tm-tours-box-1-link-right" style="width: 50%;">
     								Delete
     							</a>
+    							<?php } ?>
     						</div>
     					</div>
     					<?php } ?>
@@ -518,7 +526,7 @@ http://www.templatemo.com/tm-475-holiday
     					</div>
 					</div>
 					<div class="col-lg-4">
-    					<div class="tm-testimonials-box-transparent" style="height: 100%; background-color:none;">
+    					<div class="tm-testimonials-box-transparent" style="height: 100%; width: 100%;">
                             <div class="tm-about-box-2-img">
                                 <img src="<?php echo $model->task->taskDisplayPicture ?>" alt="image" />
                                 <p> &nbsp;</p> <!-- cant use <br /> if not will break css -->
@@ -549,7 +557,7 @@ http://www.templatemo.com/tm-475-holiday
                         </div>
 					</div>
 					<div class="col-lg-5">
-    					<div class="tm-testimonials-box-transparent" style="height: 100%;">
+    					<div class="tm-testimonials-box-transparent" style="height: 100%; width: 100%;">
     						<div class="tm-about-box-2-text">
     							<h3 class="tm-about-box-2-title"><?php echo htmlspecialchars($model->task->name) ?></h3>
                                 <p class="tm-about-box-2-description gray-text">Category: <?php echo htmlspecialchars($model->task->category) ?></p>
@@ -583,15 +591,43 @@ http://www.templatemo.com/tm-475-holiday
       	------------------------------------------------*/
       	var map = '';
       	var center;
+		var geocoder;
+		var results;
+		var status;
+		var lat = 1.2967436; //default
+		var lng = 103.7744816; //default 
+		var address = '<?php echo $model->task->postalCode ?>'; //insert zipcode here
 
-      	function initialize() {
-	        var mapOptions = {
-	          	zoom: 14,
-	          	center: new google.maps.LatLng(1.2967436, 103.7744816),
-	          	scrollwheel: false
+		function initialize() {
+			google.maps.visualRefresh = true;
+			geocoder = new google.maps.Geocoder();
+
+            geocoder.geocode( { 'address': address }, function(results, status) {
+                if (status == google.maps.GeocoderStatus.OK) {
+                    lat = results[0].geometry.location.lat();
+                    lng = results[0].geometry.location.lng();
+                    console.log('hereee' + lat + ' lng ' + lng);
+                    
+                    drawMap();
+                }
+                else {
+                	console.log("no geocode found");
+                }
+            });
+         
+		}
+        var data;
+     
+        function drawMap(){
+
+        	var mapOptions = {
+              	zoom: 18,
+              	center: new google.maps.LatLng(lat, lng),
+              	scrollwheel: false
         	};
-        
-	        map = new google.maps.Map(document.getElementById('google-map'),  mapOptions);
+
+            map = new google.maps.Map(document.getElementById('google-map'),  mapOptions);
+			
 
 	        google.maps.event.addDomListener(map, 'idle', function() {
 	          calculateCenter();
@@ -600,7 +636,8 @@ http://www.templatemo.com/tm-475-holiday
 	        google.maps.event.addDomListener(window, 'resize', function() {
 	          map.setCenter(center);
 	        });
-      	}
+
+        }
 
 	    function calculateCenter() {
 	        center = map.getCenter();
@@ -609,10 +646,10 @@ http://www.templatemo.com/tm-475-holiday
 	    function loadGoogleMap(){
 	        var script = document.createElement('script');
 	        script.type = 'text/javascript';
-	        script.src = 'https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&' + 'callback=initialize';
+	        script.src = 'https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&key=AIzaSyC-7O4_OGbw3MEe-PCjVxNM-zcsB04UOWE' + '&callback=initialize';
 	        document.body.appendChild(script);
 	    }
-
+	    
 		$(function() {
 
 			// https://css-tricks.com/snippets/jquery/smooth-scrolling/

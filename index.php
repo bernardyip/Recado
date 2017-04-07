@@ -243,7 +243,7 @@ http://www.templatemo.com/tm-475-holiday
 				    $task = $model->tasks[0];
 				    ?>
 				<div class="tm-home-box-1 tm-home-box-1-2 tm-home-box-1-center">
-					<img src="<?php echo $task->taskDisplayPicture?>" alt="image" class="img-responsive" style="width: 100%;">
+					<img src="<?php echo $task->taskDisplayPicture?>" alt="image" class="img-responsive" style="width: 100%; object-fit: cover;">
 					<a href="<?php echo $view->createLinkForTaskDetail($task->taskId)?>">
 						<div class="tm-yellow-gradient-bg tm-city-price-container">
 							<span><?php echo $task->taskName ?></span>
@@ -260,7 +260,7 @@ http://www.templatemo.com/tm-475-holiday
 				    $task = $model->tasks[1];
 				?> 
 				<div class="tm-home-box-1 tm-home-box-1-2 tm-home-box-1-center">
-					<img src="<?php echo $task->taskDisplayPicture?>" alt="image" class="img-responsive" style="width: 100%;">
+					<img src="<?php echo $task->taskDisplayPicture?>" alt="image" class="img-responsive" style="width: 100%; object-fit: cover;">
 					<a href="<?php echo $view->createLinkForTaskDetail($task->taskId)?>">
 						<div class="tm-green-gradient-bg tm-city-price-container">
 							<span><?php echo $task->taskName ?></span>
@@ -277,7 +277,7 @@ http://www.templatemo.com/tm-475-holiday
 				    $task = $model->tasks[2];
 				?> 
 				<div class="tm-home-box-1 tm-home-box-1-2 tm-home-box-1-center">
-					<img src="<?php echo $task->taskDisplayPicture?>" alt="image" class="img-responsive" style="width: 100%;">
+					<img src="<?php echo $task->taskDisplayPicture?>" alt="image" class="img-responsive" style="width: 100%; object-fit: cover;">
 					<a href="<?php echo $view->createLinkForTaskDetail($task->taskId)?>">
 						<div class="tm-red-gradient-bg tm-city-price-container">
 							<span><?php echo $task->taskName ?></span>
@@ -298,7 +298,7 @@ http://www.templatemo.com/tm-475-holiday
 				    $task = $model->tasks[4];
 				?> 
 				<div class="tm-home-box-1 tm-home-box-1-2 tm-home-box-1-center">
-					<img src="<?php echo $task->taskDisplayPicture?>" alt="image" class="img-responsive" style="width: 100%;">
+					<img src="<?php echo $task->taskDisplayPicture?>" alt="image" class="img-responsive" style="width: 100%; object-fit: cover;">
 					<a href="<?php echo $view->createLinkForTaskDetail($task->taskId)?>">
 						<div class="tm-yellow-gradient-bg tm-city-price-container">
 							<span><?php echo $task->taskName ?></span>
@@ -315,7 +315,7 @@ http://www.templatemo.com/tm-475-holiday
 				    $task = $model->tasks[4];
 				?> 
 				<div class="tm-home-box-1 tm-home-box-1-2 tm-home-box-1-center">
-					<img src="<?php echo $task->taskDisplayPicture?>" alt="image" class="img-responsive" style="width: 100%;">
+					<img src="<?php echo $task->taskDisplayPicture?>" alt="image" class="img-responsive" style="width: 100%; object-fit: cover;">
 					<a href="<?php echo $view->createLinkForTaskDetail($task->taskId)?>">
 						<div class="tm-green-gradient-bg tm-city-price-container">
 							<span><?php echo $task->taskName ?></span>
@@ -332,7 +332,7 @@ http://www.templatemo.com/tm-475-holiday
 				    $task = $model->tasks[5];
 				?> 
 				<div class="tm-home-box-1 tm-home-box-1-2 tm-home-box-1-center">
-					<img src="<?php echo $task->taskDisplayPicture?>" alt="image" class="img-responsive" style="width: 100%;">
+					<img src="<?php echo $task->taskDisplayPicture?>" alt="image" class="img-responsive" style="width: 100%; object-fit: cover;">
 					<a href="<?php echo $view->createLinkForTaskDetail($task->taskId)?>">
 						<div class="tm-red-gradient-bg tm-city-price-container">
 							<span><?php echo $task->taskName ?></span>
@@ -360,7 +360,7 @@ http://www.templatemo.com/tm-475-holiday
 			<div class="row">
 				<div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
 					<div class="tm-about-box-1">
-						<a href="#"><img src="img/about-4.jpg" alt="img" class="tm-about-box-1-img"></a>
+						<img src="img/about-4.jpg" alt="img" class="tm-about-box-1-img">
 						<h3 class="tm-about-box-1-title">Choose A Task</h3>
 						<p class="margin-bottom-15 gray-text">That fits your schedule</p>
 						
@@ -368,7 +368,7 @@ http://www.templatemo.com/tm-475-holiday
 				</div>
 				<div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
 					<div class="tm-about-box-1">
-						<a href="#"><img src="img/about-5.jpg" alt="img" class="tm-about-box-1-img"></a>
+						<img src="img/about-5.jpg" alt="img" class="tm-about-box-1-img">
 						<h3 class="tm-about-box-1-title">Place a Bid</h3>
 						<p class="margin-bottom-15 gray-text">Let us know how much you are willing to do the task for</p>
 						
@@ -376,7 +376,7 @@ http://www.templatemo.com/tm-475-holiday
 				</div>
 				<div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
 					<div class="tm-about-box-1">
-						<a href="#"><img src="img/about-6.jpg" alt="img" class="tm-about-box-1-img"></a>
+						<img src="img/about-6.jpg" alt="img" class="tm-about-box-1-img">
 						<h3 class="tm-about-box-1-title">Get Stuff Done</h3>
 						<p class="margin-bottom-15 gray-text">And cash out!</p>
 					
@@ -384,7 +384,7 @@ http://www.templatemo.com/tm-475-holiday
 				</div>
 				<div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
 					<div class="tm-about-box-1">
-						<a href="#"><img src="img/about-7.jpg" alt="img" class="tm-about-box-1-img"></a>
+						<img src="img/about-7.jpg" alt="img" class="tm-about-box-1-img">
 						<h3 class="tm-about-box-1-title">Create a Task</h3>
 						<p class="margin-bottom-15 gray-text">You can also put up tasks for people to do for you.</p>
 				

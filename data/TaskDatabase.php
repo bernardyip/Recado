@@ -46,7 +46,7 @@ class TaskDatabase extends Database {
                 "ON t.creator_id = u.id;";
     
     const SQL_TASKDETAILS_FIND_TASK = "" .
-            "SELECT t.id, t.name, t.description, t.postal_code, t.location, t.task_start_time, t.task_end_time, t.listing_price, t.updated_time, t.category_id, t.bid_picked, c.name AS category_name, u.id AS user_id, u.name AS username " .
+            "SELECT t.id, t.name, t.description, t.postal_code, t.location, t.task_start_time, t.task_end_time, t.listing_price, t.updated_time, t.bid_picked, c.id AS category_id, c.name AS category_name, u.id AS user_id, u.name AS username " .
             "FROM public.task t " .
             "INNER JOIN public.category c ON t.category_id = c.id ".
             "INNER JOIN public.user u ON t.creator_id = u.id " .
@@ -60,8 +60,10 @@ class TaskDatabase extends Database {
     const SQL_EDIT_TASK = "" . 
         "UPDATE public.task SET name=$1, description=$2, postal_code=$3, location=$4, " . 
         "task_start_time=$5, task_end_time=$6, listing_price=$7, updated_time=$8, category_id=$9" . 
-        "WHERE id=$10";
+        "WHERE id=$10 RETURNING created_time, status, bid_picked, creator_id";
     
+    const SQL_DELETE_TASK = "" .
+        "DELETE FROM public.task t WHERE t.id=$1;";
     
     const SQL_FIND_TASK_WITH_ID = "SELECT * FROM public.task t WHERE t.id=$1;";
     const SQL_FIND_TASK_WITH_USERID = "SELECT * FROM public.task t WHERE t.creator_id=$1;";
@@ -96,6 +98,8 @@ class TaskDatabase extends Database {
         pg_prepare ( $this->dbcon, 'SQL_FIND_TASK_CATEGORY', TaskDatabase::SQL_FIND_TASK_CATEGORY);
         pg_prepare ( $this->dbcon, 'SQL_TASKDETAILS_FIND_TASK', TaskDatabase::SQL_TASKDETAILS_FIND_TASK );
         pg_prepare ( $this->dbcon, 'SQL_TASKDETAILS_FIND_FINALIZED_TASK', TaskDatabase::SQL_TASKDETAILS_FIND_FINALIZED_TASK );
+        pg_prepare ( $this->dbcon, 'SQL_EDIT_TASK', TaskDatabase::SQL_EDIT_TASK );
+        pg_prepare ( $this->dbcon, 'SQL_DELETE_TASK', TaskDatabase::SQL_DELETE_TASK );
     }
     
     public function task_myTasks($userId) {
@@ -185,7 +189,7 @@ class TaskDatabase extends Database {
                 $task = pg_fetch_array( $dbResult );
                 $tasks[$i] = new TaskDetail($task['id'], $task['name'], $task['description'], 
                         $task['postal_code'], $task['location'], $task['task_start_time'], $task['task_end_time'], 
-                        $task['listing_price'], $task['updated_time'], $task['category_name'], $task['user_id'], $task['username'],
+                        $task['listing_price'], $task['updated_time'], $task['category_id'], $task['category_name'], $task['user_id'], $task['username'],
                         $task['bid_picked'], $this->getDisplayPicturePath($task['id'], $task['category_id']));
             }
             return new TaskDatabaseResult(TaskDatabaseResult::TASK_FIND_SUCCESS, $tasks, $nrRows);
@@ -357,7 +361,7 @@ class TaskDatabase extends Database {
     public function deleteTask($taskId) {
         
         $dbResult = pg_execute ( $this->dbcon, 'SQL_DELETE_TASK', array (
-                $id
+                $taskId
         ) );
         
         if (pg_affected_rows($dbResult) > 0) {
@@ -441,7 +445,7 @@ class TaskDatabase extends Database {
             $taskEndTime, $listingPrice, $categoryId) {
         
         $updatedTime = new DateTime ( null, new DateTimeZone ( "Asia/Singapore" ) );
-        $dbResult = pg_execute ( $this->dbcon, 'SQL_CREATE_TASK', array (
+        $dbResult = pg_execute ( $this->dbcon, 'SQL_EDIT_TASK', array (
                 $name, $description, $postalCode, $location, $taskStartTime->format ( 'Y-m-d\TH:i:s\Z' ), 
                 $taskEndTime->format ( 'Y-m-d\TH:i:s\Z' ), $listingPrice, 
                 $updatedTime->format ( 'Y-m-d\TH:i:s\Z' ), 
@@ -453,9 +457,9 @@ class TaskDatabase extends Database {
             return new TaskDatabaseResult(
                     TaskDatabaseResult::TASK_UPDATE_SUCCESS, 
                     array(
-                        new Task($result['id'], $name, $description, $postalCode, $location, 
-                                $taskStartTime, $taskEndTime, $listingPrice, $createdTime, 
-                                $updatedTime, $status, false, $categoryId, $creatorId)
+                        new Task($id, $name, $description, $postalCode, $location, 
+                                $taskStartTime, $taskEndTime, $listingPrice, $result['created_time'], 
+                                $updatedTime, $result['status'], $result['bid_picked'], $categoryId, $result['creator_id'])
                     ), 1);
         } else {
             return new TaskDatabaseResult(TaskDatabaseResult::TASK_UPDATE_FAIL, null, 0);

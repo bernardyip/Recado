@@ -57,7 +57,7 @@ http://www.templatemo.com/tm-475-holiday
 			<div class="row">
 				<div class="tm-section-header section-margin-top">
 					<div class="col-lg-4 col-md-3 col-sm-3"><hr></div>
-					<div class="col-lg-4 col-md-6 col-sm-6"><h2 class="tm-section-title">Create a Task</h2></div>
+					<div class="col-lg-4 col-md-6 col-sm-6"><h2 class="tm-section-title">Task Details</h2></div>
 					<div class="col-lg-4 col-md-3 col-sm-3"><hr></div>	
 				</div>				
 			</div>
@@ -69,9 +69,9 @@ http://www.templatemo.com/tm-475-holiday
 					</div> 
 					<div class="col-lg-6 col-md-6 tm-contact-form-input">
                         <div class="form-group">
-							<input type="text" id="task_name" class="form-control" placeholder="Task Name" />
+							<input type="text" id="task_name" class="form-control" value="Task Name" />
 						</div>
-                        <!-- date pickers not working, to fix -->
+                     <!-- DatePickers, to use or not to use 
                         <div class="input-group date" id="datetimepicker1">
                             <input type='text' class="form-control" placeholder="Start Date" />
                             <span class="input-group-addon">
@@ -86,29 +86,32 @@ http://www.templatemo.com/tm-475-holiday
                             </span>
 						</div>
                         <br />
+						 -->
+					
 					
                         <div class="form-group">
-							<input type="email" id="location" class="form-control" placeholder="Address" />
+							<input type="email" id="location" class="form-control" value="Address value" />
 						</div>
 						<div class="form-group">
-							<input type="email" id="postal_code" class="form-control" placeholder="Postal Code" />
+							<input type="email" id="postal_code" class="form-control" value="Postal Code value" />
 						</div>
 						<div class="form-group">
-							<input type="text" id="listing_price" class="form-control" placeholder="Listing Price" />
+							<input type="text" id="listing_price" class="form-control" value="Listing Price" />
 						</div>
 						<div class="form-group">
-							<textarea id="task_desc" class="form-control" rows="6" placeholder="Enter some description about your task"></textarea>
+							<textarea id="task_desc" class="form-control" rows="6">description hererer</textarea>
 						</div>
                         <div class="form-group">
 							            	 <select class="form-control">
-							            	 	<option value="">-Select a Category- </option>
-							            	 	<option value="">Bernard</option>
-												<option value="">Bernaaard</option>
-												<option value="">Bernaaaaaarrrd</option>
+							            	 	<option value="everything else">Everything Else</option>
+							            	 	<option value="cleaning">Cleaning</option>
+												<option value="fixing" selected>Fixing</option>
+												<option value="delivery">Delivery</option>
+                                                
 											</select> 
 							          	</div>			
 						<div class="form-group">
-							<button class="tm-submit-btn" type="submit" name="submit">Create a Task</button> 
+							<button class="tm-submit-btn" type="submit" name="submit">Update Task</button> 
 						</div>               
 					</div>
 				</form>
@@ -130,19 +133,48 @@ http://www.templatemo.com/tm-475-holiday
 	<script type="text/javascript" src="js/bootstrap-datetimepicker.min.js"></script>	<!-- bootstrap date time picker js, http://eonasdan.github.io/bootstrap-datetimepicker/ -->
 	
     <script>
-		/* Google map
+		 /* Google map
       	------------------------------------------------*/
       	var map = '';
       	var center;
+		var geocoder;
+		var results;
+		var status;
+		var lat = 1.2967436; //default
+		var lng = 103.7744816; //default 
+		var address = '123456'; //insert zipcode here
 
-      	function initialize() {
-	        var mapOptions = {
-	          	zoom: 14,
-	          	center: new google.maps.LatLng(1.2967436, 103.7744816),
+	function initialize() {
+
+			google.maps.visualRefresh = true;
+			geocoder = new google.maps.Geocoder();
+
+			 geocoder.geocode( { 'address': address }, function(results, status) {
+   			   if (status == google.maps.GeocoderStatus.OK) {
+    		     lat = results[0].geometry.location.lat();
+     		     lng = results[0].geometry.location.lng();
+				 console.log('hereee' + lat + ' lng ' + lng);
+
+                 drawMap();
+    	    	}
+    			  else {
+                      console.log("no geocode found");
+					}
+				});
+         
+		}
+        var data;
+     
+        function drawMap(){
+
+            	var mapOptions = {
+	          	zoom: 18,
+	          	center: new google.maps.LatLng(lat, lng),
 	          	scrollwheel: false
-        	};
-        
-	        map = new google.maps.Map(document.getElementById('google-map'),  mapOptions);
+        	}
+
+            map = new google.maps.Map(document.getElementById('google-map'),  mapOptions);
+			
 
 	        google.maps.event.addDomListener(map, 'idle', function() {
 	          calculateCenter();
@@ -151,7 +183,8 @@ http://www.templatemo.com/tm-475-holiday
 	        google.maps.event.addDomListener(window, 'resize', function() {
 	          map.setCenter(center);
 	        });
-      	}
+
+        }
 
 	    function calculateCenter() {
 	        center = map.getCenter();
@@ -162,7 +195,11 @@ http://www.templatemo.com/tm-475-holiday
 	        script.type = 'text/javascript';
 	        script.src = 'https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&' + 'callback=initialize';
 	        document.body.appendChild(script);
+
+			
+
 	    }
+
 	
       	// DOM is ready
 		$(function() {
