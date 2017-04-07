@@ -164,6 +164,9 @@ class EditTaskController {
         $taskResult = $this->taskDatabase->taskDetails_getTask($this->model->taskId);
         if ($taskResult->status === TaskDatabaseResult::TASK_FIND_SUCCESS) {
             $this->model->task = $taskResult->tasks[0];
+            if ($this->model->task->bidPicked) {
+                $this->redirectToEdittedTask($this->model->task);
+            }
         } else {
             // fail to find task
             $this->redirectToTasks();
@@ -178,7 +181,7 @@ class EditTaskController {
     }
     
     public function editTask() {
-        if ($this->model->isValid()) {
+        if ($this->model->isValid() && !$this->model->task->bidPicked) {
             $edittedTask = $this->taskDatabase->editTask($this->model->taskId,
                     $this->model->newTaskName, $this->model->newTaskDescription, 
                     $this->model->newTaskPostalCode, $this->model->newTaskLocation, 

@@ -234,7 +234,7 @@ class TaskDetailsController {
     }
     
     private function deleteTask() {
-        if ($this->isCreatorOrAdmin()) {
+        if ($this->isCreatorOrAdmin() && !$this->model->task->bidPicked) {
             $taskResult = $this->taskDatabase->deleteTask($this->model->taskId);
             if ($taskResult->status === TaskDatabaseResult::TASK_DELETE_SUCCESS) {
                 $this->redirectToTasks();
@@ -475,14 +475,17 @@ http://www.templatemo.com/tm-475-holiday
     							<p class="tm-tours-box-1-link-right" style="width: 50%; background-color:#b0b0b0; color:#808080">
     								Edit
     							</p>
+    							<p class="tm-tours-box-1-link-right" style="width: 50%; background-color:#b0b0b0; color:#808080">
+    								Delete
+    							</p>
     							<?php } else { ?>
     							<a href="<?php echo $controller->getEditTaskUrl() ?>" class="tm-tours-box-1-link-right" style="width: 50%;">
     								Edit
     							</a>
-    							<?php } ?>
     							<a href="<?php echo $controller->getDeleteTaskUrl() ?>" class="tm-tours-box-1-link-right" style="width: 50%;">
     								Delete
     							</a>
+    							<?php } ?>
     						</div>
     					</div>
     					<?php } ?>
