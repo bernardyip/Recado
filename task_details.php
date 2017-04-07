@@ -590,6 +590,7 @@ http://www.templatemo.com/tm-475-holiday
     /* Google map
       	------------------------------------------------*/
       	var map = '';
+      	var marker = '';
       	var center;
 		var geocoder;
 		var results;
@@ -627,6 +628,12 @@ http://www.templatemo.com/tm-475-holiday
         	};
 
             map = new google.maps.Map(document.getElementById('google-map'),  mapOptions);
+
+            marker = new google.maps.Marker({
+              position: new google.maps.LatLng(lat, lng),
+              map: map,
+              title: 'Location'
+            });
 			
 
 	        google.maps.event.addDomListener(map, 'idle', function() {
