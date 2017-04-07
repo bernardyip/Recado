@@ -131,9 +131,29 @@ class CreateTaskController {
                     $this->model->newTaskListingPrice, $this->model->newTaskCategoryId, 
                     $this->model->newTaskCreatorId);
             if ($createdTask->status === TaskDatabaseResult::TASK_CREATE_SUCCESS) {
+                $this->moveTmpUploadToImg($createdTask->tasks[0]->id);
                 $this->redirectToCreatedTask($createdTask->tasks[0]);
             } else {
                 $this->model->message = "Task creation failed :(";
+            }
+        }
+        $this->deleteTmpUpload();
+    }
+    
+    private function moveTmpUploadToImg($taskId) {
+        if (!is_null($this->model->newTaskDisplayPicture)) {
+            $image = $this->model->newTaskDisplayPicture;
+            if (file_exists($_SERVER['DOCUMENT_ROOT'] . "/img/task/$taskId.jpg")) {
+                unlink($_SERVER['DOCUMENT_ROOT'] . "/img/task/$taskId.jpg");
+            }
+            move_uploaded_file($image['tmp_name'], $_SERVER['DOCUMENT_ROOT'] . "/img/task/$taskId.jpg");
+        }
+    }
+    
+    private function deleteTmpUpload() {
+        if (!is_null($this->model->newTaskDisplayPicture)) {
+            if (file_exists($this->model->newTaskDisplayPicture['tmp_name'])) {
+                unlink($this->model->newTaskDisplayPicture['tmp_name']);
             }
         }
     }
@@ -170,13 +190,11 @@ class CreateTaskController {
         if (isset ( $_POST ['category'] ) ) {
             $this->model->newTaskCategoryId = $_POST['category'];
         }
-        if (isset ( $_POST ['display_picture'] ) ) {
-            $extension = pathinfo($target_file,PATHINFO_EXTENSION);
-            if (getimagesize($_FILES['']) !== false && $extension === "jpg") {
-                
-                // file is an image
+        if (isset ( $_FILES ['display_picture'] ) ) {
+            $extension = pathinfo($_FILES ['display_picture']['name'], PATHINFO_EXTENSION);
+            if (getimagesize($_FILES['display_picture']['tmp_name']) !== false && $extension === "jpg") {
+                $this->model->newTaskDisplayPicture = $_FILES ['display_picture'];
             }
-            $this->model->newTaskDisplayPicture = $_POST['category'];
         }
         
         if (isset ( $_GET ['action'] )) {
