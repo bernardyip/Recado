@@ -296,6 +296,7 @@ http://www.templatemo.com/tm-475-holiday
 							<?php echo HtmlHelper::makeInput2("text", "name", htmlspecialchars($model->newTaskName), "Task Name", "") ?>
 						</div>
 						<div class="form-group">
+							<label>Choose a display picture (optional)</label>
 							<?php echo HtmlHelper::makeFileInput2(".jpg", "display_picture", "", "Display Picture (.jpg only)", "Display Picture (.jpg only)")?>
 						</div>
                         <div class="form-group">
