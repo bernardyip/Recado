@@ -13,7 +13,7 @@ if (!isset($_SESSION['username'])) {
     die();
 }
 
-class CreateTaskModel {
+class EditTaskModel {
     public $newTaskName;
     public $newTaskDescription;
     public $newTaskPostalCode;
@@ -22,10 +22,11 @@ class CreateTaskModel {
     public $newTaskEndDateTime;
     public $newTaskListingPrice;
     public $newTaskCategoryId;
-    public $newTaskCreatorId;
     public $newTaskDisplayPicture;
-    
+
+    public $taskId;
     public $userId;
+    public $task;
     
     public $categories;
     public $message;
@@ -43,7 +44,6 @@ class CreateTaskModel {
         if (is_null($this->newTaskEndDateTime)) return false;
         if (is_null($this->newTaskListingPrice)) return false;
         if (is_null($this->newTaskCategoryId)) return false;
-        if (is_null($this->newTaskCreatorId)) return false;
         
         // start/end date/time validation
         
@@ -53,13 +53,44 @@ class CreateTaskModel {
                 strlen($this->newTaskLocation) > 0 &&
                 $this->newTaskStartDateTime <= $this->newTaskEndDateTime &&
                 strlen($this->newTaskListingPrice) > 0 && $this->newTaskListingPrice > 0 &&
-                strlen($this->newTaskCategoryId) > 0 && $this->newTaskCategoryId > 0 &&
-                strlen($this->newTaskCreatorId) > 0 && $this->newTaskCreatorId > 0;
+                strlen($this->newTaskCategoryId) > 0 && $this->newTaskCategoryId > 0;
     }
     
+    public function getTaskName() {
+        if (is_null($this->newTaskName)) {
+            return $this->task->name;
+        } else {
+            return $this->newTaskName;
+        }
+    }
+    
+    public function getTaskDescription() {
+        if (is_null($this->newTaskDescription)) {
+            return $this->task->description;
+        } else {
+            return $this->newTaskDescription;
+        }
+    }
+    
+    public function getTaskPostalCode() {
+        if (is_null($this->newTaskPostalCode)) {
+            return $this->task->postalCode;
+        } else {
+            return $this->newTaskPostalCode;
+        }
+    }
+    
+    public function getTaskLocation() {
+        if (is_null($this->newTaskLocation)) {
+            return $this->task->location;
+        } else {
+            return $this->newTaskLocation;
+        }
+    }
+
     public function getStartTime() {
         if (is_null($this->newTaskStartDateTime)) {
-            return (new DateTime ( null, new DateTimeZone ( "Asia/Singapore" ) ))->format ( 'Y-m-d\T\0\0:\0\0' );
+            return $this->task->taskStartTime->format ( 'Y-m-d\TH:i' );
         } else {
             return $this->newTaskStartDateTime->format ( 'Y-m-d\TH:i' );
         }
@@ -67,29 +98,43 @@ class CreateTaskModel {
     
     public function getEndTime() {
         if (is_null($this->newTaskEndDateTime)) {
-            return (new DateTime ( null, new DateTimeZone ( "Asia/Singapore" ) ))->format ( 'Y-m-d\T\2\3:\5\9' );
+            return $this->task->taskEndTime->format ( 'Y-m-d\TH:i' );
         } else {
             return $this->newTaskEndDateTime->format ( 'Y-m-d\TH:i' );
         }
     }
+    
+    public function getTaskListingPrice() {
+        if (is_null($this->newTaskListingPrice)) {
+            return $this->task->listingPrice;
+        } else {
+            return $this->newTaskListingPrice;
+        }
+    }
+    
+    public function getTaskCategoryId() {
+        if (is_null($this->newTaskCategoryId)) {
+            return $this->task->categoryId;
+        } else {
+            return $this->newTaskCategoryId;
+        }
+    }
+    
 }
 
-class CreateTaskView {
+class EditTaskView {
     
     private $model;
     private $controller;
     
-    public function __construct(CreateTaskController $controller, CreateTaskModel $model) {
+    public function __construct(EditTaskController $controller, EditTaskModel $model) {
         $this->controller = $controller;
         $this->model = $model;
     }
     
     public function getCategoryDropdown() {
         $html = "<select name=category class=\"form-control\">";
-        $selectedId = -1;
-        if (!is_null($this->model->newTaskCategoryId)) {
-            $selectedId = $this->model->newTaskCategoryId; 
-        }
+        $selectedId = $this->model->getTaskCategoryId(); 
         foreach ($this->model->categories as $category) {
             if ($selectedId === $category->id) {
                 $html = $html . "<option selected='selected' value='" . $category->id . "'>" . htmlspecialchars($category->name) . "</option>";
@@ -102,17 +147,27 @@ class CreateTaskView {
     }
 }
 
-class CreateTaskController {
-    const CREATE_TASK_URL = "createtask.php?action=create";
+class EditTaskController {
+    const EDIT_TASK_URL = "edittask.php?action=edit";
     
     private $model;
     private $taskDatabase;
     private $categoryDatabase;
     
-    public function __construct(CreateTaskModel $model) {
+    public function __construct(EditTaskModel $model) {
         $this->model = $model;
         $this->taskDatabase = new TaskDatabase();
         $this->categoryDatabase = new CategoryDatabase();
+    }
+    
+    public function getTask() {
+        $taskResult = $this->taskDatabase->taskDetails_getTask($this->model->taskId);
+        if ($taskResult->status === TaskDatabaseResult::TASK_FIND_SUCCESS) {
+            $this->model->task = $taskResult->tasks[0];
+        } else {
+            // fail to find task
+            $this->redirectToTasks();
+        }
     }
     
     public function fetchCategories() {
@@ -122,22 +177,43 @@ class CreateTaskController {
         }
     }
     
-    public function createTask() {
+    public function editTask() {
         if ($this->model->isValid()) {
-            $createdTask = $this->taskDatabase->createTask(
+            $edittedTask = $this->taskDatabase->editTask($this->model->taskId,
                     $this->model->newTaskName, $this->model->newTaskDescription, 
                     $this->model->newTaskPostalCode, $this->model->newTaskLocation, 
                     $this->model->newTaskStartDateTime, $this->model->newTaskEndDateTime, 
-                    $this->model->newTaskListingPrice, $this->model->newTaskCategoryId, 
-                    $this->model->newTaskCreatorId);
-            if ($createdTask->status === TaskDatabaseResult::TASK_CREATE_SUCCESS) {
-                $this->moveTmpUploadToImg($createdTask->tasks[0]->id);
-                $this->redirectToCreatedTask($createdTask->tasks[0]);
+                    $this->model->newTaskListingPrice, $this->model->newTaskCategoryId);
+            if ($edittedTask->status === TaskDatabaseResult::TASK_UPDATE_SUCCESS) {
+                $this->moveTmpUploadToImg($edittedTask->tasks[0]->id);
+                $this->redirectToEdittedTask($edittedTask->tasks[0]);
             } else {
-                $this->model->message = "Task creation failed :(";
+                $this->model->message = "Task update failed :(";
             }
         }
         $this->deleteTmpUpload();
+    }
+    
+    public function isCreatorOrAdmin() {
+        return $this->model->userId === 1 || $this->isCreator();
+    }
+    
+    public function isCreator() {
+        return $this->model->task->creatorId === $this->model->userId;
+    }
+    
+    public function redirectToTasks() {
+        header ( "Refresh: 0; URL=/tasks.php" );
+        die();
+    }
+    
+    public function getEditUrl() {
+        return "/edittask.php?task=" . $this->model->taskId . "&action=edit";
+    }
+    
+    private function redirectToEdittedTask($edittedTask) {
+        header ( "Refresh: 1; URL=/task_details.php?task=" . $edittedTask->id );
+        die();
     }
     
     private function moveTmpUploadToImg($taskId) {
@@ -156,11 +232,6 @@ class CreateTaskController {
                 unlink($this->model->newTaskDisplayPicture['tmp_name']);
             }
         }
-    }
-    
-    private function redirectToCreatedTask($createdTask) {
-        header ( "Refresh: 1; URL=/task_details.php?task=" . $createdTask->id );
-        die();
     }
     
     public function handleHttpPost() {
@@ -198,8 +269,8 @@ class CreateTaskController {
         }
         
         if (isset ( $_GET ['action'] )) {
-            if ($_GET ['action'] === 'create') {
-                $this->createTask ();
+            if ($_GET ['action'] === 'edit') {
+                $this->editTask();
             }
         } else {
             // invalid request.
@@ -212,20 +283,30 @@ class CreateTaskController {
     }
 }
 
-$model = new CreateTaskModel ();
-$controller = new CreateTaskController ( $model );
-$view = new CreateTaskView ( $controller, $model );
+$model = new EditTaskModel ();
+$controller = new EditTaskController ( $model );
+$view = new EditTaskView ( $controller, $model );
 
 
 if (isset ( $_SESSION['id'] ) ) {
-    $model->newTaskCreatorId = $model->userId = $_SESSION['id'];
+    $model->userId = $_SESSION['id'];
 } else {
     // should be logged in by here.
     // see top of task.php
     return;
 }
+        
+if (!isset($_GET['task'])) {
+    $controller->redirectToTasks();
+} else {
+    $model->taskId = intval($_GET['task']);
+}
+if ($model->taskId <= 0) {
+    $controller->redirectToTasks();
+}
 
 $controller->fetchCategories();
+$controller->getTask();
 
 if ($_SERVER ['REQUEST_METHOD'] === 'POST') {
     $controller->handleHttpPost ();
@@ -273,13 +354,13 @@ http://www.templatemo.com/tm-475-holiday
 			<div class="row">
 				<div class="tm-section-header section-margin-top">
 					<div class="col-lg-4 col-md-3 col-sm-3"><hr></div>
-					<div class="col-lg-4 col-md-6 col-sm-6"><h2 class="tm-section-title">Create a Task</h2></div>
+					<div class="col-lg-4 col-md-6 col-sm-6"><h2 class="tm-section-title">Edit a Task</h2></div>
 					<div class="col-lg-4 col-md-3 col-sm-3"><hr></div>	
 				</div>				
 			</div>
 			<div class="row">
 				<!-- contact form -->
-				<form action="<?php echo CreateTaskController::CREATE_TASK_URL?>" method="POST"
+				<form action="<?php echo $controller->getEditUrl()?>" method="POST"
 						onsubmit=""
 						enctype="multipart/form-data"
 						class="tm-contact-form">
@@ -293,7 +374,7 @@ http://www.templatemo.com/tm-475-holiday
 						</div>
 						<?php } ?>
                         <div class="form-group">
-							<?php echo HtmlHelper::makeInput2("text", "name", htmlspecialchars($model->newTaskName), "Task Name", "") ?>
+							<?php echo HtmlHelper::makeInput2("text", "name", htmlspecialchars($model->getTaskName()), "Task Name", "") ?>
 						</div>
 						<div class="form-group">
 							<?php echo HtmlHelper::makeFileInput2(".jpg", "display_picture", "", "Display Picture (.jpg only)", "Display Picture (.jpg only)")?>
@@ -323,22 +404,22 @@ http://www.templatemo.com/tm-475-holiday
 						 -->
 					
                         <div class="form-group">
-                        	<?php echo HtmlHelper::makeInput2("text", "location", htmlspecialchars($model->newTaskLocation), "Where the task held at?", "") ?>
+                        	<?php echo HtmlHelper::makeInput2("text", "location", htmlspecialchars($model->getTaskLocation()), "Where the task held at?", "") ?>
 						</div>
 						<div class="form-group">
-							<?php echo HtmlHelper::makeInput2("number", "postal_code", htmlspecialchars($model->newTaskPostalCode), "Postal Code", "Six digit zip code")?>
+							<?php echo HtmlHelper::makeInput2("number", "postal_code", htmlspecialchars($model->getTaskPostalCode()), "Postal Code", "Six digit zip code")?>
 						</div>
 						<div class="form-group">
-							<?php echo HtmlHelper::makeMoneyInput2("listing_price", htmlspecialchars($model->newTaskListingPrice), "Listing Price", "")?>
+							<?php echo HtmlHelper::makeMoneyInput2("listing_price", htmlspecialchars($model->getTaskListingPrice()), "Listing Price", "")?>
 						</div>
 						<div class="form-group">
-							<?php echo HtmlHelper::makeTextArea2("description", htmlspecialchars($model->newTaskDescription), 6, "Enter some description for your task")?>
+							<?php echo HtmlHelper::makeTextArea2("description", htmlspecialchars($model->getTaskDescription()), 6, "Enter some description for your task")?>
 						</div>
                         <div class="form-group">
 							<?php echo $view->getCategoryDropdown()?>
 			          	</div>			
 						<div class="form-group">
-							<button class="tm-submit-btn" type="submit" name="submit">Create a Task</button> 
+							<button class="tm-submit-btn" type="submit" name="submit">Make changes</button> 
 						</div>               
 					</div>
 				</form>

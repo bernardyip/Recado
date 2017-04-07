@@ -12,6 +12,7 @@ class TaskDetail {
     public $taskEndTime;    
     public $listingPrice;
     public $updatedTime;
+    public $categoryId;
     public $category;
     public $creator;
     public $creatorId;
@@ -20,7 +21,7 @@ class TaskDetail {
     
     public function __construct($id, $name, $description, $postalCode, $location, 
             $taskStartTime, $taskEndTime, $listingPrice, $updatedTime, 
-            $category, $creatorId, $creator, $bidPicked, $taskDisplayPicture) {
+            $categoryId, $category, $creatorId, $creator, $bidPicked, $taskDisplayPicture) {
         $this->id = (int)$id;
         $this->name = trim($name);
         $this->description = trim($description);
@@ -46,6 +47,7 @@ class TaskDetail {
         } else {
             $this->updatedTime = new DateTime($updatedTime, new DateTimeZone('Asia/Singapore'));
         }
+        $this->categoryId = (int)$categoryId;
         $this->category = trim($category);
         $this->creatorId = (int)$creatorId;
         $this->creator = trim($creator);
