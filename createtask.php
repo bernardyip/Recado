@@ -23,6 +23,7 @@ class CreateTaskModel {
     public $newTaskListingPrice;
     public $newTaskCategoryId;
     public $newTaskCreatorId;
+    public $newTaskDisplayPicture;
     
     public $userId;
     
@@ -169,6 +170,14 @@ class CreateTaskController {
         if (isset ( $_POST ['category'] ) ) {
             $this->model->newTaskCategoryId = $_POST['category'];
         }
+        if (isset ( $_POST ['display_picture'] ) ) {
+            $extension = pathinfo($target_file,PATHINFO_EXTENSION);
+            if (getimagesize($_FILES['']) !== false && $extension === "jpg") {
+                
+                // file is an image
+            }
+            $this->model->newTaskDisplayPicture = $_POST['category'];
+        }
         
         if (isset ( $_GET ['action'] )) {
             if ($_GET ['action'] === 'create') {
@@ -254,6 +263,7 @@ http://www.templatemo.com/tm-475-holiday
 				<!-- contact form -->
 				<form action="<?php echo CreateTaskController::CREATE_TASK_URL?>" method="POST"
 						onsubmit=""
+						enctype="multipart/form-data"
 						class="tm-contact-form">
 					<div class="col-lg-6 col-md-6">
 						<div id="google-map"></div>
@@ -266,6 +276,9 @@ http://www.templatemo.com/tm-475-holiday
 						<?php } ?>
                         <div class="form-group">
 							<?php echo HtmlHelper::makeInput2("text", "name", htmlspecialchars($model->newTaskName), "Task Name", "") ?>
+						</div>
+						<div class="form-group">
+							<?php echo HtmlHelper::makeFileInput2(".jpg", "display_picture", "", "Display Picture (.jpg only)", "Display Picture (.jpg only)")?>
 						</div>
                         <div class="form-group">
 							<?php echo HtmlHelper::makeInput2("datetime-local", "task_start_time", $model->getStartTime(), "", "") ?>
