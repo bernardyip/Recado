@@ -73,8 +73,8 @@ class MyTasksView {
                 $html = $html . "<br />";
             } else {
                 $html = $html . "<div class=\"tm-tours-box-1\">";
-                $html = $html . "<img src=\"" . htmlspecialchars($task->taskDisplayPicture) . "\" alt=\"image\" class=\"img-responsive\" style=\"width: 100%;\">";
-                $html = $html . "<div class=\"tm-tours-box-1-info\">";
+                $html = $html . "<img src=\"" . htmlspecialchars($task->taskDisplayPicture) . "\" alt=\"image\" class=\"img-responsive\" style=\"width: 100%; max-height: 200px; object-fit: cover;\">";
+                $html = $html . "<div class=\"tm-tours-box-1-info\" style=\"height: 150px; overflow: hidden;\">";
                 $html = $html . "<div class=\"tm-tours-box-1-info-left\">";
                 $html = $html . "<a href=\"/task_details.php?task=$task->taskId\" class=\"text-uppercase margin-bottom-20\">" . htmlspecialchars($task->taskName) . "</a>";
                 $html = $html . "<p class=\"gray-text\">" . $task->taskStartDate->format("d F Y") . "</p>";
