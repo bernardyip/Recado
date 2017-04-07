@@ -1058,10 +1058,8 @@ hr { border-top: 1px solid #111010; }
 	color: white;
 	background-color: #c13247;
 }
-.bid-win-name {
-	height: 60px;
-}
 
+.bid-win-name,
 .bid-win-price,
 .bid-lost-name,
 .bid-lost-price {

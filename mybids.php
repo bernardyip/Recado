@@ -134,7 +134,7 @@ class MyBidsView {
 			} else {
 				$html = $html . "<div class=\"tm-tours-box-1\">";
 				$html = $html . "<div class=\"bid-win\">";
-				$html = $html . "<div class=\"bid-win-price\">" . htmlspecialchars($bid->taskName);
+				$html = $html . "<div class=\"bid-win-name\">" . htmlspecialchars($bid->taskName);
 				$html = $html . "</div>";
 				$html = $html . "<a href=\"#\" class=\"bid-win-price\">" . ConversionHelper::moneyToString($bid->bidPrice). "</a>";
 				$html = $html . "</div>";
