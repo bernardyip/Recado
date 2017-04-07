@@ -1,0 +1,31 @@
+Total Tasks:
+select count(*) from task;
+
+Total Bids:
+select count(*) from bid;
+
+Average Bid Amounts:
+select avg(*) from bid; //This is if you want the average of ALL bids
+select avg(*) from bid b where b.selected = 'true'; //If you only want the average of winning bids
+
+Current Online Users: //Assuming the trigger to remove expired users is working
+select count(*) from user_auth_tokens;
+
+Total Users:
+select count(*) from user;
+
+Tasks open for bidding:
+select count(*) from task t where t.status = 'pending';
+
+Tasks created today:
+select count(*) from task t where t.created_time::date = CURRENT_DATE;
+
+Tasks created ytd/2 days and more
+select count(*) from task t where t.created_time::date = (CURRENT_DATE - '1 day'::INTERVAL) ; //edit to 2 days or more if needed
+
+For getting the values needed for crescent chart:
+select count(*) from task where category_id = '1'; //Everything Else category?
+select count(*) from task where category_id = '2'; //Cleaning Category?
+select count(*) from task where category_id = '3'; //Delivery Category?
+select count(*) from task where category_id = '4'; //Fixing Category?
+select count(*) from task; // get each (categoryTasks / totalTask) to get %
