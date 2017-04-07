@@ -260,7 +260,7 @@ class TaskDetailsController {
     
     public function isCreatorOrAdminForComment($comment) {
         return $this->model->userId === 1 || 
-                $this->model->task->$creatorId === $this->model->userId ||
+                $this->model->task->creatorId === $this->model->userId ||
                 $comment->userId === $this->model->userId;
     }
     
