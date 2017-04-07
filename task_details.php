@@ -518,7 +518,7 @@ http://www.templatemo.com/tm-475-holiday
     					</div>
 					</div>
 					<div class="col-lg-4">
-    					<div class="tm-testimonials-box-transparent" style="height: 100%; background-color:none;">
+    					<div class="tm-testimonials-box-transparent" style="height: 100%; width: 100%;">
                             <div class="tm-about-box-2-img">
                                 <img src="<?php echo $model->task->taskDisplayPicture ?>" alt="image" />
                                 <p> &nbsp;</p> <!-- cant use <br /> if not will break css -->
@@ -549,7 +549,7 @@ http://www.templatemo.com/tm-475-holiday
                         </div>
 					</div>
 					<div class="col-lg-5">
-    					<div class="tm-testimonials-box-transparent" style="height: 100%;">
+    					<div class="tm-testimonials-box-transparent" style="height: 100%; width: 100%;">
     						<div class="tm-about-box-2-text">
     							<h3 class="tm-about-box-2-title"><?php echo htmlspecialchars($model->task->name) ?></h3>
                                 <p class="tm-about-box-2-description gray-text">Category: <?php echo htmlspecialchars($model->task->category) ?></p>
