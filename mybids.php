@@ -81,7 +81,7 @@ class MyBidsView {
 				$html = $html . "<p class=\"gray-text\">ending on " . $bid->taskEndDate->format("d F Y") . "</p>";
 				$html = $html . "</div>";
 				$html = $html . "<div class=\"tm-tours-box-1-info-right\">";
-				$html = $html . "<p style=\"overflow: hidden; white-space: nowrap; text-overflow\: ellipsis;\" class=\"tours-1-description\">" . htmlspecialchars($bid->taskDescription) . "</p>";
+				$html = $html . "<p class=\"tours-1-bid\">" . htmlspecialchars($bid->taskDescription) . "</p>";
 				$html = $html . "<p class=\"tours-1-description\">";
 				$html = $html . "<a href=\"/task_details.php?task=$bid->taskId\" class=\"text-uppercase margin-bottom-20\">View Task</a>";
 				$html = $html . "</p>";
@@ -143,7 +143,7 @@ class MyBidsView {
 				$html = $html . "<p class=\"gray-text\">won on " . $bid->taskEndDate->format("d F Y") . "</p>";
 				$html = $html . "</div>";
 				$html = $html . "<div class=\"tm-tours-box-1-info-right\">";
-				$html = $html . "<p style=\"overflow: hidden; white-space: nowrap; text-overflow\: ellipsis;\" class=\"tours-1-description\">" . htmlspecialchars($bid->taskDescription) . "</p>";
+				$html = $html . "<p class=\"tours-1-bid\">" . htmlspecialchars($bid->taskDescription) . "</p>";
 				$html = $html . "<p class=\"tours-1-description\">";
 				$html = $html . "<a href=\"/task_details.php?task=$bid->taskId\" class=\"text-uppercase margin-bottom-20\">View Task</a>";
 				$html = $html . "</p>";
@@ -205,7 +205,7 @@ class MyBidsView {
 				$html = $html . "<p class=\"gray-text\">bid lost on " . $bid->taskEndDate->format("d F Y") . "</p>";
 				$html = $html . "</div>";
 				$html = $html . "<div class=\"tm-tours-box-1-info-right\">";
-				$html = $html . "<p class=\"tours-1-description\">" . htmlspecialchars($bid->taskDescription) . "</p>";
+				$html = $html . "<p class=\"tours-1-bid\">" . htmlspecialchars($bid->taskDescription) . "</p>";
 				$html = $html . "<p class=\"tours-1-description\">";
 				$html = $html . "<a href=\"/task_details.php?task=$bid->taskId\" class=\"text-uppercase margin-bottom-20\">View Task</a>";
 				$html = $html . "</p>";
