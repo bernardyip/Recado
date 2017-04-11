@@ -73,8 +73,8 @@ class TaskDatabase extends Database {
     const SQL_FIND_TASK_COUNT = "SELECT COUNT(*) AS count FROM public.task t;";
     const SQL_FIND_RECENTLY_CREATED_COUNT = "SELECT COUNT(*) from public.task t WHERE t.category_id=$1 AND t.created_time::date = (CURRENT_DATE - INTERVAL '1 day' * $2);";
     const SQL_CREATE_TASK = "INSERT INTO public.task (name, description, postal_code, location, task_start_time, task_end_time, listing_price, created_time, updated_time, status, bid_picked, category_id, creator_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id;";
-    const SQL_FIND_TASK_TITLE_OR_DESCRIPTION = "SELECT * FROM public.task t INNER JOIN public.user u ON u.id = t.creator_id WHERE (t.name ILIKE $1 OR t.description ILIKE $1) AND t.category_id IN ($2, $3, $4, $5);";
-    const SQL_FIND_TASK_CATEGORY = "SELECT * FROM public.task t INNER JOIN public.user u ON u.id = t.creator_id WHERE t.category_id IN ($2, $3, $4, $1);";
+    const SQL_FIND_TASK_TITLE_OR_DESCRIPTION = "SELECT t.id, t.name, t.description, t.category_id, t.creator_id, u.username FROM public.task t INNER JOIN public.user u ON u.id = t.creator_id WHERE (t.name ILIKE $1 OR t.description ILIKE $1) AND t.category_id IN ($2, $3, $4, $5);";
+    const SQL_FIND_TASK_CATEGORY = "SELECT t.id, t.name, t.description, t.category_id, t.creator_id, u.username FROM public.task t INNER JOIN public.user u ON u.id = t.creator_id WHERE t.category_id IN ($2, $3, $4, $1);";
     const SQL_FIND_TASK_RANDOM = "SELECT t.id, t.name, t.category_id FROM public.task t ORDER BY RANDOM();";
     const SQL_FIND_TASK_RANDOM_WITH_LIMIT = "SELECT t.id, t.name, t.category_id FROM public.task t ORDER BY RANDOM() LIMIT $1;";
     const SQL_FIND_BIDDABLE_TASK = "SELECT COUNT(*) as count FROM public.task t WHERE t.bid_Picked = 'false';";
