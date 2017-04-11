@@ -1,5 +1,5 @@
 insert into public.user (username, password, email, phone, name, bio, created_time, role) values ('admin', 'admin', 'admin@recado.com', '99999999', 'Admin', 'I am Admin', '2016-12-28T01:34:44Z', 'admin');
-insert into public.user (username, password, email, phone, name, bio, created_time, role) values ('user', 'user', 'user@recado.com', '00000000', 'Jessica Bennett', 'I am User', '2016-02-09T13:25:44Z', 'user');
+insert into public.user (username, password, email, phone, name, bio, created_time, role) values ('jess', 'user', 'jess@recado.com', '85962348', 'Jessica Bennett', 'Jess is cute', '2016-02-09T13:25:44Z', 'user');
 insert into public.user (username, password, email, phone, name, bio, created_time, role) values ('sray2', 'Zow61bKfWwRN', 'sray2@flavors.me', '82793152', 'Scott Ray', null, '2016-12-05T11:15:22Z', 'user');
 insert into public.user (username, password, email, phone, name, bio, created_time, role) values ('hgrant3', 'JOBg2ufU', 'hgrant3@usa.gov', '87781057', 'Howard Grant', null, '2016-04-08T15:08:11Z', 'user');
 insert into public.user (username, password, email, phone, name, bio, created_time, role) values ('ahunt4', '2AGocVNXYX9i', 'ahunt4@deliciousdays.com', '99557790', 'Anna Hunt', null, '2016-07-20T20:06:53Z', 'user');
@@ -18,4 +18,3 @@ insert into public.user (username, password, email, phone, name, bio, created_ti
 insert into public.user (username, password, email, phone, name, bio, created_time, role) values ('polsonh', 'C3TLSZ', 'polsonh@ameblo.jp', '97304619', 'Patricia Olson', null, '2016-10-30T16:39:07Z', 'user');
 insert into public.user (username, password, email, phone, name, bio, created_time, role) values ('twelchi', 'gVv86AWsCoa', 'twelchi@google.pl', '86718105', 'Todd Welch', null, '2016-06-10T00:14:33Z', 'user');
 insert into public.user (username, password, email, phone, name, bio, created_time, role) values ('ahawkinsj', 'Zqf8SRwj', 'ahawkinsj@t-online.de', '86719102', 'Amy Hawkins', null, '2016-06-18T12:03:51Z', 'user');
-
